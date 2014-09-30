@@ -39,14 +39,34 @@ pre_make_target() {
 }
 
 make_target() {
-  make V=1 \
+  if [[ "$PROJECT" = Odroid ]]; then
+    make V=1 \
+       ARCH=$TARGET_ARCH \
+       KSRC=$(odroid_xu3_kernel_path) \
+       CROSS_COMPILE=$TARGET_PREFIX \
+       CONFIG_POWER_SAVING=n
+    make V=1 \
+       ARCH=$TARGET_ARCH \
+       KSRC=$(odroid_u2_kernel_path) \
+       CROSS_COMPILE=$TARGET_PREFIX \
+       CONFIG_POWER_SAVING=n
+  else
+    make V=1 \
        ARCH=$TARGET_ARCH \
        KSRC=$(kernel_path) \
        CROSS_COMPILE=$TARGET_PREFIX \
        CONFIG_POWER_SAVING=n
+  fi
 }
 
 makeinstall_target() {
-  mkdir -p $INSTALL/lib/modules/$(get_module_dir)/$PKG_NAME
+  if [[ "$PROJECT" = Odroid ]]; then
+    mkdir -p $INSTALL/lib/modules/$(basename $(ls -d $(get_build_dir linux-odroid-xu3)/.install_pkg/lib/modules/*))/$PKG_NAME
+    cp *.ko $INSTALL/lib/modules/$(basename $(ls -d $(get_build_dir linux-odroid-xu3)/.install_pkg/lib/modules/*))/$PKG_NAME
+    mkdir -p $INSTALL/lib/modules/$(basename $(ls -d $(get_build_dir linux-odroid-u2)/.install_pkg/lib/modules/*))/$PKG_NAME
+    cp *.ko $INSTALL/lib/modules/$(basename $(ls -d $(get_build_dir linux-odroid-u2)/.install_pkg/lib/modules/*))/$PKG_NAME
+  else    
+    mkdir -p $INSTALL/lib/modules/$(get_module_dir)/$PKG_NAME
     cp *.ko $INSTALL/lib/modules/$(get_module_dir)/$PKG_NAME
+  fi
 }

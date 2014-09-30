@@ -260,7 +260,7 @@ else
 fi
 
 if [ ! "$XBMCPLAYER_DRIVER" = default ]; then
-  PKG_DEPENDS_TARGET="$PKG_DEPENDS_TARGET $XBMCPLAYER_DRIVER"
+  [ "$XBMCPLAYER_DRIVER" = odroid-mfc ] || PKG_DEPENDS_TARGET="$PKG_DEPENDS_TARGET $XBMCPLAYER_DRIVER"
 
   if [ "$XBMCPLAYER_DRIVER" = bcm2835-driver ]; then
     XBMC_OPENMAX="--enable-openmax"
@@ -272,6 +272,8 @@ if [ ! "$XBMCPLAYER_DRIVER" = default ]; then
     XBMC_CXXFLAGS="$XBMC_CXXFLAGS $BCM2835_INCLUDES"
   elif [ "$XBMCPLAYER_DRIVER" = libfslvpuwrap ]; then
     XBMC_CODEC="--enable-codec=imxvpu"
+  elif [ "$XBMCPLAYER_DRIVER" = odroid-mfc ]; then
+    XBMC_CODEC="--enable-codec=exynos4 --enable-codec=mfc --enable-mfc"
   else
     XBMC_OPENMAX="--disable-openmax"
   fi

@@ -21,6 +21,7 @@ ACTION!="add|change", GOTO="end_video"
 # xorg_start only does something for subsystem "pci" and "video" class.
 SUBSYSTEM=="pci", ATTR{class}=="0x030000", GOTO="subsystem_pci"
 SUBSYSTEM=="drivers", GOTO="subsystem_drivers"
+KERNEL=="mali", ENV{xorg_driver}="armsoc, TAG+="systemd", ENV{SYSTEMD_WANTS}+="xorg-configure@mali.service"
 GOTO="end_video"
 
 # check for drivers dont use the pci substem

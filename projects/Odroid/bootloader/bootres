@@ -1,0 +1,78 @@
+#!/bin/sh
+
+##
+# Simple BOOT.SCR Switcher
+##
+
+BOOTDIR=/flash
+BOOTFILE=BOOT.SCR
+BOOTSCRDIR=/usr/share/bootloader
+
+help() {
+  echo "$0 [resolution-file]"
+  echo " resolution-file:"
+  echo "   1080p"
+  echo "   1080p-noedid"
+  echo "   720p"
+  echo "   720p-noedid"
+  echo "   auto"
+  exit
+}
+
+mount() {
+  /bin/busybox mount -o remount,$1 $BOOTDIR
+}
+
+mali() {
+  HW=$(cat /proc/cpuinfo | grep ^Hardware | awk -F : '{print $2}' | sed 's, ,,')
+
+  case $HW in
+    ODROID-U2*)
+      echo U2
+      ;;
+    ODROID-XU3)
+      echo XU3
+      ;;
+  esac
+}
+
+if [ "$(whoami)" != "root" ]; then
+  echo "Please run as root user!"
+  exit
+fi
+
+
+case $1 in
+  1080p|1080P)
+    mount rw
+    cp -f $BOOTSCRDIR/boot-1080p.scr $BOOTDIR/$(mali)/$BOOTFILE
+    sync
+    mount ro
+    ;;
+  1080p-noedid|1080P-noedid)
+    mount rw
+    cp -f $BOOTSCRDIR/boot-1080p-noedid.scr $BOOTDIR/$(mali)/$BOOTFILE
+    sync
+    mount ro
+    ;;
+  720p|720P)
+    mount rw
+    cp -f $BOOTSCRDIR/boot-720p.scr $BOOTDIR/$(mali)/$BOOTFILE
+    sync
+    mount ro
+    ;;
+  720p-noedid|720P-noedid)
+    mount rw
+    cp -f $BOOTSCRDIR/boot-720p-noedid.scr $BOOTDIR/$(mali)/$BOOTFILE
+    sync
+    mount ro
+    ;;
+  auto)
+    mount rw
+    cp -f $BOOTSCRDIR/boot-auto.scr $BOOTDIR/$(mali)/$BOOTFILE
+    sync
+    mount ro
+    ;;
+  *)
+    help ;;
+esac

@@ -35,6 +35,11 @@ PKG_LONGDESC="This package contains a precompiled kernel image and the modules."
 PKG_IS_ADDON="no"
 PKG_AUTORECONF="no"
 
+if [[ "$PROJECT" = Odroid ]]; then
+  true
+  exit
+fi
+
 if [ "$PERF_SUPPORT" = "yes" -a "$DEVTOOLS" = "yes" ]; then
   PKG_DEPENDS_TARGET="$PKG_DEPENDS_TARGET elfutils Python"
 fi
@@ -159,14 +164,20 @@ make_target() {
            EXTRA_CFLAGS="$CFLAGS"
     )
   fi
+
+  if [ "$PROJECT" = "Odroid-XU3" ]; then
+    LDFLAGS="" make dtbs
+  fi
 }
 
 makeinstall_target() {
   if [ "$BOOTLOADER" = "u-boot" ]; then
-    mkdir -p $INSTALL/usr/share/bootloader
-    for dtb in arch/arm/boot/dts/*.dtb; do
-      cp $dtb $INSTALL/usr/share/bootloader
-    done
+    mkdir -p $INSTALL/usr/share/bootloader/$PROJECT
+    if [ -e arch/arm/boot/dts/*.dtb ]; then
+      for dtb in arch/arm/boot/dts/*.dtb; do
+        cp $dtb $INSTALL/usr/share/bootloader/$PROJECT/DTB
+      done
+    fi
   fi
 
   if [ "$PERF_SUPPORT" = "yes" -a "$DEVTOOLS" = "yes" ]; then
@@ -207,6 +218,8 @@ makeinstall_init() {
 post_install() {
   mkdir -p $INSTALL/etc/modprobe.d
     cp $PKG_DIR/modprobe.d/*.conf $INSTALL/etc/modprobe.d
+
+  [ "$PROJECT" = "Odroid-U2" ] && ln -sfn /storage/.config/smsc95xx_mac_addr $INSTALL/etc/smsc95xx_mac_addr
 
   enable_service cpufreq-threshold.service
 }

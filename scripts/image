@@ -40,7 +40,11 @@ if [ "$OPENELEC_VERSION" = devel ]; then
   OPENELEC_VERSION=$OPENELEC_VERSION-$BUILD_DATE-r$GIT_BUILD-g$GIT_ABBREV
 fi
 
-TARGET_VERSION="$PROJECT.$TARGET_ARCH-$OPENELEC_VERSION"
+if [ -z "$ODROID_VERSION" ]; then
+  TARGET_VERSION="$PROJECT.$TARGET_ARCH-$OPENELEC_VERSION"
+else
+  TARGET_VERSION="$PROJECT-$ODROID_VERSION"
+fi
 IMAGE_NAME="$DISTRONAME-$TARGET_VERSION"
 
 # setup fakeroot
@@ -120,10 +124,26 @@ IMAGE_NAME="$DISTRONAME-$TARGET_VERSION"
 # Basissystem...
   $SCRIPTS/install libc
   $SCRIPTS/install gcc
-  $SCRIPTS/install linux
+
+  if [[ "$PROJECT" = Odroid ]]; then
+    $SCRIPTS/install linux-odroid-xu3
+    $SCRIPTS/install initramfs
+    $SCRIPTS/install linux-odroid-u2
+    $SCRIPTS/install sd-fuse
+  else
+    $SCRIPTS/install linux
+  fi
+
   $SCRIPTS/install linux-drivers
   $SCRIPTS/install linux-firmware
-  $SCRIPTS/install $BOOTLOADER
+
+  if [[ "$PROJECT" = Odroid ]]; then
+    $SCRIPTS/install u-boot-odroid-xu3
+    $SCRIPTS/install u-boot-odroid-u2
+  else
+    $SCRIPTS/install $BOOTLOADER
+  fi
+
   $SCRIPTS/install busybox
   $SCRIPTS/install util-linux
   $SCRIPTS/install corefonts
@@ -172,10 +192,24 @@ IMAGE_NAME="$DISTRONAME-$TARGET_VERSION"
   fi
 
 # run depmod
-  MODVER=$(basename $(ls -d $INSTALL/lib/modules/*))
-  find $INSTALL/lib/modules/$MODVER/ -name *.ko | \
-    sed -e "s,$INSTALL/lib/modules/$MODVER/,," > $INSTALL/lib/modules/$MODVER/modules.order
-  $ROOT/$TOOLCHAIN/bin/depmod -b $INSTALL $MODVER > /dev/null
+  if [[ "$PROJECT" = Odroid ]]; then
+    source $ROOT/packages/linux-odroid-xu3/package.mk
+    MODVER=$(basename $(ls -d $INSTALL/lib/modules/$PKG_VERSION))
+    find $INSTALL/lib/modules/$MODVER/ -name *.ko | \
+      sed -e "s,$INSTALL/lib/modules/$MODVER/,," > $INSTALL/lib/modules/$MODVER/modules.order
+    $ROOT/$TOOLCHAIN/bin/depmod -b $INSTALL $MODVER > /dev/null
+
+    source $ROOT/packages/linux-odroid-u2/package.mk
+    MODVER=$(basename $(ls -d $INSTALL/lib/modules/$PKG_VERSION))
+    find $INSTALL/lib/modules/$MODVER/ -name *.ko | \
+      sed -e "s,$INSTALL/lib/modules/$MODVER/,," > $INSTALL/lib/modules/$MODVER/modules.order
+    $ROOT/$TOOLCHAIN/bin/depmod -b $INSTALL $MODVER > /dev/null
+  else
+    MODVER=$(basename $(ls -d $INSTALL/lib/modules/*))
+    find $INSTALL/lib/modules/$MODVER/ -name *.ko | \
+      sed -e "s,$INSTALL/lib/modules/$MODVER/,," > $INSTALL/lib/modules/$MODVER/modules.order
+    $ROOT/$TOOLCHAIN/bin/depmod -b $INSTALL $MODVER > /dev/null
+  fi
 
 # strip kernel modules
   for MOD in `find $INSTALL/lib/modules/ -name *.ko`; do
@@ -192,6 +226,8 @@ IMAGE_NAME="$DISTRONAME-$TARGET_VERSION"
     KERNEL_IMAGE="$KERNEL_UBOOT_TARGET"
   elif [ "$BOOTLOADER" = "bcm2835-bootloader" ]; then
     KERNEL_IMAGE="zImage"
+  elif [[ "$PROJECT" = Odroid ]]; then
+    KERNEL_IMAGE="zImage"
   else
     KERNEL_IMAGE="bzImage"
   fi
@@ -205,9 +241,30 @@ IMAGE_NAME="$DISTRONAME-$TARGET_VERSION"
   if [ "$BOOTLOADER" = "atv-bootloader" ]; then
     cp -PR $BUILD/atv-bootloader-*/mach_kernel $TARGET_IMG/$IMAGE_NAME.mach_kernel
     chmod 0644 $TARGET_IMG/$IMAGE_NAME.mach_kernel
+  elif [[ "$PROJECT" = Odroid ]]; then
+    source $ROOT/packages/linux-odroid-xu3/package.mk
+    cp -PR $BUILD/linux-odroid-xu3-$PKG_VERSION/arch/$KERNEL_ARCH/boot/$KERNEL_IMAGE $TARGET_IMG/$IMAGE_NAME.XU3.kernel
+    source $ROOT/packages/linux-odroid-u2/package.mk
+    cp -PR $BUILD/linux-odroid-u2-$PKG_VERSION/arch/$KERNEL_ARCH/boot/$KERNEL_IMAGE $TARGET_IMG/$IMAGE_NAME.U2.kernel
+    chmod 0644 $TARGET_IMG/$IMAGE_NAME.*kernel
   else
     cp -PR $BUILD/linux-*/arch/$KERNEL_ARCH/boot/$KERNEL_IMAGE $TARGET_IMG/$IMAGE_NAME.kernel
     chmod 0644 $TARGET_IMG/$IMAGE_NAME.kernel
+  fi
+
+  if [[ "$PROJECT" = Odroid ]]; then
+    # generate uInitrd
+    mkimage -A arm -T ramdisk -n RootFS\ [$PROJECT] -C none -d $INSTALL/../initramfs.cpio $TARGET_IMG/$IMAGE_NAME.uInitrd
+    # generate boot.scr(s)
+    for f in auto 720p 720p-noedid 1080p 1080p-noedid; do
+      mkimage -A arm -T script -n $f\ [Odroid-XU3] -C none -d \
+        $PROJECT_DIR/$PROJECT/bootloader/XU3/boot-${f}.cfg \
+        $INSTALL/usr/share/bootloader/XU3/boot-${f}.scr
+      mkimage -A arm -T script -n $f\ [Odroid-U2/3] -C none -d \
+        $PROJECT_DIR/$PROJECT/bootloader/U2/boot-${f}.cfg \
+        $INSTALL/usr/share/bootloader/U2/boot-${f}.scr
+    done
+    install -m 755 $PROJECT_DIR/$PROJECT/bootloader/bootres $INSTALL/usr/bin/bootres
   fi
 
 # create squashfs file
@@ -261,22 +318,58 @@ IMAGE_NAME="$DISTRONAME-$TARGET_VERSION"
       mkdir -p $RELEASE_DIR/licenses
         cp $ROOT/licenses/* $RELEASE_DIR/licenses
 
-      mkdir -p $RELEASE_DIR/target
+      mkdir -p $RELEASE_DIR/target/SCR
         cp $TARGET_IMG/$IMAGE_NAME.system $RELEASE_DIR/target/SYSTEM
 
         if [ -f $TARGET_IMG/$IMAGE_NAME.mach_kernel ]; then
           cp $TARGET_IMG/$IMAGE_NAME.mach_kernel $RELEASE_DIR/target/MACH_KERNEL
+        elif [[ "$PROJECT" = Odroid ]]; then
+          install -D -m 0644 $TARGET_IMG/$IMAGE_NAME.U2.kernel $RELEASE_DIR/target/U2/KERNEL
+          install -D -m 0644 $TARGET_IMG/$IMAGE_NAME.XU3.kernel $RELEASE_DIR/target/XU3/KERNEL
         else
           cp $TARGET_IMG/$IMAGE_NAME.kernel $RELEASE_DIR/target/KERNEL
         fi
+
+     if [ -f $TARGET_IMG/$IMAGE_NAME.uInitrd ]; then
+       cp $TARGET_IMG/$IMAGE_NAME.uInitrd $RELEASE_DIR/target/INITRD
+     fi
+
+     if [[ "$PROJECT" = Odroid* ]]; then
+       mkdir -p $RELEASE_DIR/3rdparty/U-Boot/{XU3,U2}
+       mkdir -p $RELEASE_DIR/target/SCR-XU3
+       for f in bl1 bl2 tzsw u-boot; do
+         cp -PR $INSTALL/usr/share/bootloader/XU3/$f $RELEASE_DIR/3rdparty/U-Boot/XU3/$f
+         cp -PR $INSTALL/usr/share/bootloader/U2/$f $RELEASE_DIR/3rdparty/U-Boot/U2/$f
+       done
+       for f in $INSTALL/usr/share/bootloader/XU3/boot*.scr; do
+         install -D -m 0644 $f $RELEASE_DIR/target/SCR-XU3/$(basename ${f})
+       done
+       for f in $INSTALL/usr/share/bootloader/U2/boot*.scr; do
+         install -D -m 0644 $f $RELEASE_DIR/target/SCR-U2/$(basename ${f})
+       done
+       # We need to default one boot.scr
+       cp $RELEASE_DIR/target/SCR-XU3/boot-$DEFAULT_SCR.scr  $RELEASE_DIR/target/SCR-XU3/BOOT.SCR
+       cp $RELEASE_DIR/target/SCR-U2/boot-$DEFAULT_SCR.scr $RELEASE_DIR/target/SCR-U2/BOOT.SCR
+       # xu3 dtb
+       install -D -m 0644 $INSTALL/usr/share/bootloader/XU3/DTB $RELEASE_DIR/target/XU3/DTB
+     fi
 
     # create md5sum's
       ( cd $RELEASE_DIR;
         md5sum -t target/SYSTEM > target/SYSTEM.md5;
         if [ -f target/MACH_KERNEL ]; then
           md5sum -t target/MACH_KERNEL > target/MACH_KERNEL.md5;
+        elif [[ "$PROJECT" = Odroid ]]; then
+          md5sum -t target/U2/KERNEL > target/U2/KERNEL.md5;
+          md5sum -t target/XU3/KERNEL > target/XU3/KERNEL.md5;
         else
           md5sum -t target/KERNEL > target/KERNEL.md5;
+        fi
+        if [[ "$PROJECT" = Odroid ]]; then
+          md5sum -t target/INITRD > target/INITRD.md5;
+          md5sum -t target/SCR-U2/BOOT.SCR > target/SCR-U2/BOOT.SCR.md5;
+          md5sum -t target/SCR-XU3/BOOT.SCR > target/SCR-XU3/BOOT.SCR.md5;
+          md5sum -t target/XU3/DTB > target/XU3/DTB.md5;
         fi
       )
 
@@ -299,6 +392,17 @@ IMAGE_NAME="$DISTRONAME-$TARGET_VERSION"
           TARGET_IMG="$TARGET_IMG" \
           IMAGE_NAME="$IMAGE_NAME" \
           $SCRIPTS/mkimage-atv
+      elif [ "$1" = "mkimage" ] && [[ "$PROJECT" = Odroid* ]]; then
+        sudo env \
+          ROOT="$ROOT" \
+          BUILD="$BUILD" \
+          INSTALL="$INSTALL" \
+          TARGET_IMG="$TARGET_IMG" \
+          IMAGE_NAME="$IMAGE_NAME" \
+          RESIZE="$RESIZE" \
+          DEFAULT_SCR="$DEFAULT_SCR" \
+          PROJECT="$PROJECT" \
+          $SCRIPTS/mkimage-odroid
       elif [ "$1" = "mkimage" -a -n "$BOOTLOADER" ]; then
         if [ "$2" == "efi" ] ; then
           UEFI=yes
