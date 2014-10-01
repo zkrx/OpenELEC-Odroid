@@ -1,5 +1,6 @@
 # build directorys
 /build.*/
+/build.*
 /.fakeroot.*
 
 # automatically downloaded source files
