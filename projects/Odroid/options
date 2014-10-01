@@ -307,10 +307,10 @@
 # Modules to install in initramfs for early boot
   INITRAMFS_MODULES=""
 
-# additional Firmware to use (dvb-firmware, misc-firmware, wlan-firmware)
+# additional Firmware to use (dvb-firmware, misc-firmware, wlan-firmware, samsung-firmware, radeon-firmware, rtlnic-firmware)
 # Space separated list is supported,
 # e.g. FIRMWARE="dvb-firmware misc-firmware wlan-firmware"
-  FIRMWARE="dvb-firmware misc-firmware wlan-firmware"
+  FIRMWARE="dvb-firmware misc-firmware wlan-firmware samsung-firmware rtlnic-firmware"
 
 # build with lm_sensors hardware monitoring support (yes / no)
   SENSOR_SUPPORT="yes"
@@ -355,8 +355,8 @@
 # Distribution Specific source location
   DISTRO_MIRROR="http://sources.openelec.tv/mirror"
   DISTRO_SRC="http://sources.openelec.tv/$OPENELEC_VERSION"
-  ODROID_MIRROR="http://freeweb.mine.nu/zalaare"
-#  ODROID_MIRROR="http://zalaare.homenet.org/odroid"
+#  ODROID_MIRROR="http://freeweb.mine.nu/zalaare"
+  ODROID_MIRROR="http://zalaare.homenet.org/odroid"
 
 # Addon Server Url
   ADDON_SERVER_URL="http://addons.openelec.tv"

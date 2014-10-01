@@ -35,9 +35,10 @@ PKG_LONGDESC="This package contains a precompiled kernel image and the modules."
 PKG_IS_ADDON="no"
 PKG_AUTORECONF="no"
 
-if [[ "$PROJECT" = Odroid ]]; then
-  true
-  exit
+if [ "$PROJECT" = Odroid ]; then
+  if [ -f "$STAMPS/$PKG_NAME/build_host" ]; then
+    exit
+  fi
 fi
 
 if [ "$PERF_SUPPORT" = "yes" -a "$DEVTOOLS" = "yes" ]; then
