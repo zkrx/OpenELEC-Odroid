@@ -16,7 +16,7 @@
 #  along with OpenELEC.  If not, see <http://www.gnu.org/licenses/>.
 ################################################################################
 
-PKG_NAME="samsung-firmware"
+PKG_NAME="radeon-firmware"
 PKG_VERSION="20140930.f662913"
 PKG_REV="1"
 PKG_ARCH="any"
@@ -26,8 +26,8 @@ PKG_URL="$ODROID_MIRROR/$PKG_NAME-$PKG_VERSION.tar.xz"
 PKG_DEPENDS_TARGET="toolchain"
 PKG_PRIORITY="optional"
 PKG_SECTION="firmware"
-PKG_SHORTDESC="samsung-firmware: firmwares for various samsung devices"
-PKG_LONGDESC="samsung-firmware: firmwares for various samsung devices"
+PKG_SHORTDESC="radeon-firmware: firmwares for various AMD RADEON devices"
+PKG_LONGDESC="radeon-firmware: firmwares for various AMD RADEON devices"
 
 PKG_IS_ADDON="no"
 PKG_AUTORECONF="no"
