@@ -58,6 +58,7 @@ post_patch() {
   sed -i -e "s|^EXTRAVERSION[[:space:]]*=.*$|EXTRAVERSION = $PKG_EXTRAVERSION|" $PKG_BUILD/Makefile
   sed -i -e "s|^CONFIG_SQUASHFS[[:space:]]*=.*$|CONFIG_SQUASHFS=y|" $PKG_BUILD/.config
   sed -i -e "s|^CONFIG_VFAT_FS[[:space:]]*=.*$|CONFIG_VFAT_FS=y|" $PKG_BUILD/.config
+  sed -i -e "s|^CONFIG_NLS_CODEPAGE_437[[:space:]]*=.*$|CONFIG_NLS_CODEPAGE_437=y|" $PKG_BUILD/.config
 
   # disable PPP support if not enabled
   if [ ! "$PPTP_SUPPORT" = yes ]; then
