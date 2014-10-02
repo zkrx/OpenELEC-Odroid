@@ -664,7 +664,7 @@
                ! -f "$UPDATE_DIR/XU3/$UPDATE_DTB" -o \
                ! -f "$UPDATE_DIR/$UPDATE_INITRD" -o \
                ! -f "$UPDATE_DIR/$UPDATE_SYSTEM"  ] ; then
-            echo "missing XU3/${UPDATE_KERNEL}, XU3/${UPDATE_BOOT}, XU3/${UPDATE_DTB, ${UPDATE_INITRD}, or ${UPDATE_SYSTEM}... normal startup in 10s"
+            echo "missing XU3/${UPDATE_KERNEL}, XU3/${UPDATE_BOOT}, XU3/${UPDATE_DTB}, ${UPDATE_INITRD}, or ${UPDATE_SYSTEM}... normal startup in 10s"
             sync
             usleep 10000000
             return 0
