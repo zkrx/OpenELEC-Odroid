@@ -73,7 +73,7 @@
   SYSTEM_TORAM_LIMIT=1024000
 
   # hide kernel log messages on console
-  echo '1 4 1 7' > /proc/sys/kernel/printk
+  echo '1 4 1 7' > /proc/sys/kernel/pjrintk
 
   # clear screen and hide cursor
   clear
@@ -169,8 +169,6 @@
 
     if [ "$ODROID" = "U2" ]; then
       sh < /dev/ttySAC1 > /dev/ttySAC1 2>&1
-    elif [ "$ODROID" = "XU3" ]; then
-      sh < /dev/ttySAC2 > /dev/ttySAC2 2>&1
     else
       sh < /dev/tty1 > /dev/tty1 2>&1
     fi
@@ -779,47 +777,48 @@
            -f "$UPDATE_DIR/$UPDATE_SYSTEM" -o \
            -f "$UPDATE_TAR" ] ; then
       
-      # check for .tar
-      if [ -f "$UPDATE_TAR" ] ; then
-        echo "Found new .tar archive. extracting..."
-        mkdir -p $UPDATE_DIR/.tmp &>/dev/null
-        tar -xf "$UPDATE_TAR" -C $UPDATE_DIR/.tmp &>/dev/null
-        mv $UPDATE_DIR/.tmp/*/target/* $UPDATE_DIR &>/dev/null
-        rm -f "$UPDATE_TAR" &>/dev/null
-        rm -rf $UPDATE_DIR/.tmp &>/dev/null
-        sync
-        if [ ! -f "$UPDATE_DIR/$UPDATE_KERNEL" -o ! -f "$UPDATE_DIR/$UPDATE_SYSTEM" ] ; then
-          echo "missing ${UPDATE_KERNEL} or ${UPDATE_SYSTEM}... normal startup in 10s"
+        # check for .tar
+        if [ -f "$UPDATE_TAR" ] ; then
+          echo "Found new .tar archive. extracting..."
+          mkdir -p $UPDATE_DIR/.tmp &>/dev/null
+          tar -xf "$UPDATE_TAR" -C $UPDATE_DIR/.tmp &>/dev/null
+          mv $UPDATE_DIR/.tmp/*/target/* $UPDATE_DIR &>/dev/null
+          rm -f "$UPDATE_TAR" &>/dev/null
+          rm -rf $UPDATE_DIR/.tmp &>/dev/null
           sync
-          usleep 10000000
-          return 0
-        fi
-      fi
-
-      if [ -f "$UPDATE_DIR/.nocheck" ] ; then
-        MD5_NOCHECK="1"
-      fi
-
-      # check md5 sums if .nocheck doesn't exist
-      if [ "$MD5_NOCHECK" -eq "0" ] ; then
-        if [ -f "$UPDATE_DIR/${UPDATE_KERNEL}.md5" -a -f "$UPDATE_DIR/${UPDATE_SYSTEM}.md5" ] ; then
-          # *.md5 size-check
-          if [ ! -s "$UPDATE_DIR/${UPDATE_KERNEL}.md5" -o ! -s "$UPDATE_DIR/${UPDATE_SYSTEM}.md5" ] ; then
-            echo "zero-sized .md5 file..."
-            MD5_FAILED="1"
-          else
-            sed  -i 's#target#/storage/.update#g' "$UPDATE_DIR/${UPDATE_KERNEL}.md5"
-            sed  -i 's#target#/storage/.update#g' "$UPDATE_DIR/${UPDATE_SYSTEM}.md5"
-
-            echo "Checking ${UPDATE_KERNEL}.md5..."
-            md5sum -c "$UPDATE_DIR/${UPDATE_KERNEL}.md5" || MD5_FAILED="1"
-
-            echo "Checking ${UPDATE_SYSTEM}.md5..."
-            md5sum -c "$UPDATE_DIR/${UPDATE_SYSTEM}.md5" || MD5_FAILED="1"
+          if [ ! -f "$UPDATE_DIR/$UPDATE_KERNEL" -o ! -f "$UPDATE_DIR/$UPDATE_SYSTEM" ] ; then
+            echo "missing ${UPDATE_KERNEL} or ${UPDATE_SYSTEM}... normal startup in 10s"
+            sync
+            usleep 10000000
+            return 0
           fi
-        else
-          echo "missing ${UPDATE_KERNEL}.md5 or ${UPDATE_SYSTEM}.md5..."
-          MD5_FAILED="1"
+        fi
+
+        if [ -f "$UPDATE_DIR/.nocheck" ] ; then
+          MD5_NOCHECK="1"
+        fi 
+
+        # check md5 sums if .nocheck doesn't exist
+        if [ "$MD5_NOCHECK" -eq "0" ] ; then
+          if [ -f "$UPDATE_DIR/${UPDATE_KERNEL}.md5" -a -f "$UPDATE_DIR/${UPDATE_SYSTEM}.md5" ] ; then
+            # *.md5 size-check
+            if [ ! -s "$UPDATE_DIR/${UPDATE_KERNEL}.md5" -o ! -s "$UPDATE_DIR/${UPDATE_SYSTEM}.md5" ] ; then
+              echo "zero-sized .md5 file..."
+              MD5_FAILED="1"
+            else
+              sed  -i 's#target#/storage/.update#g' "$UPDATE_DIR/${UPDATE_KERNEL}.md5"
+              sed  -i 's#target#/storage/.update#g' "$UPDATE_DIR/${UPDATE_SYSTEM}.md5"
+
+              echo "Checking ${UPDATE_KERNEL}.md5..."
+              md5sum -c "$UPDATE_DIR/${UPDATE_KERNEL}.md5" || MD5_FAILED="1"
+
+              echo "Checking ${UPDATE_SYSTEM}.md5..."
+              md5sum -c "$UPDATE_DIR/${UPDATE_SYSTEM}.md5" || MD5_FAILED="1"
+            fi
+          else
+            echo "missing ${UPDATE_KERNEL}.md5 or ${UPDATE_SYSTEM}.md5..."
+            MD5_FAILED="1"
+          fi
         fi
       fi
 
