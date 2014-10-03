@@ -1,41 +1,79 @@
-diff --git xbmc-13-0f3db05/configure.in xbmc-13-0f3db05-mfc/configure.in
-index 2e49fa1..2140c72 100644
+diff --git xbmc-13-0f3db05/configure.in xbmc-13-b8667e9/configure.in
+index 2e49fa1..307e9ca 100644
 --- xbmc-13-0f3db05/configure.in
-+++ xbmc-13-0f3db05-mfc/configure.in
-@@ -558,7 +558,7 @@ AC_ARG_ENABLE([gtest],
++++ xbmc-13-b8667e9/configure.in
+@@ -188,6 +188,9 @@ libusb_disabled_udev_found="== libusb disabled. =="
+ libcec_enabled="== libcec enabled. =="
+ libcec_disabled="== libcec disabled. CEC adapter support will not be available. =="
  
- AC_ARG_ENABLE([codec],
-   [AS_HELP_STRING([--enable-codec],
--  [enable additional codecs from a list of comma separated names, (default is none, choices are amcodec, libstagefright)])],
-+  [enable additional codecs from a list of comma separated names, (default is none, choices are amcodec, libstagefright, mfc)])],
-   [add_codecs=$enableval],
-   [add_codecs=no])
++mfc_enabled="== MFC enabled. =="
++mfc_disabled="== MFC disabled. =="
++
+ # External library message strings
+ external_libraries_enabled="== Use of all supported external libraries enabled. =="
+ external_libraries_disabled="== Use of all supported external libraries disabled. =="
+@@ -576,6 +579,12 @@ AC_ARG_ENABLE([libav-compat],
+   [use_libav_hacks=$enableval],
+   [use_libav_hacks=no])
  
-@@ -2003,6 +2003,9 @@ for codecs in `echo $add_codecs | sed 's/,/ /g'`; do
-     *libstagefright*)
-         XB_ADD_CODEC([LIBSTAGEFRIGHT], [libstagefright], [$codecs])
-         ;;
-+    *mfc*)
-+        XB_ADD_CODEC([MFC], [mfc], [$codecs])
-+        ;;
-     *)
-   esac
- done
-diff --git xbmc-13-0f3db05/xbmc/cores/dvdplayer/DVDCodecs/DVDFactoryCodec.cpp xbmc-13-0f3db05-mfc/xbmc/cores/dvdplayer/DVDCodecs/DVDFactoryCodec.cpp
-index 14ad038..0881b18 100644
++AC_ARG_ENABLE([mfc],
++  [AS_HELP_STRING([--enable-mfc],
++  [enable use of MFC hardware decoder (default is no) 'Linux only'])],
++  [use_mfc=$enableval],
++  [use_mfc=no])
++
+ ### End of external library options
+ 
+ if test "x$host_vendor" != "xapple"; then
+@@ -1773,6 +1782,11 @@ else
+   AC_MSG_NOTICE($libcap_disabled)
+ fi
+ 
++if test "x$use_mfc" != "xno"; then
++  USE_MFC=1;
++  AC_DEFINE(HAS_MFC, [1], [Define if MFC hardware decoder is present])
++fi
++
+ ### External libraries checks
+ 
+ # Hacks for supporting libav
+@@ -2484,6 +2498,12 @@ else
+   final_message="$final_message\n  additional codecs:\tNo"
+ fi
+ 
++if test "x$use_mfc" != "xno"; then
++  final_message="$final_message\n  MFC support:\tYes"
++else
++  final_message="$final_message\n  MFC support:\tNo"
++fi
++
+ ### External libraries messages
+ 
+ if test "$use_external_ffmpeg" = "yes"; then
+@@ -2681,6 +2701,7 @@ AC_SUBST(USE_PVR_ADDONS)
+ AC_SUBST(GNUTLS_ALL_LIBS)
+ AC_SUBST(HOGWEED_ALL_LIBS)
+ AC_SUBST(VORBISENC_ALL_LIBS)
++AC_SUBST(USE_MFC)
+ 
+ # pushd and popd are not available in other shells besides bash, so implement
+ # our own pushd/popd functions
+diff --git xbmc-13-0f3db05/xbmc/cores/dvdplayer/DVDCodecs/DVDFactoryCodec.cpp xbmc-13-b8667e9/xbmc/cores/dvdplayer/DVDCodecs/DVDFactoryCodec.cpp
+index 14ad038..a49582a 100644
 --- xbmc-13-0f3db05/xbmc/cores/dvdplayer/DVDCodecs/DVDFactoryCodec.cpp
-+++ xbmc-13-0f3db05-mfc/xbmc/cores/dvdplayer/DVDCodecs/DVDFactoryCodec.cpp
-@@ -43,6 +43,9 @@
- #include "utils/AMLUtils.h"
- #include "Video/DVDVideoCodecAmlogic.h"
- #endif
++++ xbmc-13-b8667e9/xbmc/cores/dvdplayer/DVDCodecs/DVDFactoryCodec.cpp
+@@ -56,7 +56,9 @@
+ #include "Overlay/DVDOverlayCodecText.h"
+ #include "Overlay/DVDOverlayCodecTX3G.h"
+ #include "Overlay/DVDOverlayCodecFFmpeg.h"
+-
 +#if defined(HAS_MFC)
 +#include "Video/DVDVideoCodecMFC.h"
 +#endif
- #if defined(TARGET_ANDROID)
- #include "Video/DVDVideoCodecAndroidMediaCodec.h"
- #include "android/activity/AndroidFeatures.h"
-@@ -191,6 +194,11 @@ CDVDVideoCodec* CDVDFactoryCodec::CreateVideoCodec(CDVDStreamInfo &hint, unsigne
+ 
+ #include "DVDStreamInfo.h"
+ #include "settings/Settings.h"
+@@ -191,9 +193,22 @@ CDVDVideoCodec* CDVDFactoryCodec::CreateVideoCodec(CDVDStreamInfo &hint, unsigne
  #elif defined(TARGET_POSIX) && !defined(TARGET_DARWIN)
    hwSupport += "VAAPI:no ";
  #endif
@@ -47,26 +85,22 @@ index 14ad038..0881b18 100644
  
    CLog::Log(LOGDEBUG, "CDVDFactoryCodec: compiled in hardware support: %s", hwSupport.c_str());
  
-@@ -261,6 +269,14 @@ CDVDVideoCodec* CDVDFactoryCodec::CreateVideoCodec(CDVDStreamInfo &hint, unsigne
-   }
- #endif
- 
-+#if defined(HAS_MFC) && defined(_LINUX)
-+  if (!hint.software)
-+  {
-+    CLog::Log(LOGINFO, "Exynos MFC Video Decoder...");
-+    if( (pCodec = OpenCodec(new CDVDVideoCodecMFC(), hint, options)) ) return pCodec;
++#if defined(HAS_MFC)
++  if ( !hint.software ) {
++    if ( hint.codec == AV_CODEC_ID_H263 || hint.codec == AV_CODEC_ID_H264 || hint.codec == AV_CODEC_ID_MPEG4 || hint.codec == AV_CODEC_ID_MPEG2VIDEO || AV_CODEC_ID_MPEG1VIDEO || hint.codec == AV_CODEC_ID_VC1 ) {
++      if( (pCodec = OpenCodec(new CDVDVideoCodecMFC(), hint, options)) ) return pCodec;
++    }
 +  }
 +#endif
 +
- #if defined(TARGET_ANDROID)
-   if (!hint.software && CSettings::Get().GetBool("videoplayer.usemediacodec"))
+   if (hint.stills && (hint.codec == AV_CODEC_ID_MPEG2VIDEO || hint.codec == AV_CODEC_ID_MPEG1VIDEO))
    {
-diff --git xbmc-13-0f3db05-mfc/xbmc/cores/dvdplayer/DVDCodecs/Video/DVDVideoCodecMFC.cpp xbmc-13-0f3db05-mfc/xbmc/cores/dvdplayer/DVDCodecs/Video/DVDVideoCodecMFC.cpp
+      // If dvd is an mpeg2 and hint.stills
+diff --git xbmc-13-b8667e9/xbmc/cores/dvdplayer/DVDCodecs/Video/DVDVideoCodecMFC.cpp xbmc-13-b8667e9/xbmc/cores/dvdplayer/DVDCodecs/Video/DVDVideoCodecMFC.cpp
 new file mode 100644
-index 0000000..855af5f
+index 0000000..d93a179
 --- /dev/null
-+++ xbmc-13-0f3db05-mfc/xbmc/cores/dvdplayer/DVDCodecs/Video/DVDVideoCodecMFC.cpp
++++ xbmc-13-b8667e9/xbmc/cores/dvdplayer/DVDCodecs/Video/DVDVideoCodecMFC.cpp
 @@ -0,0 +1,736 @@
 +/*
 + *      Copyright (C) 2005-2012 Team XBMC
@@ -804,16 +838,16 @@ index 0000000..855af5f
 +bool CDVDVideoCodecMFC::ClearPicture(DVDVideoPicture* pDvdVideoPicture) {
 +  return CDVDVideoCodec::ClearPicture(pDvdVideoPicture);
 +}
-diff --git xbmc-13-0f3db05-mfc/xbmc/cores/dvdplayer/DVDCodecs/Video/DVDVideoCodecMFC.h xbmc-13-0f3db05-mfc/xbmc/cores/dvdplayer/DVDCodecs/Video/DVDVideoCodecMFC.h
+diff --git xbmc-13-b8667e9/xbmc/cores/dvdplayer/DVDCodecs/Video/DVDVideoCodecMFC.h xbmc-13-b8667e9/xbmc/cores/dvdplayer/DVDCodecs/Video/DVDVideoCodecMFC.h
 new file mode 100644
-index 0000000..525de22
+index 0000000..ffa8621
 --- /dev/null
-+++ xbmc-13-0f3db05-mfc/xbmc/cores/dvdplayer/DVDCodecs/Video/DVDVideoCodecMFC.h
-@@ -0,0 +1,79 @@
++++ xbmc-13-b8667e9/xbmc/cores/dvdplayer/DVDCodecs/Video/DVDVideoCodecMFC.h
+@@ -0,0 +1,80 @@
 +#pragma once
 +
 +/*
-+ *      Copyright (C) 2005-2014 Team XBMC
++ *      Copyright (C) 2005-2012 Team XBMC
 + *      http://www.xbmc.org
 + *
 + *  This Program is free software; you can redistribute it and/or modify
@@ -835,15 +869,18 @@ index 0000000..525de22
 +#include "DVDVideoCodec.h"
 +#include "DVDStreamInfo.h"
 +#include "utils/BitstreamConverter.h"
-+#include "LinuxV4L2.h"
++#include "xbmc/linux/LinuxV4l2.h"
 +
-+#define STREAM_BUFFER_SIZE              1048576 // compressed frame size buffer. for unknown reason, possibly the firmware bug,
-+                                                // if set to lower values it corrupts adjacent value in the setup data structure for h264 streams
-+                                                // and leads to stream hangs on heavy frames
-+#define FIMC_CAPTURE_BUFFERS_CNT        3       // 2 begins to be slow.
-+#define MFC_OUTPUT_BUFFERS_CNT          3       // 1 doesn't work at all, 2 is enough most of the times, but in a rare case of interlaced video two buffers
-+                                                // must be queued all the time to get fill picture from interlaced frames, so let's have them 3
-+#define MFC_CAPTURE_EXTRA_BUFFER_CNT    8       // these are extra buffers, better keep their count as big as going to be simultaneous dequeued buffers number
++#ifndef V4L2_CAP_VIDEO_M2M_MPLANE
++  #define V4L2_CAP_VIDEO_M2M_MPLANE 0x00004000
++#endif
++
++#define STREAM_BUFFER_SIZE            1048576 //compressed frame size buffer. for unknown reason, possibly the firmware bug,
++                                              //if set to lower values it corrupts adjacent value in the setup data structure for h264 streams
++                                              //and leads to stream hangs on heavy frames
++#define FIMC_CAPTURE_BUFFERS_CNT      3 //2 begins to be slow.
++#define MFC_OUTPUT_BUFFERS_CNT        3 //1 doesn't work at all, 2 is enough most of the times, but in a rare case of interlaced video two buffers
++                                        //must be queued all the time to get fill picture from interlaced frames, so let's have them 3
 +
 +#define memzero(x) memset(&(x), 0, sizeof (x))
 +
@@ -852,34 +889,20 @@ index 0000000..525de22
 +public:
 +  CDVDVideoCodecMFC();
 +  virtual ~CDVDVideoCodecMFC();
++  virtual bool Open(CDVDStreamInfo &hints, CDVDCodecOptions &options);
 +  virtual void Dispose();
-+
-+  virtual bool        Open(CDVDStreamInfo &hints, CDVDCodecOptions &options);
-+  virtual int         Decode(BYTE* pData, int iSize, double dts, double pts);
-+  virtual void        Reset();
-+  bool                GetPictureCommon(DVDVideoPicture* pDvdVideoPicture);
-+  virtual bool        GetPicture(DVDVideoPicture* pDvdVideoPicture);
-+  virtual bool        ClearPicture(DVDVideoPicture* pDvdVideoPicture);
-+  virtual void        SetDropState(bool bDrop);
-+  virtual const char* GetName() { return m_name.c_str(); }; // m_name is never changed after open 
++  virtual int Decode(BYTE* pData, int iSize, double dts, double pts);
++  virtual void Reset();
++  bool GetPictureCommon(DVDVideoPicture* pDvdVideoPicture);
++  virtual bool GetPicture(DVDVideoPicture* pDvdVideoPicture);
++  virtual bool ClearPicture(DVDVideoPicture* pDvdVideoPicture);
++  virtual void SetDropState(bool bDrop);
++  virtual const char* GetName() { return m_name.c_str(); }; // m_name is never changed after open
 +
 +protected:
-+  bool OpenDecoder();
-+  bool CheckDecoderFormats();
-+  bool m_hasNV12Support;
-+  int  m_iDecoderHandle;
-+
-+  bool OpenConverter();
-+  int  m_iConverterHandle;
-+
-+  CBitstreamConverter m_converter;
-+  DVDVideoPicture     m_videoBuffer;
-+
-+  CDVDStreamInfo m_hints;
-+  std::string    m_name;
-+  bool           m_bVideoConvert;
-+  bool           m_bDropPictures;
-+  int            m_iDequeuedToPresentBufferNumber;
++  std::string m_name;
++  int m_iDecoderHandle;
++  int m_iConverterHandle;
 +
 +  int m_MFCOutputBuffersCount;
 +  int m_MFCCaptureBuffersCount;
@@ -888,15 +911,42 @@ index 0000000..525de22
 +  V4L2Buffer *m_v4l2MFCOutputBuffers;
 +  V4L2Buffer *m_v4l2MFCCaptureBuffers;
 +  V4L2Buffer *m_v4l2FIMCCaptureBuffers;
++
++  int m_iDequeuedToPresentBufferNumber;
++
++  bool m_bVideoConvert;
++  CDVDStreamInfo m_hints;
++
++  CBitstreamConverter m_converter;
++  bool m_bDropPictures;
++
++  DVDVideoPicture   m_videoBuffer;
++
++  bool OpenDevices();
 +};
-diff --git xbmc-13-0f3db05-mfc/xbmc/cores/dvdplayer/DVDCodecs/Video/LinuxV4L2.cpp xbmc-13-0f3db05-mfc/xbmc/cores/dvdplayer/DVDCodecs/Video/LinuxV4L2.cpp
+diff --git xbmc-13-0f3db05/xbmc/cores/dvdplayer/DVDCodecs/Video/Makefile.in xbmc-13-b8667e9/xbmc/cores/dvdplayer/DVDCodecs/Video/Makefile.in
+index 8a97889..4a1f132 100644
+--- xbmc-13-0f3db05/xbmc/cores/dvdplayer/DVDCodecs/Video/Makefile.in
++++ xbmc-13-b8667e9/xbmc/cores/dvdplayer/DVDCodecs/Video/Makefile.in
+@@ -38,6 +38,10 @@ ifeq (@USE_LIBSTAGEFRIGHT@,1)
+ SRCS += DVDVideoCodecStageFright.cpp
+ endif
+ 
++ifeq (@USE_MFC@,1)
++SRCS += DVDVideoCodecMFC.cpp
++endif
++
+ LIB=Video.a
+ 
+ include @abs_top_srcdir@/Makefile.include
+diff --git xbmc-13-b8667e9/xbmc/linux/LinuxV4l2.cpp xbmc-13-b8667e9/xbmc/linux/LinuxV4l2.cpp
 new file mode 100644
-index 0000000..fe22024
+index 0000000..b4e1993
 --- /dev/null
-+++ xbmc-13-0f3db05-mfc/xbmc/cores/dvdplayer/DVDCodecs/Video/LinuxV4L2.cpp
-@@ -0,0 +1,317 @@
++++ xbmc-13-b8667e9/xbmc/linux/LinuxV4l2.cpp
+@@ -0,0 +1,314 @@
 +/*
-+ *      Copyright (C) 2005-2014 Team XBMC
++ *      Copyright (C) 2005-2012 Team XBMC
 + *      http://www.xbmc.org
 + *
 + *  This Program is free software; you can redistribute it and/or modify
@@ -917,9 +967,9 @@ index 0000000..fe22024
 +
 +#include "system.h"
 +#if (defined HAVE_CONFIG_H) && (!defined WIN32)
-+#include "config.h"
++  #include "config.h"
 +#endif
-+#include "LinuxV4L2.h"
++#include "LinuxV4l2.h"
 +
 +#include "xbmc/utils/log.h"
 +
@@ -935,25 +985,26 @@ index 0000000..fe22024
 +#ifdef CLASSNAME
 +#undef CLASSNAME
 +#endif
-+#define CLASSNAME "CLinuxV4L2"
++#define CLASSNAME "CLinuxV4l2"
 +
-+CLinuxV4L2::CLinuxV4L2()
++CLinuxV4l2::CLinuxV4l2()
 +{
 +}
 +
-+CLinuxV4L2::~CLinuxV4L2()
++CLinuxV4l2::~CLinuxV4l2()
 +{
 +}
 +
-+int CLinuxV4L2::RequestBuffer(int device, enum v4l2_buf_type type, enum v4l2_memory memory, int numBuffers)
++int CLinuxV4l2::RequestBuffer(int device, enum v4l2_buf_type type, enum v4l2_memory memory, int numBuffers)
 +{
 +  struct v4l2_requestbuffers reqbuf;
 +  int ret = 0;
 +
-+  if (device < 0)
++  if(device < 0)
 +    return false;
 +
 +  memset(&reqbuf, 0, sizeof(struct v4l2_requestbuffers));
++
 +  reqbuf.type     = type;
 +  reqbuf.memory   = memory;
 +  reqbuf.count    = numBuffers;
@@ -968,32 +1019,32 @@ index 0000000..fe22024
 +  return reqbuf.count;
 +}
 +
-+bool CLinuxV4L2::StreamOn(int device, enum v4l2_buf_type type, int onoff)
++bool CLinuxV4l2::StreamOn(int device, enum v4l2_buf_type type, int onoff)
 +{
 +  int ret = 0;
 +  enum v4l2_buf_type setType = type;
 +
-+  if (device < 0)
++  if(device < 0)
 +    return false;
 +
 +  ret = ioctl(device, onoff, &setType);
-+  if (ret)
++  if(ret)
 +    return false;
 +
 +  return true;
 +}
 +
-+bool CLinuxV4L2::MmapBuffers(int device, int count, V4L2Buffer *v4l2Buffers, enum v4l2_buf_type type, enum v4l2_memory memory, bool queue)
++bool CLinuxV4l2::MmapBuffers(int device, int count, V4L2Buffer *v4l2Buffers, enum v4l2_buf_type type, enum v4l2_memory memory, bool queue)
 +{
 +  struct v4l2_buffer buf;
 +  struct v4l2_plane planes[V4L2_NUM_MAX_PLANES];
 +  int ret;
 +  int i, j;
 +
-+  if (device < 0 || !v4l2Buffers || count == 0)
++  if(device < 0 || !v4l2Buffers || count == 0)
 +    return false;
 +
-+  for (i = 0; i < count; i++)
++  for(i = 0; i < count; i++)
 +  {
 +    memset(&buf, 0, sizeof(struct v4l2_buffer));
 +    memset(&planes, 0, sizeof(struct v4l2_plane) * V4L2_NUM_MAX_PLANES);
@@ -1018,11 +1069,11 @@ index 0000000..fe22024
 +    {
 +      buffer->iSize[j]       = buf.m.planes[j].length;
 +      buffer->iBytesUsed[j]  = buf.m.planes[j].bytesused;
-+      if (buffer->iSize[j])
++      if(buffer->iSize[j])
 +      {
 +        buffer->cPlane[j] = mmap(NULL, buf.m.planes[j].length, PROT_READ | PROT_WRITE,
-+                            MAP_SHARED, device, buf.m.planes[j].m.mem_offset);
-+        if (buffer->cPlane[j] == MAP_FAILED)
++                       MAP_SHARED, device, buf.m.planes[j].m.mem_offset);
++        if(buffer->cPlane[j] == MAP_FAILED)
 +        {
 +          CLog::Log(LOGERROR, "%s::%s - Mmapping buffer", CLASSNAME, __func__);
 +          return false;
@@ -1034,26 +1085,26 @@ index 0000000..fe22024
 +    }
 +    buffer->iIndex = i;
 +
-+    if (queue)
++    if(queue)
 +      QueueBuffer(device, type, memory, buffer);
 +  }
 +
 +  return true;
 +}
 +
-+V4L2Buffer *CLinuxV4L2::FreeBuffers(int count, V4L2Buffer *v4l2Buffers)
++V4L2Buffer *CLinuxV4l2::FreeBuffers(int count, V4L2Buffer *v4l2Buffers)
 +{
 +  int i, j;
 +
-+  if (v4l2Buffers != NULL)
++  if(v4l2Buffers != NULL)
 +  {
-+    for (i = 0; i < count; i++)
++    for(i = 0; i < count; i++)
 +    {
 +      V4L2Buffer *buffer = &v4l2Buffers[i];
 +
 +      for (j = 0; j < buffer->iNumPlanes; j++)
 +      {
-+        if (buffer->cPlane[j] && buffer->cPlane[j] != MAP_FAILED)
++        if(buffer->cPlane[j] && buffer->cPlane[j] != MAP_FAILED)
 +          munmap(buffer->cPlane[j], buffer->iSize[j]);
 +      }
 +    }
@@ -1062,13 +1113,13 @@ index 0000000..fe22024
 +  return NULL;
 +}
 +
-+int CLinuxV4L2::DequeueBuffer(int device, enum v4l2_buf_type type, enum v4l2_memory memory, double *dequeuedTimestamp)
++int CLinuxV4l2::DequeueBuffer(int device, enum v4l2_buf_type type, enum v4l2_memory memory, double *dequeuedTimestamp)
 +{
 +  struct v4l2_buffer vbuf;
 +  struct v4l2_plane  vplanes[V4L2_NUM_MAX_PLANES];
 +  int ret = 0;
 +
-+  if (device < 0)
++  if(device < 0)
 +    return V4L2_ERROR;
 +
 +  memset(&vplanes, 0, sizeof(struct v4l2_plane) * V4L2_NUM_MAX_PLANES);
@@ -1079,15 +1130,13 @@ index 0000000..fe22024
 +  vbuf.length   = V4L2_NUM_MAX_PLANES;
 +
 +  ret = ioctl(device, VIDIOC_DQBUF, &vbuf);
-+  if (ret)
-+  {
++  if (ret) {
 +    if (errno != EAGAIN)
 +      CLog::Log(LOGERROR, "%s::%s - Dequeue buffer", CLASSNAME, __func__);
 +    return V4L2_ERROR;
 +  }
 +
-+  if (type == V4L2_BUF_TYPE_VIDEO_CAPTURE_MPLANE)
-+  {
++  if (type == V4L2_BUF_TYPE_VIDEO_CAPTURE_MPLANE) {
 +    // Unbox two 32-bit integers from struct timeval received from MFC back into one 64-bit double expected by XBMC as pts
 +    // WARNING: It will work only if double is 64-bit.
 +    // Since MFC is IP available only in Samsung Exynos ARM's and the code is for V4L2 for linux it should work.
@@ -1097,13 +1146,13 @@ index 0000000..fe22024
 +  return vbuf.index;
 +}
 +
-+int CLinuxV4L2::QueueBuffer(int device, enum v4l2_buf_type type, enum v4l2_memory memory, V4L2Buffer *buffer)
++int CLinuxV4l2::QueueBuffer(int device, enum v4l2_buf_type type, enum v4l2_memory memory, V4L2Buffer *buffer)
 +{
 +  struct v4l2_buffer vbuf;
 +  struct v4l2_plane  vplanes[buffer->iNumPlanes];
 +  int ret = 0;
 +
-+  if (!buffer || device <0)
++  if(!buffer || device <0)
 +    return V4L2_ERROR;
 +
 +  memset(&vplanes, 0, sizeof(struct v4l2_plane) * buffer->iNumPlanes);
@@ -1113,8 +1162,7 @@ index 0000000..fe22024
 +  vbuf.index    = buffer->iIndex;
 +  vbuf.m.planes = vplanes;
 +  vbuf.length   = buffer->iNumPlanes;
-+  if (type == V4L2_BUF_TYPE_VIDEO_OUTPUT_MPLANE)
-+  {
++  if (type == V4L2_BUF_TYPE_VIDEO_OUTPUT_MPLANE) {
 +    vbuf.flags |= V4L2_BUF_FLAG_TIMESTAMP_COPY;
 +    // This will box 64-bit double given as pts from XBMC into two 32-bit integers available in struct timeval which MFC expects.
 +    // WARNING: This values has nothing to do with real timestamp of the frame, it is just two 32-bit halves of 64-bit double
@@ -1128,8 +1176,7 @@ index 0000000..fe22024
 +
 +  for (int i = 0; i < buffer->iNumPlanes; i++)
 +  {
-+    switch (vbuf.memory)
-+    {
++    switch (vbuf.memory) {
 +      case V4L2_MEMORY_USERPTR:
 +        vplanes[i].m.userptr = (unsigned long)buffer->cPlane[i];
 +        break;
@@ -1152,7 +1199,7 @@ index 0000000..fe22024
 +  return vbuf.index;
 +}
 +
-+int CLinuxV4L2::PollInput(int device, int timeout)
++int CLinuxV4l2::PollInput(int device, int timeout)
 +{
 +  int ret = 0;
 +  struct pollfd p;
@@ -1173,7 +1220,7 @@ index 0000000..fe22024
 +  return V4L2_READY;
 +}
 +
-+int CLinuxV4L2::PollOutput(int device, int timeout)
++int CLinuxV4l2::PollOutput(int device, int timeout)
 +{
 +  int ret = 0;
 +  struct pollfd p;
@@ -1194,7 +1241,7 @@ index 0000000..fe22024
 +  return V4L2_READY;
 +}
 +
-+int CLinuxV4L2::SetControllValue(int device, int id, int value)
++int CLinuxV4l2::SetControllValue(int device, int id, int value)
 +{
 +  struct v4l2_control control;
 +  int ret;
@@ -1204,7 +1251,7 @@ index 0000000..fe22024
 +
 +  ret = ioctl(device, VIDIOC_S_CTRL, &control);
 +
-+  if (ret < 0)
++  if(ret < 0)
 +  {
 +    CLog::Log(LOGERROR, "%s::%s - Set controll if %d value %d\n", CLASSNAME, __func__, id, value);
 +    return V4L2_ERROR;
@@ -1212,16 +1259,16 @@ index 0000000..fe22024
 +
 +  return V4L2_OK;
 +}
-diff --git xbmc-13-0f3db05-mfc/xbmc/cores/dvdplayer/DVDCodecs/Video/LinuxV4L2.h xbmc-13-0f3db05-mfc/xbmc/cores/dvdplayer/DVDCodecs/Video/LinuxV4L2.h
+diff --git xbmc-13-b8667e9/xbmc/linux/LinuxV4l2.h xbmc-13-b8667e9/xbmc/linux/LinuxV4l2.h
 new file mode 100644
-index 0000000..e48b3d4
+index 0000000..32843d0
 --- /dev/null
-+++ xbmc-13-0f3db05-mfc/xbmc/cores/dvdplayer/DVDCodecs/Video/LinuxV4L2.h
-@@ -0,0 +1,76 @@
++++ xbmc-13-b8667e9/xbmc/linux/LinuxV4l2.h
+@@ -0,0 +1,77 @@
 +#pragma once
 +
 +/*
-+ *      Copyright (C) 2005-2014 Team XBMC
++ *      Copyright (C) 2005-2012 Team XBMC
 + *      http://www.xbmc.org
 + *
 + *  This Program is free software; you can redistribute it and/or modify
@@ -1242,33 +1289,30 @@ index 0000000..e48b3d4
 +
 +#include <linux/videodev2.h>
 +
-+#define V4L2_ERROR                   -1
-+#define V4L2_BUSY                     1
-+#define V4L2_READY                    2
-+#define V4L2_OK                       3
-+
-+#define V4L2_NUM_MAX_PLANES           3
-+
-+#ifndef V4L2_CAP_VIDEO_M2M_MPLANE
-+#define V4L2_CAP_VIDEO_M2M_MPLANE     0x00004000
-+#endif
 +#ifndef V4L2_BUF_FLAG_TIMESTAMP_COPY
-+#define V4L2_BUF_FLAG_TIMESTAMP_COPY  0x00004000
++  #define V4L2_BUF_FLAG_TIMESTAMP_COPY 0x4000
 +#endif
++
++#define V4L2_ERROR -1
++#define V4L2_BUSY  1
++#define V4L2_READY 2
++#define V4L2_OK    3
 +
 +#ifdef __cplusplus
 +extern "C" {
 +#endif
 +
++#define V4L2_NUM_MAX_PLANES 3
++
 +typedef struct V4L2Buffer
 +{
-+  int    iSize[V4L2_NUM_MAX_PLANES];
-+  int    iOffset[V4L2_NUM_MAX_PLANES];
-+  int    iBytesUsed[V4L2_NUM_MAX_PLANES];
++  int   iSize[V4L2_NUM_MAX_PLANES];
++  int   iOffset[V4L2_NUM_MAX_PLANES];
++  int   iBytesUsed[V4L2_NUM_MAX_PLANES];
 +  void  *cPlane[V4L2_NUM_MAX_PLANES];
-+  int    iNumPlanes;
-+  int    iIndex;
-+  bool   bQueue;
++  int   iNumPlanes;
++  int   iIndex;
++  bool  bQueue;
 +  double timestamp;
 +} V4L2Buffer;
 +
@@ -1276,36 +1320,37 @@ index 0000000..e48b3d4
 +}
 +#endif
 +
-+class CLinuxV4L2
++class CLinuxV4l2
 +{
 +public:
-+  CLinuxV4L2();
-+  virtual ~CLinuxV4L2();
++  CLinuxV4l2();
++  virtual ~CLinuxV4l2();
 +
-+  static int         RequestBuffer(int device, enum v4l2_buf_type type, enum v4l2_memory memory, int numBuffers);
-+  static bool        StreamOn(int device, enum v4l2_buf_type type, int onoff);
-+  static bool        MmapBuffers(int device, int count, V4L2Buffer *v4l2Buffers, enum v4l2_buf_type type, enum v4l2_memory memory, bool queue = true);
++  static int RequestBuffer(int device, enum v4l2_buf_type type, enum v4l2_memory memory, int numBuffers);
++  static bool StreamOn(int device, enum v4l2_buf_type type, int onoff);
++  static bool MmapBuffers(int device, int count, V4L2Buffer *v4l2Buffers, enum v4l2_buf_type type, enum v4l2_memory memory, bool queue = true);
 +  static V4L2Buffer *FreeBuffers(int count, V4L2Buffer *v4l2Buffers);
 +
-+  static int         DequeueBuffer(int device, enum v4l2_buf_type type, enum v4l2_memory memory, double *dequeuedTimestamp);
-+  static int         QueueBuffer(int device, enum v4l2_buf_type type, enum v4l2_memory memory, V4L2Buffer *buffer);
++  static int DequeueBuffer(int device, enum v4l2_buf_type type, enum v4l2_memory memory, double *dequeuedTimestamp);
++  static int QueueBuffer(int device, enum v4l2_buf_type type, enum v4l2_memory memory, V4L2Buffer *buffer);
 +
-+  static int         PollInput(int device, int timeout);
-+  static int         PollOutput(int device, int timeout);
-+  static int         SetControllValue(int device, int id, int value);
++  static int PollInput(int device, int timeout);
++  static int PollOutput(int device, int timeout);
++  static int SetControllValue(int device, int id, int value);
 +};
-diff --git xbmc-13-0f3db05/xbmc/cores/dvdplayer/DVDCodecs/Video/Makefile.in xbmc-13-0f3db05-mfc/xbmc/cores/dvdplayer/DVDCodecs/Video/Makefile.in
-index 8a97889..cf02749 100644
---- xbmc-13-0f3db05/xbmc/cores/dvdplayer/DVDCodecs/Video/Makefile.in
-+++ xbmc-13-0f3db05-mfc/xbmc/cores/dvdplayer/DVDCodecs/Video/Makefile.in
-@@ -30,6 +30,10 @@ SRCS += DVDVideoCodecAmlogic.cpp
- INCLUDES += -I$(prefix)/include/amcodec
- INCLUDES += -I$(prefix)/include/amplayer
- endif
-+ifeq (@USE_MFC@,1)
-+SRCS += LinuxV4L2.cpp
-+SRCS += DVDVideoCodecMFC.cpp
-+endif
- 
- ifeq (@USE_ANDROID@,1)
- SRCS += DVDVideoCodecAndroidMediaCodec.cpp
++
++inline int v4l2_align(int v, int a) {
++  return ((v + a - 1) / a) * a;
++}
+diff --git xbmc-13-0f3db05/xbmc/linux/Makefile.in xbmc-13-b8667e9/xbmc/linux/Makefile.in
+index 22ad33a..bfaf902 100644
+--- xbmc-13-0f3db05/xbmc/linux/Makefile.in
++++ xbmc-13-b8667e9/xbmc/linux/Makefile.in
+@@ -7,6 +7,7 @@ SRCS += DBusReserve.cpp
+ SRCS += HALManager.cpp
+ SRCS += LinuxResourceCounter.cpp
+ SRCS += LinuxTimezone.cpp
++SRCS += LinuxV4l2.cpp
+ SRCS += PosixMountProvider.cpp
+ SRCS += XFileUtils.cpp
+ SRCS += XHandle.cpp
