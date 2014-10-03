@@ -17,7 +17,7 @@
 ################################################################################
 
 PKG_NAME="linux-odroid-u2"
-PKG_VERSION="3.8.13.27.1"
+PKG_VERSION="3.8.13.28.1"
 PKG_EXTRAVERSION=".$(echo $PKG_VERSION | awk -F. '{print $4"."$5}')"
 PKG_URL="$ODROID_MIRROR/$PKG_NAME-$PKG_VERSION.tar.xz"
 PKG_REV="1"

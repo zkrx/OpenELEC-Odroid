@@ -17,7 +17,7 @@
 ################################################################################
 
 PKG_NAME="linux-odroid-xu3"
-PKG_VERSION="3.10.54.1"
+PKG_VERSION="3.10.54.2"
 PKG_EXTRAVERSION=".$(echo $PKG_VERSION | awk -F. '{print $4}')"
 PKG_URL="$ODROID_MIRROR/$PKG_NAME-$PKG_VERSION.tar.xz"
 PKG_REV="1"
