@@ -105,7 +105,7 @@ trap cleanup SIGINT
   echo "image: creating filesystem on partition 1..."
   echo "  losetup -o $(MiB 2) --sizelimit $(MiB $(($SYSTEM_SIZE + 2))) \"$LOOP\" \"$DISK\""
   losetup -o $(MiB 2) --sizelimit $(MiB $(($SYSTEM_SIZE + 2))) "$LOOP" "$DISK" || error "Setup partition 1 loop failed!"
-  echo "  mkfs.vfat -c -F 32 -n Systen \"$LOOP\""
+  echo "  mkfs.vfat -c -F 32 -n System \"$LOOP\""
   mkfs.vfat -c -F 32 -n System "$LOOP" > /dev/null 2>&1 || error "Create FS on partition 1 failed!"
   sync
 
@@ -116,12 +116,19 @@ trap cleanup SIGINT
 
   # copy files
   echo "image: copying files to partition 1..."
-  install -D $TARGET_IMG/$IMAGE_NAME.XU3.kernel "$OE_TMP/XU3/KERNEL"
-  install -D $TARGET_IMG/$IMAGE_NAME.U2.kernel "$OE_TMP/U2/KERNEL"
-  install -D $TARGET_IMG/$IMAGE_NAME.system "$OE_TMP/SYSTEM"
-  install -D $TARGET_IMG/$IMAGE_NAME.uInitrd "$OE_TMP/INITRD"
+  echo "  XU3/KERNEL"
+  install -D -m 0644 $BUILD/$(basename $(ls -d $BUILD/linux-odroid-xu3-*))/arch/arm/boot/zImage $OE_TMP/XU3/KERNEL
+  echo "  U2/KERNEL"
+  install -D -m 0644 $BUILD/$(basename $(ls -d $BUILD/linux-odroid-u2-*))/arch/arm/boot/zImage $OE_TMP/U2/KERNEL
+  echo "  SYSTEM"
+  install -D $INSTALL/../SYSTEM "$OE_TMP/SYSTEM"
+  echo "  INITRD"
+  install -D $INSTALL/../uInitrd "$OE_TMP/INITRD"
+  echo "  XU3/DTB"
   install -D $INSTALL/usr/share/bootloader/XU3/DTB "$OE_TMP/XU3/DTB"
+  echo "  XU3/BOOT.SCR"
   install -D $INSTALL/usr/share/bootloader/XU3/boot-$DEFAULT_SCR.scr "$OE_TMP/XU3/BOOT.SCR"
+  echo "  U2/BOOT.SCR"
   install -D $INSTALL/usr/share/bootloader/U2/boot-$DEFAULT_SCR.scr "$OE_TMP/U2/BOOT.SCR"
 
 # unmount partition 1
