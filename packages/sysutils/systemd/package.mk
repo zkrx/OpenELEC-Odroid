@@ -209,6 +209,8 @@ post_makeinstall_target() {
   mkdir -p $INSTALL/usr/config
     cp -PR $PKG_DIR/config/* $INSTALL/usr/config
 
+    rm -rf $INSTALL/etc/udev
+      ln -sf /storage/.config/udev.d $INSTALL/etc/udev
     rm -rf $INSTALL/etc/modules-load.d
       ln -sf /storage/.config/modules-load.d $INSTALL/etc/modules-load.d
     rm -rf $INSTALL/etc/sysctl.d
