@@ -23,7 +23,7 @@ mount() {
   /bin/busybox mount -o remount,$1 $BOOTDIR
 }
 
-mali() {
+get_mali() {
   HW=$(cat /proc/cpuinfo | grep ^Hardware | awk -F : '{print $2}' | sed 's, ,,')
 
   case $HW in
@@ -45,31 +45,31 @@ fi
 case $1 in
   1080p|1080P)
     mount rw
-    cp -f $BOOTSCRDIR/boot-1080p.scr $BOOTDIR/$(mali)/$BOOTFILE
+    cp -f $BOOTSCRDIR/$(get_mali)/boot-1080p.scr $BOOTDIR/$(get_mali)/$BOOTFILE
     sync
     mount ro
     ;;
   1080p-noedid|1080P-noedid)
     mount rw
-    cp -f $BOOTSCRDIR/boot-1080p-noedid.scr $BOOTDIR/$(mali)/$BOOTFILE
+    cp -f $BOOTSCRDIR/$(get_mali)/boot-1080p-noedid.scr $BOOTDIR/$(get_mali)/$BOOTFILE
     sync
     mount ro
     ;;
   720p|720P)
     mount rw
-    cp -f $BOOTSCRDIR/boot-720p.scr $BOOTDIR/$(mali)/$BOOTFILE
+    cp -f $BOOTSCRDIR/$(get_mali)/boot-720p.scr $BOOTDIR/$(get_mali)/$BOOTFILE
     sync
     mount ro
     ;;
   720p-noedid|720P-noedid)
     mount rw
-    cp -f $BOOTSCRDIR/boot-720p-noedid.scr $BOOTDIR/$(mali)/$BOOTFILE
+    cp -f $BOOTSCRDIR/$(get_mali)/boot-720p-noedid.scr $BOOTDIR/$(get_mali)/$BOOTFILE
     sync
     mount ro
     ;;
   auto)
     mount rw
-    cp -f $BOOTSCRDIR/boot-auto.scr $BOOTDIR/$(mali)/$BOOTFILE
+    cp -f $BOOTSCRDIR/$(get_mali)/boot-auto.scr $BOOTDIR/$(get_mali)/$BOOTFILE
     sync
     mount ro
     ;;
