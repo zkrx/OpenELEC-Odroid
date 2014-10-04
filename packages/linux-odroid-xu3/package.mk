@@ -43,10 +43,9 @@ fi
 PKG_MAKE_OPTS_HOST="ARCH=$TARGET_ARCH headers_check"
 
 KERNEL_IMAGE="zImage"
+KERNEL_CFG_FILE=$ROOT/$BUILD/$PKG_NAME-$PKG_VERSION/arch/arm/configs/odroidxu3_defconfig
 
 post_patch() {
-  KERNEL_CFG_FILE=$PROJECT_DIR/$PROJECT/$PKG_NAME/$PKG_NAME.$TARGET_ARCH.conf
-
   sed -i -e "s|^HOSTCC[[:space:]]*=.*$|HOSTCC = $HOST_CC|" \
          -e "s|^HOSTCXX[[:space:]]*=.*$|HOSTCXX = $HOST_CXX|" \
          -e "s|^ARCH[[:space:]]*?=.*$|ARCH = $TARGET_ARCH|" \
