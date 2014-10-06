@@ -37,6 +37,6 @@ make_target() {
 }
 
 makeinstall_target() {
-  mkdir -p $INSTALL/lib/firmware
-  cp -R * $INSTALL/lib/firmware
+  mkdir -p $INSTALL/lib/firmware/s5p-mfc
+  cp -R * $INSTALL/lib/firmware/s5p-mfc
 }
