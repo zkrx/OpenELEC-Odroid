@@ -26,8 +26,8 @@
   OE_TMP=$(mktemp -d)
   LOOP=$(losetup -f)
   
-  SYSTEM_SIZE=128
-  STORAGE_SIZE=32 # STORAGE_SIZE must be >= 32 !
+  SYSTEM_SIZE=132
+  STORAGE_SIZE=48 # STORAGE_SIZE must be >= 32 !
 
   # SYSTEM + STORAGE + U-Boot Req
   DISK_SIZE="$(( $SYSTEM_SIZE + $STORAGE_SIZE + 2 ))"
@@ -105,8 +105,8 @@ trap cleanup SIGINT
   echo "image: creating filesystem on partition 1..."
   echo "  losetup -o $(MiB 2) --sizelimit $(MiB $(($SYSTEM_SIZE + 2))) \"$LOOP\" \"$DISK\""
   losetup -o $(MiB 2) --sizelimit $(MiB $(($SYSTEM_SIZE + 2))) "$LOOP" "$DISK" || error "Setup partition 1 loop failed!"
-  echo "  mkfs.vfat -c -F 32 -n System \"$LOOP\""
-  mkfs.vfat -c -F 32 -n System "$LOOP" > /dev/null 2>&1 || error "Create FS on partition 1 failed!"
+  echo "  mkfs.vfat -c -s 1 -S 512 -F 32 -n System \"$LOOP\""
+  mkfs.vfat -c -s 1 -S 512 -F 32 -n System "$LOOP" > /dev/null 2>&1 || error "Create FS on partition 1 failed!"
   sync
 
 # mount partition 1
