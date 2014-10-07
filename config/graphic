@@ -36,6 +36,10 @@ get_graphicdrivers() {
       XORG_DRIVERS="$XORG_DRIVERS dove"
     fi
 
+    if [ "$drv" = "armsoc" ]; then
+      XORG_DRIVERS="$XORG_DRIVERS armsoc"
+    fi
+
     if [ "$drv" = "i915" ]; then
       DRI_DRIVERS="$DRI_DRIVERS,i915"
       XORG_DRIVERS="$XORG_DRIVERS intel"

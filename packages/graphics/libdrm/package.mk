@@ -55,6 +55,9 @@ configure_target() {
     [ "$drv" = "nouveau" ] && \
       DRM_CONFIG=`echo $DRM_CONFIG | sed -e 's/disable-libkms/enable-libkms/'` && \
       DRM_CONFIG=`echo $DRM_CONFIG | sed -e 's/disable-nouveau/enable-nouveau/'`
+    [ "$drv" = "armsoc" ] && \
+      DRM_CONFIG=`echo $DRM_CONFIG | sed -e 's/disable-libkms/enable-libkms/'` && \
+      DRM_CONFIG="$DRM_CONFIG --enable-exynos-experimental-api"
   done
 
   ../configure --host=$TARGET_NAME \

@@ -36,10 +36,15 @@ PKG_IS_ADDON="no"
 PKG_AUTORECONF="no"
 
 configure_target() {
-  ( cd kernel
-    LDFLAGS="" make dvb_hdhomerun KERNEL_DIR=$(kernel_path)
-    fix_module_depends dvb_hdhomerun_core.ko "dvb_core"
-  )
+  cp -av $ROOT/$PKG_BUILD $ROOT/$BUILD/$PKG_NAME-odroid-u2
+  cd $ROOT/$BUILD/$PKG_NAME-odroid-u2
+  LDFLAGS="" make -C kernel dvb_hdhomerun KERNEL_DIR=$(odroid_u2_kernel_path)
+  fix_module_depends kernel/dvb_hdhomerun_core.ko "dvb_core"
+
+  cp -av $ROOT/$PKG_BUILD $ROOT/$BUILD/$PKG_NAME-odroid-xu3
+  cd $ROOT/$BUILD/$PKG_NAME-odroid-xu3
+  LDFLAGS="" make -C kernel dvb_hdhomerun KERNEL_DIR=$(odroid_xu3_kernel_path)
+  fix_module_depends kernel/dvb_hdhomerun_core.ko "dvb_core"
 
 # absolute path
   LIBHDHOMERUN_PATH=$(ls -d $ROOT/$BUILD/libhdhomerun-*/)
@@ -55,9 +60,14 @@ configure_target() {
 }
 
 makeinstall_target() {
-  cd $ROOT/$PKG_BUILD
-    mkdir -p $INSTALL/lib/modules/$(get_module_dir)/hdhomerun
-      cp kernel/*.ko $INSTALL/lib/modules/$(get_module_dir)/hdhomerun/
+  cd $ROOT/$BUILD/$PKG_NAME-odroid-u2
+    echo $(basename $(ls -d $(get_build_dir linux-odroid-u2)/.install_pkg/lib/modules/*))/hdhomerun
+    mkdir -vp $INSTALL/lib/modules/$(basename $(ls -d $(get_build_dir linux-odroid-u2)/.install_pkg/lib/modules/*))/hdhomerun
+      cp -v kernel/*.ko $INSTALL/lib/modules/$(basename $(ls -d $(get_build_dir linux-odroid-u2)/.install_pkg/lib/modules/*))/hdhomerun
+  cd $ROOT/$BUILD/$PKG_NAME-odroid-xu3
+    mkdir -vp $INSTALL/lib/modules/$(basename $(ls -d $(get_build_dir linux-odroid-xu3)/.install_pkg/lib/modules/*))/hdhomerun
+      cp -v kernel/*.ko $INSTALL/lib/modules/$(basename $(ls -d $(get_build_dir linux-odroid-xu3)/.install_pkg/lib/modules/*))/hdhomerun
+
 
     mkdir -p $INSTALL/usr/bin
       cp -PR .$TARGET_NAME/userhdhomerun $INSTALL/usr/bin

@@ -28,7 +28,11 @@ PKG_ARCH="any"
 PKG_LICENSE="GPL"
 PKG_SITE="https://github.com/anholt/libepoxy"
 PKG_URL="$DISTRO_SRC/$PKG_NAME-$PKG_VERSION.tar.xz"
-PKG_DEPENDS_TARGET="toolchain Mesa"
+if [[ "$PROJECT" = Odroid* ]]; then
+  PKG_DEPENDS_TARGET="toolchain $OPENGLES"
+else
+  PKG_DEPENDS_TARGET="toolchain Mesa"
+fi
 PKG_PRIORITY="optional"
 PKG_SECTION="graphics"
 PKG_SHORTDESC="libepoxy: a library for handling OpenGL function pointer management for you."
@@ -36,4 +40,3 @@ PKG_LONGDESC="Epoxy is a library for handling OpenGL function pointer management
 
 PKG_IS_ADDON="no"
 PKG_AUTORECONF="yes"
-

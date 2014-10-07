@@ -7,3 +7,5 @@
 # ADDON_VERSION: Addon version
   ADDON_VERSION="4.1"
 
+# ODROID_VERSION: BUILD Revision for Odroid
+  ODROID_VERSION="4.2.0.0"

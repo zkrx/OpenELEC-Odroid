@@ -57,6 +57,11 @@ else
   PKG_CONFIGURE_OPTS_TARGET="$PKG_CONFIGURE_OPTS_TARGET --disable-imx6"
 fi
 
+if [ "$XBMCPLAYER_DRIVER" = "odroid-mfc" ]; then
+  PKG_CONFIGURE_OPTS_TARGET="$PKG_CONFIGURE_OPTS_TARGET --enable-exynos"
+else
+  PKG_CONIFGURE_OPTS_TARGET="$PKG_CONFIGURE_OPTS_TARGET --disable-exynos"
+fi
 
 # dont use some optimizations because of build problems
   export LDFLAGS=`echo $LDFLAGS | sed -e "s|-Wl,--as-needed||"`
