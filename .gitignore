@@ -36,3 +36,4 @@ mkpkg-temp
 .ccache*
 .bash*
 .zsh*
+.less*
