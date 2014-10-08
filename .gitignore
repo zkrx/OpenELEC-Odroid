@@ -37,6 +37,7 @@ mkpkg-temp
 .bash*
 .zsh*
 .zcomp*
+.zdirs
 .less*
 
 # git stuff
