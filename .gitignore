@@ -36,6 +36,7 @@ mkpkg-temp
 .ccache*
 .bash*
 .zsh*
+.zcomp*
 .less*
 
 # git stuff
