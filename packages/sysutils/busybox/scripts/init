@@ -527,7 +527,7 @@
         rm -f "$UPDATE_TAR" &>/dev/null
         rm -rf $UPDATE_DIR/.tmp &>/dev/null
         sync
-          
+
         if [ ! -f "$UPDATE_DIR/U2/$UPDATE_KERNEL" -o \
              ! -f "$UPDATE_DIR/U2/$UPDATE_BOOT" -o \
              ! -f "$UPDATE_DIR/XU3/$UPDATE_KERNEL" -o \
@@ -540,7 +540,7 @@
           usleep 10000000
           return 0
         fi
-        
+
         if [ -f "$UPDATE_DIR/.nocheck" ] ; then
           MD5_NOCHECK="1"
         fi
@@ -572,7 +572,7 @@
               sed  -i 's#target#/storage/.update#g' "$UPDATE_DIR/XU3/${UPDATE_DTB}.md5"
               sed  -i 's#target#/storage/.update#g' "$UPDATE_DIR/${UPDATE_INITRD}.md5"
               sed  -i 's#target#/storage/.update#g' "$UPDATE_DIR/${UPDATE_SYSTEM}.md5"
-              
+
               echo "Checking U2/${UPDATE_KERNEL}.md5..."
               md5sum -c "$UPDATE_DIR/U2/${UPDATE_KERNEL}.md5" || MD5_FAILED="1"
 
