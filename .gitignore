@@ -30,3 +30,9 @@ mkpkg-temp
 
 # crap
 .DS_Store
+
+# homedirectory stuff
+.ssh
+.ccache*
+.bash*
+.zsh*
