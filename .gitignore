@@ -21,6 +21,9 @@ mkpkg-temp
 # private working directory
 /.work/
 
+# meta patches
+/patches/unused/
+
 # symlinks...
 /sources
 /.work
@@ -39,6 +42,7 @@ mkpkg-temp
 .zcomp*
 .zdirs
 .less*
+.nanohistory
 
 # git stuff
 .gitconfig
