@@ -25,12 +25,14 @@
 # set variables
   OE_TMP=$(mktemp -d)
   LOOP=$(losetup -f)
-  
-  SYSTEM_SIZE=132
-  STORAGE_SIZE=48 # STORAGE_SIZE must be >= 32 !
 
-  # SYSTEM + STORAGE + U-Boot Req
-  DISK_SIZE="$(( $SYSTEM_SIZE + $STORAGE_SIZE + 2 ))"
+  SYSTEM_SIZE=256
+  STORAGE_SIZE=40  # STORAGE_SIZE must be >= 32 !
+  SPACER=1         # SPACER is space on end of each partition (2x)
+  UBOOT=2          # UBOOT must be >= 2 !
+
+  # UBOOT + SYSTEM + SPACER + STORAGE + SPACER
+  DISK_SIZE="$(( $UBOOT + $SYSTEM_SIZE + $SPACER + $STORAGE_SIZE + $SPACER ))"
   DISK="$TARGET_IMG/$IMAGE_NAME.img"
 
 # functions
@@ -70,8 +72,8 @@ trap cleanup SIGINT
 
 # create an image
   echo "image: creating image: $DISK..."
-  echo "  dd if=/dev/zero of=$DISK bs=512 count=$(($(Sector $(MiB $DISK_SIZE)) + 2))"
-  dd if=/dev/zero of=$DISK bs=512 count=$(($(Sector $(MiB $DISK_SIZE)) + 2)) $DEBUG_NULL > /dev/null 2>&1 || error "Create image failed!"
+  echo "  dd if=/dev/zero of=$DISK bs=512 count=$(Sector $(MiB $DISK_SIZE))"
+  dd if=/dev/zero of=$DISK bs=512 count=$(Sector $(MiB $DISK_SIZE)) $DEBUG_NULL > /dev/null 2>&1 || error "Create image failed!"
   sync
 
 # write a disklabel
@@ -84,16 +86,15 @@ trap cleanup SIGINT
 
 # create part1
   echo "image: creating partition 1 on $DISK..."
-  SYSTEM_PART_END="$(Sector $(MiB $(($SYSTEM_SIZE + 2))))"
-  echo "  parted -s \"$LOOP\" -a min unit s mkpart primary fat32 $(Sector $(MiB 2)) $SYSTEM_PART_END"
-  parted -s "$LOOP" -a min unit s mkpart primary fat32 $(Sector $(MiB 2)) $SYSTEM_PART_END || error "Create partition 1 failed!"
-  echo "  parted -s \"$LOOP\" set 1 boot on" 
-  parted -s "$LOOP" set 1 boot on
+  SYSTEM_PART_START="$(Sector $(MiB $UBOOT))"
+  SYSTEM_PART_END="$(($SYSTEM_PART_START + $(Sector $(MiB $SYSTEM_SIZE))))"
+  echo "  parted -s \"$LOOP\" -a min unit s mkpart primary fat32 $SYSTEM_PART_START $SYSTEM_PART_END"
+  parted -s "$LOOP" -a min unit s mkpart primary fat32 $SYSTEM_PART_START $SYSTEM_PART_END || error "Create partition 1 failed!"
   sync
 
 # create part2
   echo "image: creating partition 2 on $DISK..."
-  STORAGE_PART_START="$(($SYSTEM_PART_END + 1))"
+  STORAGE_PART_START="$(($SYSTEM_PART_END + $(Sector $(MiB $SPACER))))"
   STORAGE_PART_END="$(($STORAGE_PART_START + $(Sector $(MiB $STORAGE_SIZE))))"
   echo "  parted -s \"$LOOP\" -a min unit s mkpart primary ext4 $STORAGE_PART_START $STORAGE_PART_END"
   parted -s "$LOOP" -a min unit s mkpart primary ext4 $STORAGE_PART_START $STORAGE_PART_END || error "Create partition 2 failed!"
@@ -103,10 +104,10 @@ trap cleanup SIGINT
   echo "  losetup -d \"$LOOP\""
   losetup -d "$LOOP"
   echo "image: creating filesystem on partition 1..."
-  echo "  losetup -o $(MiB 2) --sizelimit $(MiB $(($SYSTEM_SIZE + 2))) \"$LOOP\" \"$DISK\""
-  losetup -o $(MiB 2) --sizelimit $(MiB $(($SYSTEM_SIZE + 2))) "$LOOP" "$DISK" || error "Setup partition 1 loop failed!"
-  echo "  mkfs.vfat -c -s 1 -S 512 -F 32 -n System \"$LOOP\""
-  mkfs.vfat -c -s 1 -S 512 -F 32 -n System "$LOOP" > /dev/null 2>&1 || error "Create FS on partition 1 failed!"
+  echo "  losetup -o $(($SYSTEM_PART_START * 512 )) --sizelimit $(MiB $SYSTEM_SIZE) \"$LOOP\" \"$DISK\""
+  losetup -o $(($SYSTEM_PART_START * 512 )) --sizelimit $(MiB $SYSTEM_SIZE) "$LOOP" "$DISK" || error "Setup partition 1 loop failed!"
+  echo "  mkfs.vfat -c -F 32 -n System \"$LOOP\""
+  mkfs.vfat -c -F 32 -n System "$LOOP" > /dev/null 2>&1 || error "Create FS on partition 1 failed!"
   sync
 
 # mount partition 1
