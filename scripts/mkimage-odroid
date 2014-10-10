@@ -51,6 +51,18 @@
     exit 99
   }
 
+  fuse() {
+    ( TEMP=$(mktemp -d)
+      mkdir -p $TEMP/mkfuse
+      cp -ar $INSTALL/usr/share/bootloader/XU3 $TEMP/mkfuse
+      cp -ar $INSTALL/usr/share/bootloader/U2 $TEMP/mkfuse
+      rm $TEMP/mkfuse/{XU3,U2}/*{DTB,scr}
+      sed -e 's,UBOOT_DIR=.*,UBOOT_DIR=$(pwd),' $ROOT/tools/mkfuse/mkfuse > $TEMP/mkfuse/mkfuse
+      chmod +x $TEMP/mkfuse/mkfuse
+      ( cd $TEMP ; tar Jcvf $TARGET_IMG/mkfuse.txz * )
+      rm -rf $TEMP )
+  }
+
   MiB() {
     echo $(( $1 * 1024 * 1024 ))
   }
@@ -167,6 +179,9 @@ trap cleanup SIGINT
   echo "  umount \"$LOOP\""
   umount "$LOOP"
   sync
+
+# make fuse tool
+  fuse
 
 # cleanup
   cleanup

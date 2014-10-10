@@ -42,7 +42,8 @@ mkpkg-temp
 .zcomp*
 .zdirs
 .less*
-.nanohistory
+.config
+.nano_history
 
 # git stuff
 .gitconfig
