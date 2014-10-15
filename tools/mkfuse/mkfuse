@@ -13,8 +13,8 @@ fuse() {
 [ -z $2 ] && usage
 
 # Global
-UBOOT_DIR=$(pwd)/../../$(basename $(ls -d $(pwd)/../../build.*))/image/system/usr/share/bootloader
-UBOOT_FLAGS="iflag=dsync oflag=dsync"
+UBOOT_DIR=$INSTALL/usr/share/bootloader
+UBOOT_FLAGS="iflag=dsync oflag=dsync conv=notrunc"
 
 # Odroid-U2
 U2_DIR=$UBOOT_DIR/U2

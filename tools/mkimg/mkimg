@@ -1,0 +1,11 @@
+#!/bin/sh
+
+echo "Copying original Odroid image for U2/3 fusing..."
+cp -a $TARGET_IMG/$IMAGE_NAME.img $TARGET_IMG/$IMAGE_NAME.U2.img
+echo "Copying original Odroid image for XU3 fusing..."
+cp -a $TARGET_IMG/$IMAGE_NAME.img $TARGET_IMG/$IMAGE_NAME.XU3.img
+
+echo "Fusing U2/3 Image"
+$ROOT/tools/mkfuse/mkfuse U2 $TARGET_IMG/$IMAGE_NAME.U2.img
+echo "Fusing XU3 Image"
+$ROOT/tools/mkfuse/mkfuse XU3 $TARGET_IMG/$IMAGE_NAME.XU3.img

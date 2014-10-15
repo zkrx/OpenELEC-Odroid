@@ -43,7 +43,6 @@
     losetup -d "$LOOP"
     echo "  rm -rf \"$OE_TMP\""
     rm -rf "$OE_TMP"
-    exit
   }
 
   error() {
@@ -73,15 +72,15 @@ trap cleanup SIGINT
 # create an image
   echo "image: creating image: $DISK..."
   echo "  dd if=/dev/zero of=$DISK bs=512 count=$(Sector $(MiB $DISK_SIZE))"
-  dd if=/dev/zero of=$DISK bs=512 count=$(Sector $(MiB $DISK_SIZE)) $DEBUG_NULL > /dev/null 2>&1 || error "Create image failed!"
+#  dd if=/dev/zero of=$DISK bs=512 count=$(Sector $(MiB $DISK_SIZE)) $DEBUG_NULL > /dev/null 2>&1 || error "Create image failed!"
   sync
 
 # write a disklabel
   echo "image: creating partition table on $DISK..."
   echo "  losetup \"$LOOP\" \"$DISK\""
-  losetup "$LOOP" "$DISK"
+#  losetup "$LOOP" "$DISK"
   echo "  parted -s \"$LOOP\" mklabel msdos"
-  parted -s "$LOOP" mklabel msdos
+#  parted -s "$LOOP" mklabel msdos
   sync
 
 # create part1
@@ -89,7 +88,7 @@ trap cleanup SIGINT
   SYSTEM_PART_START="$(Sector $(MiB $UBOOT))"
   SYSTEM_PART_END="$(($SYSTEM_PART_START + $(Sector $(MiB $SYSTEM_SIZE))))"
   echo "  parted -s \"$LOOP\" -a min unit s mkpart primary fat32 $SYSTEM_PART_START $SYSTEM_PART_END"
-  parted -s "$LOOP" -a min unit s mkpart primary fat32 $SYSTEM_PART_START $SYSTEM_PART_END || error "Create partition 1 failed!"
+#  parted -s "$LOOP" -a min unit s mkpart primary fat32 $SYSTEM_PART_START $SYSTEM_PART_END || error "Create partition 1 failed!"
   sync
 
 # create part2
@@ -97,63 +96,63 @@ trap cleanup SIGINT
   STORAGE_PART_START="$(($SYSTEM_PART_END + $(Sector $(MiB $SPACER))))"
   STORAGE_PART_END="$(($STORAGE_PART_START + $(Sector $(MiB $STORAGE_SIZE))))"
   echo "  parted -s \"$LOOP\" -a min unit s mkpart primary ext4 $STORAGE_PART_START $STORAGE_PART_END"
-  parted -s "$LOOP" -a min unit s mkpart primary ext4 $STORAGE_PART_START $STORAGE_PART_END || error "Create partition 2 failed!"
+#  parted -s "$LOOP" -a min unit s mkpart primary ext4 $STORAGE_PART_START $STORAGE_PART_END || error "Create partition 2 failed!"
   sync
 
 # create filesystem on partition 1
   echo "  losetup -d \"$LOOP\""
-  losetup -d "$LOOP"
+#  losetup -d "$LOOP"
   echo "image: creating filesystem on partition 1..."
   echo "  losetup -o $(($SYSTEM_PART_START * 512 )) --sizelimit $(MiB $SYSTEM_SIZE) \"$LOOP\" \"$DISK\""
-  losetup -o $(($SYSTEM_PART_START * 512 )) --sizelimit $(MiB $SYSTEM_SIZE) "$LOOP" "$DISK" || error "Setup partition 1 loop failed!"
+#  losetup -o $(($SYSTEM_PART_START * 512 )) --sizelimit $(MiB $SYSTEM_SIZE) "$LOOP" "$DISK" || error "Setup partition 1 loop failed!"
   echo "  mkfs.vfat -c -F 32 -n System \"$LOOP\""
-  mkfs.vfat -c -F 32 -n System "$LOOP" > /dev/null 2>&1 || error "Create FS on partition 1 failed!"
+#  mkfs.vfat -c -F 32 -n System "$LOOP" > /dev/null 2>&1 || error "Create FS on partition 1 failed!"
   sync
 
 # mount partition 1
   echo "image: mounting partition 1 on $OE_TMP..."
   echo "  mount \"$LOOP\" \"$OE_TMP\""
-  mount "$LOOP" "$OE_TMP" || error "Mounting partition 1 failed"
+#  mount "$LOOP" "$OE_TMP" || error "Mounting partition 1 failed"
 
   # copy files
   echo "image: copying files to partition 1..."
   echo "  XU3/KERNEL"
-  install -D -m 0644 $BUILD/$(basename $(ls -d $BUILD/linux-odroid-xu3-*))/arch/arm/boot/zImage $OE_TMP/XU3/KERNEL
+#  install -D -m 0644 $BUILD/$(basename $(ls -d $BUILD/linux-odroid-xu3-*))/arch/arm/boot/zImage $OE_TMP/XU3/KERNEL
   echo "  U2/KERNEL"
-  install -D -m 0644 $BUILD/$(basename $(ls -d $BUILD/linux-odroid-u2-*))/arch/arm/boot/zImage $OE_TMP/U2/KERNEL
+#  install -D -m 0644 $BUILD/$(basename $(ls -d $BUILD/linux-odroid-u2-*))/arch/arm/boot/zImage $OE_TMP/U2/KERNEL
   echo "  SYSTEM"
-  install -D $INSTALL/../SYSTEM "$OE_TMP/SYSTEM"
+#  install -D $INSTALL/../SYSTEM "$OE_TMP/SYSTEM"
   echo "  INITRD"
-  install -D $INSTALL/../uInitrd "$OE_TMP/INITRD"
+#  install -D $INSTALL/../uInitrd "$OE_TMP/INITRD"
   echo "  XU3/DTB"
-  install -D $INSTALL/usr/share/bootloader/XU3/DTB "$OE_TMP/XU3/DTB"
+#  install -D $INSTALL/usr/share/bootloader/XU3/DTB "$OE_TMP/XU3/DTB"
   echo "  XU3/BOOT.SCR"
-  install -D $INSTALL/usr/share/bootloader/XU3/boot-$DEFAULT_SCR.scr "$OE_TMP/XU3/BOOT.SCR"
+#  install -D $INSTALL/usr/share/bootloader/XU3/boot-$DEFAULT_SCR.scr "$OE_TMP/XU3/BOOT.SCR"
   echo "  U2/BOOT.SCR"
-  install -D $INSTALL/usr/share/bootloader/U2/boot-$DEFAULT_SCR.scr "$OE_TMP/U2/BOOT.SCR"
+#  install -D $INSTALL/usr/share/bootloader/U2/boot-$DEFAULT_SCR.scr "$OE_TMP/U2/BOOT.SCR"
 
 # unmount partition 1
   echo "image: unmounting partition 1..."
   sync
   echo "  umount \"$LOOP\""
-  umount "$LOOP"
+#  umount "$LOOP"
 
 # create filesystem on partition 2
   echo "  losetup -d \"$LOOP\""
-  losetup -d "$LOOP"
+#  losetup -d "$LOOP"
   echo "image: creating filesystem on partition 2..."
   echo "  losetup -o $(($STORAGE_PART_START * 512)) --sizelimit $(MiB $STORAGE_SIZE) \"$LOOP\" \"$DISK\""
-  losetup -o $(($STORAGE_PART_START * 512)) --sizelimit $(MiB $STORAGE_SIZE) "$LOOP" "$DISK" || error "Setup partition 2 loop failed!"
+#  losetup -o $(($STORAGE_PART_START * 512)) --sizelimit $(MiB $STORAGE_SIZE) "$LOOP" "$DISK" || error "Setup partition 2 loop failed!"
   echo "  mke2fs -q -t ext4 -m 0 -O ^has_journal -E stride=2,stripe-width=1024 -b 4096 -L Storage \"$LOOP\""
-  mke2fs -q -t ext4 -m 0 -O ^has_journal -E stride=2,stripe-width=1024 -b 4096 -L Storage "$LOOP" > /dev/null 2>&1 || error "Create FS on partition 2 failed!"
+#  mke2fs -q -t ext4 -m 0 -O ^has_journal -E stride=2,stripe-width=1024 -b 4096 -L Storage "$LOOP" > /dev/null 2>&1 || error "Create FS on partition 2 failed!"
   echo "  e2fsck -n \"$LOOP\""
-  e2fsck -n "$LOOP" > /dev/null 2>&1 || error "Partition 2 FS check failed!"
+#  e2fsck -n "$LOOP" > /dev/null 2>&1 || error "Partition 2 FS check failed!"
   sync
 
 # mount partition 2
   echo "image: mounting partition 2 on $OE_TMP..."
   echo "  mount \"$LOOP\" \"$OE_TMP\""
-  mount "$LOOP" "$OE_TMP" || error "Mounting partition 2 failed!"
+#  mount "$LOOP" "$OE_TMP" || error "Mounting partition 2 failed!"
 
 # add resize mark
   if [ "$RESIZE" = "yes" ]; then
@@ -165,11 +164,14 @@ trap cleanup SIGINT
 # unmount partition 2 
   echo "image: unmounting partition 2..."
   echo "  umount \"$LOOP\""
-  umount "$LOOP"
+#  umount "$LOOP"
   sync
 
-# create bin
-  $ROOT/tools/mkbin/mkbin
-
 # cleanup
-  cleanup
+#  cleanup
+
+# create u2/3 and xu3 images
+#  $ROOT/tools/mkimg/mkimg
+
+# make self-fusing binary
+  $ROOT/tools/mkbin/mkbin

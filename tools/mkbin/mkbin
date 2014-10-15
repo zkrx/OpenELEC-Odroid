@@ -1,0 +1,68 @@
+#!/bin/sh
+UBOOT_FLAGS="bs=512 conv=notrunc status=none"
+UBOOT_DIR="$INSTALL/usr/share/bootloader"
+ORIG_IMAGE="$TARGET_IMG/$IMAGE_NAME.img"
+OUTPUT="$TARGET_IMG/$IMAGE_NAME.bin"
+
+get_fuse() {
+  dd if=$1 of=/dev/null bs=512 > $ROOT/$BUILD/.stamps/gen_length 2>&1
+  echo $(($(head -1 $ROOT/$BUILD/.stamps/gen_length | awk '{print $1}')))
+}
+
+cU2_BL1=$(get_fuse $UBOOT_DIR/U2/bl1)
+cU2_BL2=$(get_fuse $UBOOT_DIR/U2/bl2)
+cU2_UBOOT=$(get_fuse $UBOOT_DIR/U2/u-boot)
+cU2_TZSW=$(get_fuse $UBOOT_DIR/U2/tzsw)
+cXU3_BL1=$(get_fuse $UBOOT_DIR/XU3/bl1)
+cXU3_BL2=$(get_fuse $UBOOT_DIR/XU3/bl2)
+cXU3_UBOOT=$(get_fuse $UBOOT_DIR/XU3/u-boot)
+cXU3_TZSW=$(get_fuse $UBOOT_DIR/XU3/tzsw)
+
+cat << EoF > $OUTPUT
+#!/bin/sh
+
+usage() {
+  echo "\$0 U2|XU3 path/to/image|/dev/mmcblk0"
+  exit
+}
+
+if [ -z "\$1" ]; then usage ; fi
+if [ -z "\$2" ]; then usage ; fi
+
+UBOOT_FLAGS="$UBOOT_FLAGS"
+
+echo "Extract: Extracting Odroid Image"
+dd if=\$0 of=\$2 bs=512 skip=4096 seek=0 || error image
+sync
+
+echo "Fuse: Fusing Odroid for \$1"
+case \$1 in
+  U2)
+    dd \$UBOOT_FLAGS if=\$0 of=\$2 skip=7 seek=1 count=$cU2_BL1
+    dd \$UBOOT_FLAGS if=\$0 of=\$2 skip=37 seek=31 count=$cU2_BL2
+    dd \$UBOOT_FLAGS if=\$0 of=\$2 skip=66 seek=63 count=$cU2_UBOOT
+    dd \$UBOOT_FLAGS if=\$0 of=\$2 skip=819 seek=2111 count=$cU2_TZSW
+    ;;
+  XU3)
+    dd \$UBOOT_FLAGS if=\$0 of=\$2 skip=1135 seek=1 count=$cXU3_BL1
+    dd \$UBOOT_FLAGS if=\$0 of=\$2 skip=1167 seek=32 count=$cXU3_BL2
+    dd \$UBOOT_FLAGS if=\$0 of=\$2 skip=1197 seek=63 count=$cXU3_UBOOT
+    dd \$UBOOT_FLAGS if=\$0 of=\$2 skip=1736 seek=719 count=$cXU3_TZSW
+    ;;
+esac
+sync
+exit 0
+EoF
+
+dd if=$UBOOT_DIR/U2/bl1 of=$OUTPUT seek=7 count=$cU2_BL1 $UBOOT_FLAGS
+dd if=$UBOOT_DIR/U2/bl2 of=$OUTPUT seek=37 count=$cU2_BL2 $UBOOT_FLAGS
+dd if=$UBOOT_DIR/U2/u-boot of=$OUTPUT seek=66 count=$cU2_UBOOT $UBOOT_FLAGS
+dd if=$UBOOT_DIR/U2/tzsw of=$OUTPUT seek=819 count=$cU2_TZSW $UBOOT_FLAGS
+dd if=$UBOOT_DIR/XU3/bl1 of=$OUTPUT seek=1135 count=$cXU3_BL1 $UBOOT_FLAGS
+dd if=$UBOOT_DIR/XU3/bl2 of=$OUTPUT seek=1167 count=$cXU3_BL2 $UBOOT_FLAGS
+dd if=$UBOOT_DIR/XU3/u-boot of=$OUTPUT seek=1197 count=$cXU3_UBOOT $UBOOT_FLAGS
+dd if=$UBOOT_DIR/XU3/tzsw of=$OUTPUT seek=1736 count=$cXU3_TZSW $UBOOT_FLAGS
+dd if=$ORIG_IMAGE of=$OUTPUT seek=4096 $UBOOT_FLAGS
+sync
+
+chmod +x $OUTPUT
