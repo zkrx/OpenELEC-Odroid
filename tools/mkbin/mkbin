@@ -17,8 +17,7 @@ fi
 UBOOT_FLAGS="bs=512 conv=notrunc"
 ORIG_IMAGE="$TARGET_IMG/$IMAGE_NAME.img"
 OUTPUT="$TARGET_IMG/$IMAGE_NAME.bin"
-#TEMP="$(mktemp -d)"
-TEMP=/tmp
+TEMP="$(mktemp -d)"
 
 error() {
   echo "Error!"
@@ -84,4 +83,4 @@ sync
 chmod +x $OUTPUT
 
 # cleanup
-rm -rfv $TEMP
+rm -rf $TEMP
