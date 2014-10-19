@@ -43,7 +43,6 @@
     losetup -d "$LOOP"
     echo "  rm -rf \"$OE_TMP\""
     rm -rf "$OE_TMP"
-    exit
   }
 
   error() {
@@ -168,8 +167,11 @@ trap cleanup SIGINT
   umount "$LOOP"
   sync
 
-# create bin
-  $ROOT/tools/mkbin/mkbin
-
 # cleanup
   cleanup
+
+# create u2/3 and xu3 images
+#  $ROOT/tools/mkimg/mkimg
+
+# make self-fusing binary
+  $ROOT/tools/mkbin/mkbin

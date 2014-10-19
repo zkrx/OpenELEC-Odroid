@@ -403,7 +403,7 @@ IMAGE_NAME="$DISTRONAME-$TARGET_VERSION"
           RESIZE="$RESIZE" \
           DEFAULT_SCR="$DEFAULT_SCR" \
           PROJECT="$PROJECT" \
-          $SCRIPTS/mkimage-odroid-ng
+          $SCRIPTS/mkimage-odroid
       elif [ "$1" = "mkimage" -a -n "$BOOTLOADER" ]; then
         if [ "$2" == "efi" ] ; then
           UEFI=yes
