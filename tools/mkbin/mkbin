@@ -1,29 +1,38 @@
 #!/bin/sh
-UBOOT_FLAGS="bs=512 conv=notrunc status=none"
-UBOOT_DIR="$INSTALL/usr/share/bootloader"
+
+# Global
+if [ -z $INSTALL ]; then 
+  UBOOT_DIR="$(dirname $0)/../../$(basename $(ls -d $(dirname $0)/../../build.*))/image/system/usr/share/bootloader"
+else
+  UBOOT_DIR="$INSTALL/usr/share/bootloader"
+fi
+if [ -z $TARGET_IMG ]; then
+  TARGET_IMG="$(dirname $0)/../../target"
+fi
+if [ -z $IMAGE_NAME ]; then
+  . $(dirname $0)/../../config/version
+  IMAGE_NAME=OpenELEC-Odroid-$ODROID_VERSION
+fi
+
+UBOOT_FLAGS="bs=512 conv=notrunc"
 ORIG_IMAGE="$TARGET_IMG/$IMAGE_NAME.img"
 OUTPUT="$TARGET_IMG/$IMAGE_NAME.bin"
+#TEMP="$(mktemp -d)"
+TEMP=/tmp
 
-get_fuse() {
-  dd if=$1 of=/dev/null bs=512 > $ROOT/$BUILD/.stamps/gen_length 2>&1
-  echo $(($(head -1 $ROOT/$BUILD/.stamps/gen_length | awk '{print $1}')))
+error() {
+  echo "Error!"
+  exit 1
 }
 
-cU2_BL1=$(get_fuse $UBOOT_DIR/U2/bl1)
-cU2_BL2=$(get_fuse $UBOOT_DIR/U2/bl2)
-cU2_UBOOT=$(get_fuse $UBOOT_DIR/U2/u-boot)
-cU2_TZSW=$(get_fuse $UBOOT_DIR/U2/tzsw)
-cXU3_BL1=$(get_fuse $UBOOT_DIR/XU3/bl1)
-cXU3_BL2=$(get_fuse $UBOOT_DIR/XU3/bl2)
-cXU3_UBOOT=$(get_fuse $UBOOT_DIR/XU3/u-boot)
-cXU3_TZSW=$(get_fuse $UBOOT_DIR/XU3/tzsw)
+[ -f "$TARGET_IMG/$IMAGE_NAME.bin" ] || rm -f "$TARGET_IMG/$IMAGE_NAME.bin"
 
-cat << EoF > $OUTPUT
+cat << EoF > $TEMP/script.bin
 #!/bin/sh
 
 usage() {
   echo "\$0 U2|XU3 path/to/image|/dev/mmcblk0"
-  exit
+  exit 0
 }
 
 if [ -z "\$1" ]; then usage ; fi
@@ -32,37 +41,47 @@ if [ -z "\$2" ]; then usage ; fi
 UBOOT_FLAGS="$UBOOT_FLAGS"
 
 echo "Extract: Extracting Odroid Image"
-dd if=\$0 of=\$2 bs=512 skip=4096 seek=0 || error image
+dd if=\$0 of=\$2 bs=512 skip=6154 > /dev/null 2>&1
 sync
 
 echo "Fuse: Fusing Odroid for \$1"
 case \$1 in
-  U2)
-    dd \$UBOOT_FLAGS if=\$0 of=\$2 skip=7 seek=1 count=$cU2_BL1
-    dd \$UBOOT_FLAGS if=\$0 of=\$2 skip=37 seek=31 count=$cU2_BL2
-    dd \$UBOOT_FLAGS if=\$0 of=\$2 skip=66 seek=63 count=$cU2_UBOOT
-    dd \$UBOOT_FLAGS if=\$0 of=\$2 skip=819 seek=2111 count=$cU2_TZSW
-    ;;
-  XU3)
-    dd \$UBOOT_FLAGS if=\$0 of=\$2 skip=1135 seek=1 count=$cXU3_BL1
-    dd \$UBOOT_FLAGS if=\$0 of=\$2 skip=1167 seek=32 count=$cXU3_BL2
-    dd \$UBOOT_FLAGS if=\$0 of=\$2 skip=1197 seek=63 count=$cXU3_UBOOT
-    dd \$UBOOT_FLAGS if=\$0 of=\$2 skip=1736 seek=719 count=$cXU3_TZSW
-    ;;
+  U2)  dd \$UBOOT_FLAGS if=\$0 of=\$2 skip=10 seek=1 count=3000 > /dev/null 2>&1 ;;
+  XU3) dd \$UBOOT_FLAGS if=\$0 of=\$2 skip=3050 seek=1 count=3000 > /dev/null 2>&1 ;;
 esac
 sync
 exit 0
 EoF
 
-dd if=$UBOOT_DIR/U2/bl1 of=$OUTPUT seek=7 count=$cU2_BL1 $UBOOT_FLAGS
-dd if=$UBOOT_DIR/U2/bl2 of=$OUTPUT seek=37 count=$cU2_BL2 $UBOOT_FLAGS
-dd if=$UBOOT_DIR/U2/u-boot of=$OUTPUT seek=66 count=$cU2_UBOOT $UBOOT_FLAGS
-dd if=$UBOOT_DIR/U2/tzsw of=$OUTPUT seek=819 count=$cU2_TZSW $UBOOT_FLAGS
-dd if=$UBOOT_DIR/XU3/bl1 of=$OUTPUT seek=1135 count=$cXU3_BL1 $UBOOT_FLAGS
-dd if=$UBOOT_DIR/XU3/bl2 of=$OUTPUT seek=1167 count=$cXU3_BL2 $UBOOT_FLAGS
-dd if=$UBOOT_DIR/XU3/u-boot of=$OUTPUT seek=1197 count=$cXU3_UBOOT $UBOOT_FLAGS
-dd if=$UBOOT_DIR/XU3/tzsw of=$OUTPUT seek=1736 count=$cXU3_TZSW $UBOOT_FLAGS
-dd if=$ORIG_IMAGE of=$OUTPUT seek=4096 $UBOOT_FLAGS
+# start with 2 1.5MiB chunks, 1 10s chunk and the 3MiB output
+echo "Creating blank data blobs..."
+dd $UBOOT_FLAGS if=/dev/zero of=$OUTPUT count=6154 > /dev/null 2>&1 || error
+dd $UBOOT_FLAGS if=/dev/zero of=$TEMP/U2.bin count=3072 > /dev/null 2>&1 || error
+dd $UBOOT_FLAGS if=/dev/zero of=$TEMP/XU3.bin count=3072 > /dev/null 2>&1 || error
+
+# use mkfuse to fuse the 2 1.5MiB chunks (REMEMBER that mkfuse uses
+# seek=1, so bl1 is going to be 2 512 chunks in)
+$(dirname $0)/../mkfuse/mkfuse U2 $TEMP/U2.bin
+$(dirname $0)/../mkfuse/mkfuse XU3 $TEMP/XU3.bin
+
+# write 10s chunk out to output
+echo "Writing script blob to final $(basename $OUTPUT)... (0-7)"
+dd $UBOOT_FLAGS if=$TEMP/script.bin of=$OUTPUT seek=0 count=7 > /dev/null 2>&1 || error
+# then the U2 chunk
+echo "Writing U2 U-Boot to final $(basename $OUTPUT)... (10-3010)"
+dd $UBOOT_FLAGS if=$TEMP/U2.bin of=$OUTPUT skip=1 seek=10 count=3010 > /dev/null 2>&1 || error
+# and the XU3 chunk
+echo "Writing XU3 U-Boot to final $(basename $OUTPUT)... (3050-6050)"
+dd $UBOOT_FLAGS if=$TEMP/XU3.bin of=$OUTPUT skip=1 seek=3050 count=3000 > /dev/null 2>&1 || error
 sync
 
+# write image onto end
+echo "Writing original non-fused $(basename $ORIG_IMAGE) to final $(basename $OUTPUT)... (6154-)"
+dd $UBOOT_FLAGS if=$ORIG_IMAGE of=$OUTPUT seek=6154 > /dev/null 2>&1 || error
+sync
+
+# make sure .bin is executable
 chmod +x $OUTPUT
+
+# cleanup
+rm -rfv $TEMP
