@@ -74,10 +74,10 @@
   PROJECT_CFLAGS=""
 
 # LTO (Link Time Optimization) support
-  LTO_SUPPORT="yes"
+  LTO_SUPPORT="no"
 
 # GOLD (Google Linker) support
-  GOLD_SUPPORT="yes"
+  GOLD_SUPPORT="no"
 
 # Bootloader to use (syslinux / u-boot / atv-bootloader / bcm2835-bootloader / odroid)
   BOOTLOADER="odroid"
