@@ -6,15 +6,24 @@ usage(){
 }
 
 fuse() {
-  dd $UBOOT_FLAGS if=$1 of=$2 seek=$3 > /dev/null 2>&1
+  dd $UBOOT_FLAGS if=$1 of=$2 seek=$3 > /dev/null 2>&1 || error
+}
+
+error() {
+  echo "Error!"
+  exit 1
 }
 
 [ -z $1 ] && usage
 [ -z $2 ] && usage
 
 # Global
-UBOOT_DIR=$INSTALL/usr/share/bootloader
-UBOOT_FLAGS="iflag=dsync oflag=dsync conv=notrunc"
+if [ -z $INSTALL ]; then 
+  UBOOT_DIR="$(dirname $0)/../../$(basename $(ls -d $(dirname $0)/../../build.*))/image/system/usr/share/bootloader"
+else
+  UBOOT_DIR=$INSTALL/usr/share/bootloader
+fi
+UBOOT_FLAGS="bs=512 conv=notrunc"
 
 # Odroid-U2
 U2_DIR=$UBOOT_DIR/U2
