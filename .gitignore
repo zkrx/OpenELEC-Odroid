@@ -44,6 +44,8 @@ mkpkg-temp
 .less*
 .config
 .nano_history
+.histfile
+.OpenELEC
 
 # git stuff
 .gitconfig
