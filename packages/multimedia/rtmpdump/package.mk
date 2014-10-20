@@ -34,6 +34,7 @@ PKG_IS_ADDON="no"
 PKG_AUTORECONF="no"
 
 MAKEFLAGS="-j1"
+LDFLAGS="${LDFLAGS/-Wl,--as-needed }"
 
 make_target() {
   make prefix=/usr \
