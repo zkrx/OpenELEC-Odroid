@@ -120,6 +120,7 @@ post_makeinstall_target() {
     rm  -f $INSTALL/usr/bin/kernel-install
     rm -rf $INSTALL/etc/xdg
     rm -rf $INSTALL/usr/share/factory
+    rm -rf $INSTALL/etc/udev
 
    rm -f $INSTALL/usr/lib/udev/hwdb.d/20-OUI.hwdb
    rm -f $INSTALL/usr/lib/udev/hwdb.d/20-acpi-vendor.hwdb
@@ -209,8 +210,6 @@ post_makeinstall_target() {
   mkdir -p $INSTALL/usr/config
     cp -PR $PKG_DIR/config/* $INSTALL/usr/config
 
-    rm -rf $INSTALL/etc/udev
-      ln -sf /storage/.config/udev.d $INSTALL/etc/udev
     rm -rf $INSTALL/etc/modules-load.d
       ln -sf /storage/.config/modules-load.d $INSTALL/etc/modules-load.d
     rm -rf $INSTALL/etc/sysctl.d
