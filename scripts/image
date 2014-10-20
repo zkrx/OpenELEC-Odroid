@@ -249,12 +249,16 @@ IMAGE_NAME="$DISTRONAME-$TARGET_VERSION"
     mkimage -A arm -T ramdisk -n RootFS\ [$PROJECT] -C none -d $INSTALL/../initramfs.cpio $INSTALL/../uInitrd
     # generate boot.scr(s)
     for f in auto 720p 720p-noedid 1080p 1080p-noedid; do
+      sed -i "s|smsc95xx.macaddr=.*|smsc95xx.macaddr=$($ROOT/tools/mkmac/mkmac)|" \
+        $PROJECT_DIR/$PROJECT/bootloader/XU3/boot-${f}.cfg
       mkimage -A arm -T script -n $f\ [Odroid-XU3] -C none -d \
         $PROJECT_DIR/$PROJECT/bootloader/XU3/boot-${f}.cfg \
         $INSTALL/usr/share/bootloader/XU3/boot-${f}.scr
       mkimage -A arm -T script -n $f\ [Odroid-U2/3] -C none -d \
         $PROJECT_DIR/$PROJECT/bootloader/U2/boot-${f}.cfg \
         $INSTALL/usr/share/bootloader/U2/boot-${f}.scr
+      sed -i "s|smsc95xx.macaddr=.*|smsc95xx.macaddr=|" \
+        $PROJECT_DIR/$PROJECT/bootloader/XU3/boot-${f}.cfg
     done
     install -m 755 $PROJECT_DIR/$PROJECT/bootloader/bootres $INSTALL/usr/bin/bootres
   fi
