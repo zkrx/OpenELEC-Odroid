@@ -63,7 +63,7 @@
       # fpa fpe2 fpe3 maverick vfp vfpv3 vfpv3-fp16 vfpv3-d16 vfpv3-d16-fp16
       # vfpv3xd vfpv3xd-fp16 neon neon-fp16 vfpv4 vfpv4-d16 fpv4-sp-d16
       # neon-vfpv4.
-      TARGET_FPU="vfpv3"
+      TARGET_FPU="neon"
       ;;
   esac
 
@@ -74,10 +74,10 @@
   PROJECT_CFLAGS=""
 
 # LTO (Link Time Optimization) support
-  LTO_SUPPORT="no"
+  LTO_SUPPORT="yes"
 
 # GOLD (Google Linker) support
-  GOLD_SUPPORT="no"
+  GOLD_SUPPORT="yes"
 
 # Bootloader to use (syslinux / u-boot / atv-bootloader / bcm2835-bootloader / odroid)
   BOOTLOADER="odroid"
