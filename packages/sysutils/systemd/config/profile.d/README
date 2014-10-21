@@ -1,0 +1,2 @@
+Any environment setup wanted similar to how /etc/profile.d/*.conf is accomplished can be placed here.
+  * Any config not ending in .conf will be ignored

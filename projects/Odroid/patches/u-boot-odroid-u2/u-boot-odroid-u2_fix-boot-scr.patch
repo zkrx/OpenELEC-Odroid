@@ -1,0 +1,15 @@
+diff --git u-boot-odroid-u2-2010.12.ae1bb3c/include/env_default.h u-boot-odroid-u2/include/env_default.h
+index 5936c85..81627ef 100644
+--- u-boot-odroid-u2-2010.12.ae1bb3c/include/env_default.h
++++ u-boot-odroid-u2/include/env_default.h
+@@ -25,8 +25,8 @@ const unsigned char default_environment[] = {
+ #if defined(CONFIG_HKDK4412) && defined(CONFIG_EXYNOS_PRIME)
+     "bootscript=source 40008000\0"
+     "default_bootcmd=echo >>> Run Default Bootcmd <<<;movi read kernel 0 40008000;movi read rootfs 0 41000000 100000;bootm 40008000 41000000\0"
+-    "loadbootscript_1=echo >>> Load Boot Script from mmc 0:1 <<<;fatload mmc 0:1 40008000 boot.scr\0"
+-    "loadbootscript_2=echo >>> Load Boot Script from mmc 0:2 <<<;fatload mmc 0:2 40008000 boot.scr\0"
++    "loadbootscript_1=echo >>> Load Boot Script from mmc 0:1 <<<;fatload mmc 0:1 40008000 u2/boot.scr\0"
++    "loadbootscript_2=echo >>> Load Boot Script from mmc 0:2 <<<;fatload mmc 0:2 40008000 u2/boot.scr\0"
+     "usb_invert_clken=0\0"
+ #endif
+ 

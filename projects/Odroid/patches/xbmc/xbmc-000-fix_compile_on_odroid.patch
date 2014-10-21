@@ -1,0 +1,19 @@
+--- xbmc-13-7435ffd/Makefile.in.orig	2014-07-04 09:45:26.000000000 -0400
++++ xbmc-13-7435ffd/Makefile.in	2014-07-14 12:46:05.898449000 -0400
+@@ -272,6 +272,7 @@
+ CXXFLAGS=@CXXFLAGS@
+ LDFLAGS=@LDFLAGS@
+ INCLUDES=$(sort @INCLUDES@)
++LIBS_n=-lX11 -ltalloc -ltevent -ltdb -lwbclient -lresolv
+ 
+ CLEAN_FILES=xbmc.bin xbmc-xrandr libxbmc.so
+ 
+@@ -537,7 +538,7 @@
+ ifeq ($(findstring osx,@ARCH@), osx)
+ 	$(SILENT_LD) $(CXX) $(LDFLAGS) -o xbmc.bin $(MAINOBJS) -Wl,-all_load,-ObjC $(MAINOBJS) $(DYNOBJSXBMC) $(NWAOBJSXBMC) $(OBJSXBMC) $(LIBS) -rdynamic
+ else
+-	$(SILENT_LD) $(CXX) $(CXXFLAGS) $(LDFLAGS) -o xbmc.bin $(MAINOBJS) -Wl,--start-group $(MAINOBJS) $(DYNOBJSXBMC) $(OBJSXBMC) -Wl,--end-group $(NWAOBJSXBMC) $(LIBS) -rdynamic
++	$(SILENT_LD) $(CXX) $(CXXFLAGS) $(LDFLAGS) -o xbmc.bin $(MAINOBJS) -Wl,--start-group $(MAINOBJS) $(DYNOBJSXBMC) $(OBJSXBMC) -Wl,--end-group $(NWAOBJSXBMC) $(LIBS) $(LIBS_n) -rdynamic
+ endif
+ 
+ xbmc-xrandr: xbmc-xrandr.c

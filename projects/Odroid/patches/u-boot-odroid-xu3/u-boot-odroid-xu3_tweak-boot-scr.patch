@@ -1,0 +1,19 @@
+diff --git u-boot-odroid-xu3-2012.07.7a2a023.orig/common/env_common.c u-boot-odroid-xu3-2012.07.7a2a023/common/env_common.c
+index 5606abc..eafdc39 100644
+--- u-boot-odroid-xu3-2012.07.7a2a023.orig/common/env_common.c
++++ u-boot-odroid-xu3-2012.07.7a2a023/common/env_common.c
+@@ -44,10 +44,10 @@ const uchar default_environment[] = {
+ #if defined(CONFIG_BOARD_HARDKERNEL)
+     "default_bootcmd=echo >>> Run Default Bootcmd <<<;movi read kernel 0 40008000;movi read rootfs 0 41000000 100000;bootz 40008000 41000000\0"
+     "bootscript=source 40008000\0"
+-    "loadbootscript_1=echo >>> Load Boot Script from mmc 0:1 <<<;fatload mmc 0:1 40008000 boot.scr\0"
+-    "loadbootscript_2=echo >>> Load Boot Script from mmc 0:2 <<<;fatload mmc 0:2 40008000 boot.scr\0"
+-    "loadbootscript_3=echo >>> Load Boot Script from mmc 1:1 <<<;fatload mmc 1:1 40008000 boot.scr\0"
+-    "loadbootscript_4=echo >>> Load Boot Script from mmc 1:2 <<<;fatload mmc 1:2 40008000 boot.scr\0"
++    "loadbootscript_1=echo >>> Load Boot Script from mmc 0:1 <<<;fatload mmc 0:1 40008000 xu3/boot.scr\0"
++    "loadbootscript_2=echo >>> Load Boot Script from mmc 0:2 <<<;fatload mmc 0:2 40008000 xu3/boot.scr\0"
++    "loadbootscript_3=echo >>> Load Boot Script from mmc 1:1 <<<;fatload mmc 1:1 40008000 xu3/boot.scr\0"
++    "loadbootscript_4=echo >>> Load Boot Script from mmc 1:2 <<<;fatload mmc 1:2 40008000 xu3/boot.scr\0"
+     #if defined(CONFIG_UBOOT_COPY_SD2EMMC)
+         "copy_uboot_sd2emmc=" CONFIG_UBOOT_COPY_SD2EMMC "\0"
+     #endif
