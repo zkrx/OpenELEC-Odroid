@@ -42,6 +42,8 @@ PKG_CONFIGURE_OPTS_TARGET="ac_cv_header_ansidecl_h=no \
              --with-sysroot=$SYSROOT_PREFIX \
              --without-lzma"
 
+LDFLAGS="${LDFLAGS} -lz"
+
 post_makeinstall_target() {
   $SED "s:\(['= ]\)/usr:\\1$SYSROOT_PREFIX/usr:g" \
     $SYSROOT_PREFIX/usr/bin/xml2-config

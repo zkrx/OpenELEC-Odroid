@@ -1,8 +1,6 @@
-diff --git xbmc-fbdev-13-0f3db05/xbmc/windowing/egl/EGLNativeTypeFbdev.cpp xbmc-fbdev-13-0f3db05/xbmc/windowing/egl/EGLNativeTypeFbdev.cpp
-new file mode 100644
-index 0000000..9cd4274
---- /dev/null
-+++ xbmc-fbdev-13-0f3db05/xbmc/windowing/egl/EGLNativeTypeFbdev.cpp
+diff -Nur xbmc-14-31ce987-odroid/xbmc/windowing/egl/EGLNativeTypeFbdev.cpp xbmc-14-31ce987/xbmc/windowing/egl/EGLNativeTypeFbdev.cpp
+--- xbmc-14-31ce987-odroid/xbmc/windowing/egl/EGLNativeTypeFbdev.cpp	1970-01-01 00:00:00.000000000 +0000
++++ xbmc-14-31ce987/xbmc/windowing/egl/EGLNativeTypeFbdev.cpp	2014-10-22 20:04:19.347025113 +0000
 @@ -0,0 +1,251 @@
 +/*
 + *      Copyright (C) 2011-2012 Team XBMC
@@ -255,11 +253,9 @@ index 0000000..9cd4274
 +  printf("%s::%s \n", CLASSNAME, __func__);
 +  return false;
 +}
-diff --git xbmc-fbdev-13-0f3db05/xbmc/windowing/egl/EGLNativeTypeFbdev.h xbmc-fbdev-13-0f3db05/xbmc/windowing/egl/EGLNativeTypeFbdev.h
-new file mode 100644
-index 0000000..0b5c908
---- /dev/null
-+++ xbmc-fbdev-13-0f3db05/xbmc/windowing/egl/EGLNativeTypeFbdev.h
+diff -Nur xbmc-14-31ce987-odroid/xbmc/windowing/egl/EGLNativeTypeFbdev.h xbmc-14-31ce987/xbmc/windowing/egl/EGLNativeTypeFbdev.h
+--- xbmc-14-31ce987-odroid/xbmc/windowing/egl/EGLNativeTypeFbdev.h	1970-01-01 00:00:00.000000000 +0000
++++ xbmc-14-31ce987/xbmc/windowing/egl/EGLNativeTypeFbdev.h	2014-10-22 20:04:19.347025113 +0000
 @@ -0,0 +1,66 @@
 +#pragma once
 +
@@ -327,29 +323,26 @@ index 0000000..0b5c908
 +  int width;
 +  int height;
 +};
-diff --git xbmc-13-0f3db05/xbmc/windowing/egl/EGLWrapper.cpp xbmc-fbdev-13-0f3db05/xbmc/windowing/egl/EGLWrapper.cpp
-index 045cdfc..7a86321 100644
---- xbmc-13-0f3db05/xbmc/windowing/egl/EGLWrapper.cpp
-+++ xbmc-fbdev-13-0f3db05/xbmc/windowing/egl/EGLWrapper.cpp
-@@ -26,6 +26,7 @@
+diff -Nur xbmc-14-31ce987-odroid/xbmc/windowing/egl/EGLWrapper.cpp xbmc-14-31ce987/xbmc/windowing/egl/EGLWrapper.cpp
+--- xbmc-14-31ce987-odroid/xbmc/windowing/egl/EGLWrapper.cpp	2014-10-18 10:14:06.000000000 +0000
++++ xbmc-14-31ce987/xbmc/windowing/egl/EGLWrapper.cpp	2014-10-22 20:07:17.696516967 +0000
+@@ -24,6 +24,7 @@
  #include "EGLNativeTypeAndroid.h"
  #include "EGLNativeTypeAmlogic.h"
  #include "EGLNativeTypeRaspberryPI.h"
 +#include "EGLNativeTypeFbdev.h"
  #include "EGLNativeTypeWayland.h"
+ #include "EGLNativeTypeIMX.h"
  #include "EGLWrapper.h"
- 
-@@ -83,7 +84,8 @@ bool CEGLWrapper::Initialize(const std::string &implementation)
-   if ((nativeGuess = CreateEGLNativeType<CEGLNativeTypeWayland>(implementation)) ||
+@@ -83,6 +84,7 @@
        (nativeGuess = CreateEGLNativeType<CEGLNativeTypeAndroid>(implementation)) ||
        (nativeGuess = CreateEGLNativeType<CEGLNativeTypeAmlogic>(implementation)) ||
--      (nativeGuess = CreateEGLNativeType<CEGLNativeTypeRaspberryPI>(implementation)))
-+      (nativeGuess = CreateEGLNativeType<CEGLNativeTypeRaspberryPI>(implementation)) ||
-+      (nativeGuess = CreateEGLNativeType<CEGLNativeTypeFbdev>(implementation)))
+       (nativeGuess = CreateEGLNativeType<CEGLNativeTypeRaspberryPI>(implementation)) ||
++      (nativeGuess = CreateEGLNativeType<CEGLNativeTypeFbdev>(implementation)) ||
+       (nativeGuess = CreateEGLNativeType<CEGLNativeTypeIMX>(implementation))
+       )
    {
-     m_nativeTypes = nativeGuess;
- 
-@@ -371,6 +373,7 @@ bool CEGLWrapper::SetVSync(EGLDisplay display, bool enable)
+@@ -372,6 +374,7 @@
    EGLBoolean status;
    // depending how buffers are setup, eglSwapInterval
    // might fail so let caller decide if this is an error.
@@ -357,14 +350,13 @@ index 045cdfc..7a86321 100644
    status = eglSwapInterval(display, enable ? 1 : 0);
    CheckError();
    return status;
-diff --git xbmc-13-0f3db05/xbmc/windowing/egl/Makefile.in xbmc-fbdev-13-0f3db05/xbmc/windowing/egl/Makefile.in
-index f800b7f..d686b61 100644
---- xbmc-13-0f3db05/xbmc/windowing/egl/Makefile.in
-+++ xbmc-fbdev-13-0f3db05/xbmc/windowing/egl/Makefile.in
-@@ -5,6 +5,7 @@ SRCS+= EGLNativeTypeAmlogic.cpp
- SRCS+= EGLNativeTypeAndroid.cpp
+diff -Nur xbmc-14-31ce987-odroid/xbmc/windowing/egl/Makefile.in xbmc-14-31ce987/xbmc/windowing/egl/Makefile.in
+--- xbmc-14-31ce987-odroid/xbmc/windowing/egl/Makefile.in	2014-10-18 10:14:06.000000000 +0000
++++ xbmc-14-31ce987/xbmc/windowing/egl/Makefile.in	2014-10-22 20:05:01.578430510 +0000
+@@ -6,6 +6,7 @@
  SRCS+= EGLNativeTypeRaspberryPI.cpp
  SRCS+= EGLNativeTypeWayland.cpp
+ SRCS+= EGLNativeTypeIMX.cpp
 +SRCS+= EGLNativeTypeFbdev.cpp
  SRCS+= EGLWrapper.cpp
  

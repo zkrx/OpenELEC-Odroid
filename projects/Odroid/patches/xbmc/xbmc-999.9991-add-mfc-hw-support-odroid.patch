@@ -1,18 +1,17 @@
-diff --git xbmc-13-0f3db05/configure.in xbmc-13-b8667e9/configure.in
-index 2e49fa1..307e9ca 100644
---- xbmc-13-0f3db05/configure.in
-+++ xbmc-13-b8667e9/configure.in
-@@ -188,6 +188,9 @@ libusb_disabled_udev_found="== libusb disabled. =="
+diff -Nur xbmc-14-31ce987/configure.in xbmc-14-31ce987-odroid/configure.in
+--- xbmc-14-31ce987/configure.in	2014-10-18 10:14:20.000000000 +0000
++++ xbmc-14-31ce987-odroid/configure.in	2014-10-22 19:43:18.216106383 +0000
+@@ -218,6 +218,9 @@
  libcec_enabled="== libcec enabled. =="
  libcec_disabled="== libcec disabled. CEC adapter support will not be available. =="
  
 +mfc_enabled="== MFC enabled. =="
 +mfc_disabled="== MFC disabled. =="
 +
- # External library message strings
- external_libraries_enabled="== Use of all supported external libraries enabled. =="
- external_libraries_disabled="== Use of all supported external libraries disabled. =="
-@@ -576,6 +579,12 @@ AC_ARG_ENABLE([libav-compat],
+ dashes="------------------------"
+ final_message="\n  ${APP_NAME} Configuration:"
+ final_message="\n$dashes$final_message\n$dashes"
+@@ -560,6 +563,12 @@
    [use_libav_hacks=$enableval],
    [use_libav_hacks=no])
  
@@ -25,7 +24,7 @@ index 2e49fa1..307e9ca 100644
  ### End of external library options
  
  if test "x$host_vendor" != "xapple"; then
-@@ -1773,6 +1782,11 @@ else
+@@ -1660,6 +1667,11 @@
    AC_MSG_NOTICE($libcap_disabled)
  fi
  
@@ -34,10 +33,10 @@ index 2e49fa1..307e9ca 100644
 +  AC_DEFINE(HAS_MFC, [1], [Define if MFC hardware decoder is present])
 +fi
 +
- ### External libraries checks
- 
- # Hacks for supporting libav
-@@ -2484,6 +2498,12 @@ else
+ # FFmpeg
+ FFMPEG_LIBNAMES="libavcodec >= 56.1.100
+                  libavfilter >= 5.1.100
+@@ -2388,6 +2400,12 @@
    final_message="$final_message\n  additional codecs:\tNo"
  fi
  
@@ -49,20 +48,19 @@ index 2e49fa1..307e9ca 100644
 +
  ### External libraries messages
  
- if test "$use_external_ffmpeg" = "yes"; then
-@@ -2681,6 +2701,7 @@ AC_SUBST(USE_PVR_ADDONS)
- AC_SUBST(GNUTLS_ALL_LIBS)
- AC_SUBST(HOGWEED_ALL_LIBS)
- AC_SUBST(VORBISENC_ALL_LIBS)
+ if test "$host_vendor" = "apple" ; then
+@@ -2592,6 +2609,7 @@
+ AC_SUBST(USE_SSE4)
+ AC_SUBST(USE_MMAL)
+ AC_SUBST(USE_X11)
 +AC_SUBST(USE_MFC)
  
  # pushd and popd are not available in other shells besides bash, so implement
  # our own pushd/popd functions
-diff --git xbmc-13-0f3db05/xbmc/cores/dvdplayer/DVDCodecs/DVDFactoryCodec.cpp xbmc-13-b8667e9/xbmc/cores/dvdplayer/DVDCodecs/DVDFactoryCodec.cpp
-index 14ad038..a49582a 100644
---- xbmc-13-0f3db05/xbmc/cores/dvdplayer/DVDCodecs/DVDFactoryCodec.cpp
-+++ xbmc-13-b8667e9/xbmc/cores/dvdplayer/DVDCodecs/DVDFactoryCodec.cpp
-@@ -56,7 +56,9 @@
+diff -Nur xbmc-14-31ce987/xbmc/cores/dvdplayer/DVDCodecs/DVDFactoryCodec.cpp xbmc-14-31ce987-odroid/xbmc/cores/dvdplayer/DVDCodecs/DVDFactoryCodec.cpp
+--- xbmc-14-31ce987/xbmc/cores/dvdplayer/DVDCodecs/DVDFactoryCodec.cpp	2014-10-18 10:14:06.000000000 +0000
++++ xbmc-14-31ce987-odroid/xbmc/cores/dvdplayer/DVDCodecs/DVDFactoryCodec.cpp	2014-10-22 19:44:41.063040719 +0000
+@@ -55,7 +55,9 @@
  #include "Overlay/DVDOverlayCodecText.h"
  #include "Overlay/DVDOverlayCodecTX3G.h"
  #include "Overlay/DVDOverlayCodecFFmpeg.h"
@@ -73,34 +71,36 @@ index 14ad038..a49582a 100644
  
  #include "DVDStreamInfo.h"
  #include "settings/Settings.h"
-@@ -191,9 +193,22 @@ CDVDVideoCodec* CDVDFactoryCodec::CreateVideoCodec(CDVDStreamInfo &hint, unsigne
- #elif defined(TARGET_POSIX) && !defined(TARGET_DARWIN)
-   hwSupport += "VAAPI:no ";
+@@ -190,6 +192,11 @@
+ #else
+   hwSupport += "iMXVPU:no ";
  #endif
 +#if defined(HAS_MFC) && defined(_LINUX)
 +  hwSupport += "MFC:yes ";
 +#elif defined(_LINUX)
 +  hwSupport += "MFC:no ";
 +#endif
- 
    CLog::Log(LOGDEBUG, "CDVDFactoryCodec: compiled in hardware support: %s", hwSupport.c_str());
+ 
+   if (hint.stills && (hint.codec == AV_CODEC_ID_MPEG2VIDEO || hint.codec == AV_CODEC_ID_MPEG1VIDEO))
+@@ -198,6 +205,14 @@
+      if ( (pCodec = OpenCodec(new CDVDVideoCodecLibMpeg2(), hint, options)) ) return pCodec;
+   }
  
 +#if defined(HAS_MFC)
 +  if ( !hint.software ) {
-+    if ( hint.codec == AV_CODEC_ID_H263 || hint.codec == AV_CODEC_ID_H264 || hint.codec == AV_CODEC_ID_MPEG4 || hint.codec == AV_CODEC_ID_MPEG2VIDEO || AV_CODEC_ID_MPEG1VIDEO || hint.codec == AV_CODEC_ID_VC1 ) {
++    if ( hint.codec == AV_CODEC_ID_H263 || hint.codec == AV_CODEC_ID_H264 || hint.codec == AV_CODEC_ID_MPEG4 || hint.codec == AV_CODEC_ID_MPEG2VIDEO || AV_CODEC_ID_MPEG1VIDEO || int.codec == AV_CODEC_ID_VC1 ) {
 +      if( (pCodec = OpenCodec(new CDVDVideoCodecMFC(), hint, options)) ) return pCodec;
 +    }
 +  }
 +#endif
 +
-   if (hint.stills && (hint.codec == AV_CODEC_ID_MPEG2VIDEO || hint.codec == AV_CODEC_ID_MPEG1VIDEO))
-   {
-      // If dvd is an mpeg2 and hint.stills
-diff --git xbmc-13-b8667e9/xbmc/cores/dvdplayer/DVDCodecs/Video/DVDVideoCodecMFC.cpp xbmc-13-b8667e9/xbmc/cores/dvdplayer/DVDCodecs/Video/DVDVideoCodecMFC.cpp
-new file mode 100644
-index 0000000..d93a179
---- /dev/null
-+++ xbmc-13-b8667e9/xbmc/cores/dvdplayer/DVDCodecs/Video/DVDVideoCodecMFC.cpp
+ #if defined(HAS_LIBAMCODEC)
+   // amcodec can handle dvd playback.
+   if (!hint.software && CSettings::Get().GetBool("videoplayer.useamcodec"))
+diff -Nur xbmc-14-31ce987/xbmc/cores/dvdplayer/DVDCodecs/Video/DVDVideoCodecMFC.cpp xbmc-14-31ce987-odroid/xbmc/cores/dvdplayer/DVDCodecs/Video/DVDVideoCodecMFC.cpp
+--- xbmc-14-31ce987/xbmc/cores/dvdplayer/DVDCodecs/Video/DVDVideoCodecMFC.cpp	1970-01-01 00:00:00.000000000 +0000
++++ xbmc-14-31ce987-odroid/xbmc/cores/dvdplayer/DVDCodecs/Video/DVDVideoCodecMFC.cpp	2014-10-22 19:42:25.008790631 +0000
 @@ -0,0 +1,736 @@
 +/*
 + *      Copyright (C) 2005-2012 Team XBMC
@@ -838,11 +838,9 @@ index 0000000..d93a179
 +bool CDVDVideoCodecMFC::ClearPicture(DVDVideoPicture* pDvdVideoPicture) {
 +  return CDVDVideoCodec::ClearPicture(pDvdVideoPicture);
 +}
-diff --git xbmc-13-b8667e9/xbmc/cores/dvdplayer/DVDCodecs/Video/DVDVideoCodecMFC.h xbmc-13-b8667e9/xbmc/cores/dvdplayer/DVDCodecs/Video/DVDVideoCodecMFC.h
-new file mode 100644
-index 0000000..ffa8621
---- /dev/null
-+++ xbmc-13-b8667e9/xbmc/cores/dvdplayer/DVDCodecs/Video/DVDVideoCodecMFC.h
+diff -Nur xbmc-14-31ce987/xbmc/cores/dvdplayer/DVDCodecs/Video/DVDVideoCodecMFC.h xbmc-14-31ce987-odroid/xbmc/cores/dvdplayer/DVDCodecs/Video/DVDVideoCodecMFC.h
+--- xbmc-14-31ce987/xbmc/cores/dvdplayer/DVDCodecs/Video/DVDVideoCodecMFC.h	1970-01-01 00:00:00.000000000 +0000
++++ xbmc-14-31ce987-odroid/xbmc/cores/dvdplayer/DVDCodecs/Video/DVDVideoCodecMFC.h	2014-10-22 19:42:25.012790580 +0000
 @@ -0,0 +1,80 @@
 +#pragma once
 +
@@ -924,12 +922,11 @@ index 0000000..ffa8621
 +
 +  bool OpenDevices();
 +};
-diff --git xbmc-13-0f3db05/xbmc/cores/dvdplayer/DVDCodecs/Video/Makefile.in xbmc-13-b8667e9/xbmc/cores/dvdplayer/DVDCodecs/Video/Makefile.in
-index 8a97889..4a1f132 100644
---- xbmc-13-0f3db05/xbmc/cores/dvdplayer/DVDCodecs/Video/Makefile.in
-+++ xbmc-13-b8667e9/xbmc/cores/dvdplayer/DVDCodecs/Video/Makefile.in
-@@ -38,6 +38,10 @@ ifeq (@USE_LIBSTAGEFRIGHT@,1)
- SRCS += DVDVideoCodecStageFright.cpp
+diff -Nur xbmc-14-31ce987/xbmc/cores/dvdplayer/DVDCodecs/Video/Makefile.in xbmc-14-31ce987-odroid/xbmc/cores/dvdplayer/DVDCodecs/Video/Makefile.in
+--- xbmc-14-31ce987/xbmc/cores/dvdplayer/DVDCodecs/Video/Makefile.in	2014-10-18 10:14:06.000000000 +0000
++++ xbmc-14-31ce987-odroid/xbmc/cores/dvdplayer/DVDCodecs/Video/Makefile.in	2014-10-22 19:42:25.012790580 +0000
+@@ -42,6 +42,10 @@
+ SRCS += DVDVideoCodecMMAL.cpp
  endif
  
 +ifeq (@USE_MFC@,1)
@@ -939,11 +936,9 @@ index 8a97889..4a1f132 100644
  LIB=Video.a
  
  include @abs_top_srcdir@/Makefile.include
-diff --git xbmc-13-b8667e9/xbmc/linux/LinuxV4l2.cpp xbmc-13-b8667e9/xbmc/linux/LinuxV4l2.cpp
-new file mode 100644
-index 0000000..b4e1993
---- /dev/null
-+++ xbmc-13-b8667e9/xbmc/linux/LinuxV4l2.cpp
+diff -Nur xbmc-14-31ce987/xbmc/linux/LinuxV4l2.cpp xbmc-14-31ce987-odroid/xbmc/linux/LinuxV4l2.cpp
+--- xbmc-14-31ce987/xbmc/linux/LinuxV4l2.cpp	1970-01-01 00:00:00.000000000 +0000
++++ xbmc-14-31ce987-odroid/xbmc/linux/LinuxV4l2.cpp	2014-10-22 19:42:25.012790580 +0000
 @@ -0,0 +1,314 @@
 +/*
 + *      Copyright (C) 2005-2012 Team XBMC
@@ -1259,11 +1254,9 @@ index 0000000..b4e1993
 +
 +  return V4L2_OK;
 +}
-diff --git xbmc-13-b8667e9/xbmc/linux/LinuxV4l2.h xbmc-13-b8667e9/xbmc/linux/LinuxV4l2.h
-new file mode 100644
-index 0000000..32843d0
---- /dev/null
-+++ xbmc-13-b8667e9/xbmc/linux/LinuxV4l2.h
+diff -Nur xbmc-14-31ce987/xbmc/linux/LinuxV4l2.h xbmc-14-31ce987-odroid/xbmc/linux/LinuxV4l2.h
+--- xbmc-14-31ce987/xbmc/linux/LinuxV4l2.h	1970-01-01 00:00:00.000000000 +0000
++++ xbmc-14-31ce987-odroid/xbmc/linux/LinuxV4l2.h	2014-10-22 19:42:25.012790580 +0000
 @@ -0,0 +1,77 @@
 +#pragma once
 +
@@ -1342,12 +1335,11 @@ index 0000000..32843d0
 +inline int v4l2_align(int v, int a) {
 +  return ((v + a - 1) / a) * a;
 +}
-diff --git xbmc-13-0f3db05/xbmc/linux/Makefile.in xbmc-13-b8667e9/xbmc/linux/Makefile.in
-index 22ad33a..bfaf902 100644
---- xbmc-13-0f3db05/xbmc/linux/Makefile.in
-+++ xbmc-13-b8667e9/xbmc/linux/Makefile.in
-@@ -7,6 +7,7 @@ SRCS += DBusReserve.cpp
- SRCS += HALManager.cpp
+diff -Nur xbmc-14-31ce987/xbmc/linux/Makefile.in xbmc-14-31ce987-odroid/xbmc/linux/Makefile.in
+--- xbmc-14-31ce987/xbmc/linux/Makefile.in	2014-10-18 10:14:04.000000000 +0000
++++ xbmc-14-31ce987-odroid/xbmc/linux/Makefile.in	2014-10-22 19:42:25.012790580 +0000
+@@ -6,6 +6,7 @@
+ SRCS += DBusReserve.cpp
  SRCS += LinuxResourceCounter.cpp
  SRCS += LinuxTimezone.cpp
 +SRCS += LinuxV4l2.cpp
