@@ -17,8 +17,7 @@
 ################################################################################
 
 PKG_NAME="linux-odroid-xu3"
-PKG_VERSION="3.10.54.2"
-PKG_EXTRAVERSION=".$(echo $PKG_VERSION | awk -F. '{print $4}')"
+PKG_VERSION="3.10.58+9de8d8f"
 PKG_URL="$ODROID_MIRROR/$PKG_NAME-$PKG_VERSION.tar.xz"
 PKG_REV="1"
 PKG_ARCH="any"
@@ -30,8 +29,8 @@ PKG_DEPENDS_INIT="toolchain"
 PKG_NEED_UNPACK="$LINUX_DEPENDS"
 PKG_PRIORITY="optional"
 PKG_SECTION="linux"
-PKG_SHORTDESC="linux26: The Linux kernel 2.6 precompiled kernel binary image and modules"
-PKG_LONGDESC="This package contains a precompiled kernel image and the modules."
+PKG_SHORTDESC="linux: The Linux kernel precompiled kernel binary image and modules"
+PKG_LONGDESC="This package contains a precompiled Linux kernel image and the modules."
 
 PKG_IS_ADDON="no"
 PKG_AUTORECONF="no"
@@ -54,7 +53,6 @@ post_patch() {
 
   cp $KERNEL_CFG_FILE $PKG_BUILD/.config
 
-  sed -i -e "s|^EXTRAVERSION[[:space:]]*=.*$|EXTRAVERSION = $PKG_EXTRAVERSION|" $PKG_BUILD/Makefile
   sed -i -e "s|^CONFIG_SQUASHFS[[:space:]]*=.*$|CONFIG_SQUASHFS=y|" $PKG_BUILD/.config
   sed -i -e "s|^CONFIG_VFAT_FS[[:space:]]*=.*$|CONFIG_VFAT_FS=y|" $PKG_BUILD/.config
   sed -i -e "s|^CONFIG_NLS_CODEPAGE_437[[:space:]]*=.*$|CONFIG_NLS_CODEPAGE_437=y|" $PKG_BUILD/.config
@@ -109,7 +107,7 @@ make_target() {
 
       # dont use some optimizations because of build problems
         strip_lto
-        LDFLAGS=`echo $LDFLAGS | sed -e "s|-Wl,--as-needed||"`
+        LDFLAGS="${LDFLAGS/-Wl,--as-needed }"
 
       export FLAGSGLIBC="$CFLAGS -I$SYSROOT_PREFIX/usr/include"
       export CFLAGS="$CFLAGS -I$SYSROOT_PREFIX/usr/include"

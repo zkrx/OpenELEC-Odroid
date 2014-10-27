@@ -1,0 +1,58 @@
+#!/bin/sh
+################################################################################
+#      This file is part of OpenELEC - http://www.openelec.tv
+#      Copyright (C) 2009-2012 Stephan Raue (stephan@openelec.tv)
+#
+#  This Program is free software; you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation; either version 2, or (at your option)
+#  any later version.
+#
+#  This Program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+#  GNU General Public License for more details.
+#
+#  You should have received a copy of the GNU General Public License
+#  along with OpenELEC.tv; see the file COPYING.  If not, write to
+#  the Free Software Foundation, 51 Franklin Street, Suite 500, Boston, MA 02110, USA.
+#  http://www.gnu.org/copyleft/gpl.html
+################################################################################
+
+usage() {
+  echo "$0 XU3|U2"
+  echo " ex. $0 XU3"
+  exit 1
+}
+
+echo "getting sources..."
+  if [ ! -d linux-odroid ]; then
+    git clone git://github.com/hardkernel/linux.git linux-odroid
+  fi
+
+  cd linux-odroid
+    git reset --hard
+    git clean -fid
+    git pull
+    case $1 in
+      XU3|xu3) git checkout -m odroidxu3-3.10.y ; BUILD=xu3 ;;
+      U2|U3|u2|u3) git checkout -m odroid-3.8.y ; BUILD=u2 ;;
+    esac
+    GIT_REV=`git log -n1 --format=%h`
+    sed -i "s|^EXTRAVERSION[[:space:]]*=.*$|EXTRAVERSION = +$GIT_REV|" Makefile
+    VERSION="$(grep \^VERSION Makefile | awk '{print $3}').$(grep \^PATCHLEVEL Makefile | awk '{print $3}').$(grep \^SUBLEVEL Makefile | awk '{print $3}')+$GIT_REV"
+  cd ..
+
+echo "copying sources..."
+  rm -rf linux-$VERSION
+  cp -a linux-odroid linux-odroid-$BUILD-$VERSION
+
+echo "cleaning sources..."
+  rm -rf linux-odroid-$BUILD-$VERSION/.git
+
+echo "packing sources..."
+  tar cJf linux-odroid-$BUILD-$VERSION.tar.xz linux-odroid-$BUILD-$VERSION
+
+echo "remove temporary sourcedir..."
+  rm -rf linux-odroid-$BUILD-$VERSION
+

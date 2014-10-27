@@ -17,7 +17,7 @@
 ################################################################################
 
 PKG_NAME="samsung-firmware"
-PKG_VERSION="20140930.f662913"
+PKG_VERSION="20141026.0e5f637"
 PKG_REV="1"
 PKG_ARCH="any"
 PKG_LICENSE=""
@@ -38,6 +38,8 @@ make_target() {
 
 makeinstall_target() {
   mkdir -p $INSTALL/lib/firmware/s5p-mfc
-  cp -R * $INSTALL/lib/firmware/s5p-mfc
-  ln -s s5p-mfc/s5p-mfc-v8.fw $INSTALL/lib/firmware/s5p-mfc-v8.fw
+  cp -R * $INSTALL/lib/firmware
+  for fw in s5p-* ; do
+    ln -sf ../${fw} $INSTALL/lib/firmware/s5p-mfc/${fw}
+  done
 }
