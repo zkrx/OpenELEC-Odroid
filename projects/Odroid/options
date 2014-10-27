@@ -307,10 +307,10 @@
 # Modules to install in initramfs for early boot
   INITRAMFS_MODULES=""
 
-# additional Firmware to use (dvb-firmware, misc-firmware, wlan-firmware, samsung-firmware, radeon-firmware, rtlnic-firmware)
+# additional Firmware to use (dvb-firmware, misc-firmware, wlan-firmware, radeon-firmware, rtlnic-firmware, samsung-firmware)
 # Space separated list is supported,
 # e.g. FIRMWARE="dvb-firmware misc-firmware wlan-firmware"
-  FIRMWARE="dvb-firmware misc-firmware wlan-firmware samsung-firmware rtlnic-firmware"
+  FIRMWARE="dvb-firmware misc-firmware wlan-firmware rtlnic-firmware samsung-firmware"
 
 # build with lm_sensors hardware monitoring support (yes / no)
   SENSOR_SUPPORT="yes"
