@@ -1,0 +1,16 @@
+--- a/gcc/config/mips/linux64.h   2014-01-02 23:23:26.000000000 +0100
++++ b/gcc/config/mips/linux64.h   2014-04-22 20:28:54.699515966 +0200
+@@ -23,9 +23,9 @@
+ #define GNU_USER_LINK_EMULATIONN32 "elf32%{EB:b}%{EL:l}tsmipn32"
+
+ #define GLIBC_DYNAMIC_LINKER32 "/lib/ld.so.1"
+-#define GLIBC_DYNAMIC_LINKER64 "/lib64/ld.so.1"
+-#define GLIBC_DYNAMIC_LINKERN32 "/lib32/ld.so.1"
+-#define UCLIBC_DYNAMIC_LINKERN32 "/lib32/ld-uClibc.so.0"
++#define GLIBC_DYNAMIC_LINKER64 "/lib/ld.so.1"
++#define GLIBC_DYNAMIC_LINKERN32 "/lib/ld.so.1"
++#define UCLIBC_DYNAMIC_LINKERN32 "/lib/ld-uClibc.so.0"
+ #define BIONIC_DYNAMIC_LINKERN32 "/system/bin/linker32"
+ #define GNU_USER_DYNAMIC_LINKERN32 \
+   CHOOSE_DYNAMIC_LINKER (GLIBC_DYNAMIC_LINKERN32, UCLIBC_DYNAMIC_LINKERN32, \
+
