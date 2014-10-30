@@ -17,7 +17,7 @@
 ################################################################################
 
 PKG_NAME="linux-odroid-xu3"
-PKG_VERSION="3.10.58+9de8d8f"
+PKG_VERSION="3.10.58+ffb20df"
 PKG_URL="$ODROID_MIRROR/$PKG_NAME-$PKG_VERSION.tar.xz"
 PKG_REV="1"
 PKG_ARCH="any"
