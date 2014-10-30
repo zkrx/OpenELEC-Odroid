@@ -32,7 +32,7 @@ echo "getting sources..."
 
   cd linux-odroid
     git reset --hard
-    git clean -fid
+    git clean -fdx
     git pull
     case $1 in
       XU3|xu3) git checkout -m odroidxu3-3.10.y ; BUILD=xu3 ;;
