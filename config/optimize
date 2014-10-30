@@ -14,7 +14,10 @@ if [ "$LTO_SUPPORT" = yes ];then
 fi
 
 if [ "$GOLD_SUPPORT" = yes ];then
-  LD_OPTIM_GOLD="-fuse-ld=gold"
+  # disable GOLD when using GCC prior to 4.8
+  if [ "$(ver_comp $GCC_VERSION 4.8)" = 11 ] ; then
+    LD_OPTIM_GOLD="-fuse-ld=gold"
+  fi
 fi
 
 if [ "$DEBUG" = yes ]; then

@@ -1,0 +1,25 @@
+--- gcc-4.7.4/gcc/config/i386/linux64.h.orig	2014-10-29 21:39:02.721381623 -0400
++++ gcc-4.7.4/gcc/config/i386/linux64.h	2014-10-29 21:39:23.677357849 -0400
+@@ -29,5 +29,5 @@
+ #define GNU_USER_LINK_EMULATIONX32 "elf32_x86_64"
+ 
+ #define GLIBC_DYNAMIC_LINKER32 "/lib/ld-linux.so.2"
+-#define GLIBC_DYNAMIC_LINKER64 "/lib64/ld-linux-x86-64.so.2"
+-#define GLIBC_DYNAMIC_LINKERX32 "/libx32/ld-linux-x32.so.2"
++#define GLIBC_DYNAMIC_LINKER64 "/lib/ld-linux-x86-64.so.2"
++#define GLIBC_DYNAMIC_LINKERX32 "/lib/ld-linux-x32.so.2"
+--- gcc-4.7.4/gcc/config/mips/linux64.h.orig	2014-10-29 21:39:45.341333035 -0400
++++ gcc-4.7.4/gcc/config/mips/linux64.h	2014-10-29 21:40:17.145296695 -0400
+@@ -24,9 +24,9 @@
+ #define GNU_USER_LINK_EMULATIONN32 "elf32%{EB:b}%{EL:l}tsmipn32"
+ 
+ #define GLIBC_DYNAMIC_LINKER32 "/lib/ld.so.1"
+-#define GLIBC_DYNAMIC_LINKER64 "/lib64/ld.so.1"
+-#define GLIBC_DYNAMIC_LINKERN32 "/lib32/ld.so.1"
+-#define UCLIBC_DYNAMIC_LINKERN32 "/lib32/ld-uClibc.so.0"
++#define GLIBC_DYNAMIC_LINKER64 "/lib/ld64.so.1"
++#define GLIBC_DYNAMIC_LINKERN32 "/lib/ld.so.1"
++#define UCLIBC_DYNAMIC_LINKERN32 "/lib/ld-uClibc.so.0"
+ #define BIONIC_DYNAMIC_LINKERN32 "/system/bin/linker32"
+ #define GNU_USER_DYNAMIC_LINKERN32 \
+   CHOOSE_DYNAMIC_LINKER (GLIBC_DYNAMIC_LINKERN32, UCLIBC_DYNAMIC_LINKERN32, \
