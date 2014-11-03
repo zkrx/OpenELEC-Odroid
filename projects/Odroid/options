@@ -100,10 +100,6 @@
 # Additional kernel make parameters (for example to specify the u-boot loadaddress)
   KERNEL_MAKE_EXTRACMD=""
 
-# GCC to use. values can be:
-# default:  default mainline gcc
-  GCC_VERSION="4.9.1"
-
 # Kernel to use. values can be:
 # default:  default mainline kernel
   LINUX="Odroid"
@@ -355,8 +351,8 @@
 # Distribution Specific source location
   DISTRO_MIRROR="http://sources.openelec.tv/mirror"
   DISTRO_SRC="http://sources.openelec.tv/$OPENELEC_VERSION"
-#  ODROID_MIRROR="http://freeweb.mine.nu/zalaare"
-  ODROID_MIRROR="http://zalaare.homenet.org/odroid"
+  ODROID_MIRROR="http://freeweb.mine.nu/zalaare"
+#  ODROID_MIRROR="http://zalaare.homenet.org/odroid"
 
 # Addon Server Url
   ADDON_SERVER_URL="http://addons.openelec.tv"
