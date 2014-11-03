@@ -33,11 +33,11 @@ echo "getting sources..."
   cd linux-odroid
     git reset --hard
     git clean -fdx
-    git pull
     case $1 in
       XU3|xu3) git checkout -m odroidxu3-3.10.y ; BUILD=xu3 ;;
       U2|U3|u2|u3) git checkout -m odroid-3.8.y ; BUILD=u2 ;;
     esac
+    git pull
     GIT_REV=`git log -n1 --format=%h`
     sed -i "s|^EXTRAVERSION[[:space:]]*=.*$|EXTRAVERSION = +$GIT_REV|" Makefile
     VERSION="$(grep \^VERSION Makefile | awk '{print $3}').$(grep \^PATCHLEVEL Makefile | awk '{print $3}').$(grep \^SUBLEVEL Makefile | awk '{print $3}')+$GIT_REV"
