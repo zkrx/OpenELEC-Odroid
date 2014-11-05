@@ -23,21 +23,23 @@ case $(cat /proc/cpuinfo | grep ^Hardware | awk -F : '{print $2}' | sed 's, ,,')
    ODROID-XU3) ODROID=XU3 ;;
 esac
 
-DEVICE=$(blkid | grep LABEL=\"System\" | awk -F: '{print $1}' | sed 's/p[0-9]//')
+[ -z "$BOOT_ROOT" ] && BOOT_ROOT="/flash"
+[ -z "$DEVICE" ] && DEVICE=$(df "$BOOT_ROOT" | tail -1 | awk {' print $1 '} | sed 's,p[0-9],,')
+[ -z "$SYSTEM_ROOT" ] && SYSTEM_ROOT=""
 
 echo "*** updating u-boot for $ODROID on: $DEVICE ..."
 
 case $ODROID in
   U2)
-    dd bs=512 if=/usr/share/bootloader/U2/bl1 of=$DEVICE seek=1
-    dd bs=512 if=/usr/share/bootloader/U2/bl2 of=$DEVICE seek=31
-    dd bs=512 if=/usr/share/bootloader/U2/u-boot of=$DEVICE seek=63
-    dd bs=512 if=/usr/share/bootloader/U2/tzsw of=$DEVICE seek=2111
+    dd bs=512 if=$SYSTEM_ROOT/usr/share/bootloader/U2/bl1 of=$DEVICE seek=1
+    dd bs=512 if=$SYSTEM_ROOT/usr/share/bootloader/U2/bl2 of=$DEVICE seek=31
+    dd bs=512 if=$SYSTEM_ROOT/usr/share/bootloader/U2/u-boot of=$DEVICE seek=63
+    dd bs=512 if=$SYSTEM_ROOT/usr/share/bootloader/U2/tzsw of=$DEVICE seek=2111
     ;;
   XU3)
-    dd bs=512 if=/usr/share/bootloader/XU3/bl1 of=$DEVICE seek=1
-    dd bs=512 if=/usr/share/bootloader/XU3/bl2 of=$DEVICE seek=31
-    dd bs=512 if=/usr/share/bootloader/XU3/u-boot of=$DEVICE seek=63
-    dd bs=512 if=/usr/share/bootloader/XU3/tzsw of=$DEVICE seek=719
+    dd bs=512 if=$SYSTEM_ROOT/usr/share/bootloader/XU3/bl1 of=$DEVICE seek=1
+    dd bs=512 if=$SYSTEM_ROOT/usr/share/bootloader/XU3/bl2 of=$DEVICE seek=31
+    dd bs=512 if=$SYSTEM_ROOT/usr/share/bootloader/XU3/u-boot of=$DEVICE seek=63
+    dd bs=512 if=$SYSTEM_ROOT/usr/share/bootloader/XU3/tzsw of=$DEVICE seek=719
     ;;
 esac
