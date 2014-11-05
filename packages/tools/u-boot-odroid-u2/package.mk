@@ -56,4 +56,6 @@ makeinstall_target() {
   if [ -f "./u-boot.bin" ]; then
     cp -PRv ./u-boot.bin $INSTALL/usr/share/bootloader/U2/u-boot
   fi 
+
+  cp -PRv $PKG_DIR/scripts/update.sh $INSTALL/usr/share/bootloader
 }
