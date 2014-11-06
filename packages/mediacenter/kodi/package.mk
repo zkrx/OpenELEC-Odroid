@@ -254,7 +254,7 @@ else
 fi
 
 if [ ! "$KODIPLAYER_DRIVER" = default ]; then
-  PKG_DEPENDS_TARGET="$PKG_DEPENDS_TARGET $KODIPLAYER_DRIVER"
+  [ "$KODIPLAYER_DRIVER" = odroid-mfc ] || PKG_DEPENDS_TARGET="$PKG_DEPENDS_TARGET $KODIPLAYER_DRIVER"
 
   if [ "$KODIPLAYER_DRIVER" = bcm2835-driver ]; then
     KODI_OPENMAX="--enable-openmax"
@@ -266,6 +266,8 @@ if [ ! "$KODIPLAYER_DRIVER" = default ]; then
     KODI_CXXFLAGS="$KODI_CXXFLAGS $BCM2835_INCLUDES"
   elif [ "$KODIPLAYER_DRIVER" = libfslvpuwrap ]; then
     KODI_CODEC="--enable-codec=imxvpu"
+  elif [ "$KODIPLAYER_DRIVER" = odroid-mfc ]; then
+    KODI_CODEC="--enable-codec=mfc --enable-mfc"
   else
     KODI_OPENMAX="--disable-openmax"
   fi

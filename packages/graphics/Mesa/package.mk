@@ -50,6 +50,12 @@ else
   MESA_VDPAU="--disable-vdpau"
 fi
 
+if [[ "$PROJECT" = Odroid* ]]; then
+  GLES="--enable-gles2"
+else
+  GLES="--disable-gles2"
+fi
+
 XA_CONFIG="--disable-xa"
 
 PKG_CONFIGURE_OPTS_TARGET="CC_FOR_BUILD=$HOST_CC \
@@ -67,7 +73,7 @@ PKG_CONFIGURE_OPTS_TARGET="CC_FOR_BUILD=$HOST_CC \
                            --enable-opengl \
                            --enable-driglx-direct \
                            --disable-gles1 \
-                           --disable-gles2 \
+                           $GLES \
                            --disable-openvg \
                            --enable-dri \
                            --disable-dri3 \
@@ -95,11 +101,19 @@ PKG_CONFIGURE_OPTS_TARGET="CC_FOR_BUILD=$HOST_CC \
                            --with-sysroot=$SYSROOT_PREFIX"
 
 
+if [[ "$PROJECT" = Odroid* ]]; then
+  makeinstall_target() {
+    make DESTDIR=$SYSROOT_PREFIX install
+  }
+fi
+
 post_makeinstall_target() {
+  if [[ "$PROJECT" != Odroid* ]]; then
   # rename and relink for cooperate with nvidia drivers
     rm -rf $INSTALL/usr/lib/libGL.so
     rm -rf $INSTALL/usr/lib/libGL.so.1
     ln -sf libGL.so.1 $INSTALL/usr/lib/libGL.so
     ln -sf /var/lib/libGL.so $INSTALL/usr/lib/libGL.so.1
     mv $INSTALL/usr/lib/libGL.so.1.2.0 $INSTALL/usr/lib/libGL_mesa.so.1
+  fi
 }
