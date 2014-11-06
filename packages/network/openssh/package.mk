@@ -50,6 +50,11 @@ PKG_CONFIGURE_OPTS_TARGET="--sysconfdir=/etc/ssh \
                            --without-pam"
 
 pre_configure_target() {
+  # remove LTO optimization for GCC prior to 4.9
+  if [[ "$GCC_VERSION" != 4.9* ]] ; then
+    strip_lto
+  fi
+
   export LD="$TARGET_CC"
   export LDFLAGS="$TARGET_CFLAGS $TARGET_LDFLAGS"
 }

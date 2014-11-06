@@ -19,7 +19,8 @@ error() {
 
 # Global
 if [ -z $INSTALL ]; then 
-  UBOOT_DIR="$(dirname $0)/../../$(basename $(ls -d $(dirname $0)/../../build.*))/image/system/usr/share/bootloader"
+  . $(dirname $0)/../../config/version
+  UBOOT_DIR="$(dirname $0)/../../$(basename $(ls -d $(dirname $0)/../../build.*${OPENELEC_VERSION}))/image/system/usr/share/bootloader"
 else
   UBOOT_DIR=$INSTALL/usr/share/bootloader
 fi

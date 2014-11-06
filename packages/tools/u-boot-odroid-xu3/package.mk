@@ -17,7 +17,7 @@
 ################################################################################
 
 PKG_NAME="u-boot-odroid-xu3"
-PKG_VERSION="2012.07.7a2a023"
+PKG_VERSION="2012.07+e029d56"
 PKG_SITE="http://hardkernel.org"
 PKG_URL="http://zalaare.homenet.org/odroid/$PKG_NAME-$PKG_VERSION.tar.xz"
 PKG_REV="1"

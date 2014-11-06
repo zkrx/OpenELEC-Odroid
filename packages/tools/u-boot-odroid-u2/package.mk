@@ -17,7 +17,7 @@
 ################################################################################
 
 PKG_NAME="u-boot-odroid-u2"
-PKG_VERSION="2010.12.ae1bb3c"
+PKG_VERSION="2010.12+33e05ff"
 PKG_SITE="http://hardkernel.org"
 PKG_URL="http://zalaare.homenet.org/odroid/$PKG_NAME-$PKG_VERSION.tar.xz"
 PKG_REV="1"
@@ -56,4 +56,6 @@ makeinstall_target() {
   if [ -f "./u-boot.bin" ]; then
     cp -PRv ./u-boot.bin $INSTALL/usr/share/bootloader/U2/u-boot
   fi 
+
+  cp -PRv $PKG_DIR/scripts/update.sh $INSTALL/usr/share/bootloader
 }
