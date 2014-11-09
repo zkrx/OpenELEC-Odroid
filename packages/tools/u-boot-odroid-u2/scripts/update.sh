@@ -21,6 +21,7 @@
 case $(cat /proc/cpuinfo | grep ^Hardware | awk -F : '{print $2}' | sed 's, ,,') in
    ODROID-U2*) ODROID=U2 ;;
    ODROID-XU3) ODROID=XU3 ;;
+   ODROIDX2) ODROID=U2 ;;
 esac
 
 [ -z "$BOOT_ROOT" ] && BOOT_ROOT="/flash"
