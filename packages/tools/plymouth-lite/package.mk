@@ -47,15 +47,18 @@ makeinstall_init() {
     cp ply-image $INSTALL/bin
 
   mkdir -p $INSTALL/splash
-    if [ -f $PROJECT_DIR/$PROJECT/splash/splash.conf ]; then
+    if [ -f $DISTRO_DIR/$DISTRO/splash/splash.conf ]; then
+      cp $DISTRO_DIR/$DISTRO/splash/splash.conf $INSTALL/splash
+      cp $DISTRO_DIR/$DISTRO/splash/*.png $INSTALL/splash
+    elif [ -f $DISTRO_DIR/$DISTRO/splash/splash-1024.png \
+           -o -f $DISTRO_DIR/$DISTRO/splash/splash-full.png ]; then
+      cp $DISTRO_DIR/$DISTRO/splash/splash-*.png $INSTALL/splash
+    elif [ -f $PROJECT_DIR/$PROJECT/splash/splash.conf ]; then
       cp $PROJECT_DIR/$PROJECT/splash/splash.conf $INSTALL/splash
       cp $PROJECT_DIR/$PROJECT/splash/*.png $INSTALL/splash
     elif [ -f $PROJECT_DIR/$PROJECT/splash/splash-1024.png \
            -o -f $PROJECT_DIR/$PROJECT/splash/splash-full.png ]; then
       cp $PROJECT_DIR/$PROJECT/splash/splash-*.png $INSTALL/splash
-    elif [ -f $PKG_DIR/splash.$DISTRO/splash-1024.png \
-           -o -f $PKG_DIR/splash.$DISTRO/splash-full.png ]; then
-      cp $PKG_DIR/splash.$DISTRO/splash-*.png $INSTALL/splash
     else
       cp $PKG_DIR/splash/splash-*.png $INSTALL/splash
     fi
