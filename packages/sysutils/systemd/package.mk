@@ -206,9 +206,10 @@ post_makeinstall_target() {
       ln -sf /storage/.config/sysctl.d $INSTALL/etc/sysctl.d
     rm -rf $INSTALL/etc/tmpfiles.d
       ln -sf /storage/.config/tmpfiles.d $INSTALL/etc/tmpfiles.d
-    rm -rf $INSTALL/etc/udev/hwdb.d
+  mkdir -p $INSTALL/etc/udev
+    [ -d $INSTALL/etc/udev/hwdb.d ] && rm -rf $INSTALL/etc/udev/hwdb.d
       ln -sf /storage/.config/hwdb.d $INSTALL/etc/udev/hwdb.d
-    rm -rf $INSTALL/etc/udev/rules.d
+    [ -d $INSTALL/etc/udev/rules.d ] && rm -rf $INSTALL/etc/udev/rules.d
       ln -sf /storage/.config/udev.rules.d $INSTALL/etc/udev/rules.d
 }
 
