@@ -101,7 +101,7 @@ new file mode 100644
 index 0000000..d93a179
 --- /dev/null
 +++ xbmc-13-b8667e9/xbmc/cores/dvdplayer/DVDCodecs/Video/DVDVideoCodecMFC.cpp
-@@ -0,0 +1,736 @@
+@@ -0,0 +1,737 @@
 +/*
 + *      Copyright (C) 2005-2012 Team XBMC
 + *      http://www.xbmc.org
@@ -138,6 +138,7 @@ index 0000000..d93a179
 +#include "settings/DisplaySettings.h"
 +#include "settings/AdvancedSettings.h"
 +#include "utils/fastmemcpy.h"
++#include "utils/log.h"
 +
 +#include <sys/mman.h>
 +#include <sys/ioctl.h>
