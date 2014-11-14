@@ -38,6 +38,7 @@ pre_make_target() {
 }
 
 make_target() {
+  find . -type f -name '*.c' -or -name '*.h' | xargs sed -i 's/\^M//g'
   if [ "$PROJECT" = Odroid ]; then
     ( mkdir .xu3 && cp -a * .xu3 )
     make -C .xu3 V=1 \
@@ -71,4 +72,3 @@ makeinstall_target() {
     cp *.ko $INSTALL/lib/modules/$(get_module_dir)/$PKG_NAME
   fi
 }
-
