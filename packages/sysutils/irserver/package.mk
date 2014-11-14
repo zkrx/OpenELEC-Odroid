@@ -37,12 +37,16 @@ if [ "$TARGET_ARCH" = "i386" ]; then
 elif [ "$TARGET_ARCH" = "x86_64" ]; then
   IRSERVER_BIN="irserver64"
 elif [ "$TARGET_ARCH" = "arm" ]; then
-  IRSERVER_BIN="irserver_arm"
+  IRSERVER_BIN="irserver_arm_noccf"
 fi
+
+pre_configure_target() {
+  mkdir -p arm
+}
 
 make_target() {
   make CC=$TARGET_CC CFLAGS="$CFLAGS" LDFLAGS="$LDFLAGS" $IRSERVER_BIN
-  $STRIP $IRSERVER_BIN
+  $STRIP irserver
 }
 
 makeinstall_target() {
@@ -50,7 +54,7 @@ makeinstall_target() {
     cp $PKG_DIR/config/*.conf $INSTALL/usr/config
 
   mkdir -p $INSTALL/usr/sbin
-    cp -P $IRSERVER_BIN $INSTALL/usr/sbin/irserver
+    cp -P irserver $INSTALL/usr/sbin/irserver
 
   mkdir -p $INSTALL/usr/share/irtrans/remotes
     cp remotes/irtrans.rem $INSTALL/usr/share/irtrans/remotes
