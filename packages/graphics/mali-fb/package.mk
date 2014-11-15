@@ -17,7 +17,7 @@
 ################################################################################
 
 PKG_NAME="mali-fb"
-PKG_VERSION="r4p0-4"
+PKG_VERSION="1.2"
 PKG_REV="1"
 PKG_ARCH="arm"
 PKG_LICENSE="nonfree"
@@ -37,10 +37,11 @@ make_target() {
 }
 
 makeinstall_target() {
-  mkdir -p $SYSROOT_PREFIX/usr
-    cp -PR usr/* $SYSROOT_PREFIX/usr
-    
-  mkdir -p $INSTALL/usr/lib
-    cp -PR usr/lib/*.so* $INSTALL/usr/lib
+  mkdir -p $INSTALL
+    cp -PR * $INSTALL
 }
 
+post_makeinstall_target() {
+  rm -rf $SYSROOT_PREFIX/usr/lib/mali-4xx
+  rm -rf $SYSROOT_PREFIX/usr/lib/mali-t62x
+}
