@@ -16,6 +16,7 @@ help() {
   echo "   720p"
   echo "   720p-noedid"
   echo "   auto"
+  echo "   debug"
   exit
 }
 
@@ -32,6 +33,9 @@ get_mali() {
       ;;
     ODROID-XU3)
       echo XU3
+      ;;
+    ODROIDX2)
+      echo U2
       ;;
   esac
 }
@@ -70,6 +74,12 @@ case $1 in
   auto)
     mount rw
     cp -f $BOOTSCRDIR/$(get_mali)/boot-auto.scr $BOOTDIR/$(get_mali)/$BOOTFILE
+    sync
+    mount ro
+    ;;
+  debug)
+    mount rw
+    cp -f $BOOTSCRDIR/$(get_mali)/boot-debug.scr $BOOTDIR/$(get_mali)/$BOOTFILE
     sync
     mount ro
     ;;
