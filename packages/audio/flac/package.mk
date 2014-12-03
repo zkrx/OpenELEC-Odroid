@@ -17,7 +17,7 @@
 ################################################################################
 
 PKG_NAME="flac"
-PKG_VERSION="1.3.0"
+PKG_VERSION="1.3.1"
 PKG_REV="1"
 PKG_ARCH="any"
 PKG_LICENSE="LGPL"
@@ -52,10 +52,10 @@ else
 fi
 
 pre_configure_target() {
-  # remove LTO optimization for GCC prior to 4.9
-  if [[ "$GCC_VERSION" != 4.9* ]] ; then
-    strip_lto
-  fi
+  # flac-1.3.1 dont build with LTO support
+  strip_lto
+
+  export CFLAGS="$CFLAGS -fPIC -DPIC"
 }
 
 post_makeinstall_target() {
