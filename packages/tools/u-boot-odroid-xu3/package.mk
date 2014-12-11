@@ -17,9 +17,9 @@
 ################################################################################
 
 PKG_NAME="u-boot-odroid-xu3"
-PKG_VERSION="2012.07+e029d56"
+PKG_VERSION="2012.07+4217cfb"
 PKG_SITE="http://hardkernel.org"
-PKG_URL="http://zalaare.homenet.org/odroid/$PKG_NAME-$PKG_VERSION.tar.xz"
+PKG_URL="$ODROID_MIRROR/$PKG_NAME-$PKG_VERSION.tar.xz"
 PKG_REV="1"
 PKG_ARCH="arm"
 PKG_LICENSE="GPL"
@@ -49,8 +49,8 @@ make_target() {
 makeinstall_target() {
   mkdir -p $INSTALL/usr/share/bootloader/XU3
 
-  for f in bl1.bin.hardkernel bl2.bin.hardkernel tzsw.bin.hardkernel; do
-    cp -PRv $ROOT/$PKG_BUILD/sd_fuse/hardkernel/$f $INSTALL/usr/share/bootloader/XU3/${f/.*}
+  for f in bl1.bin.hardkernel bl2.bin.hardkernel.1mb_uboot tzsw.bin.hardkernel; do
+    cp -PRv $ROOT/$PKG_BUILD/sd_fuse/hardkernel_1mb_uboot/$f $INSTALL/usr/share/bootloader/XU3/${f/.*}
   done
 
   if [ -f "./u-boot.bin" ]; then

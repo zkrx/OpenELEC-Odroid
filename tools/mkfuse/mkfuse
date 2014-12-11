@@ -26,48 +26,54 @@ else
 fi
 UBOOT_FLAGS="bs=512 conv=notrunc"
 
+# U-Boot Layout
+BL1=1
+BL2=31
+UBOOT=63
+TZSW=2111
+
 # Odroid-U2
 U2_DIR=$UBOOT_DIR/U2
-U2_BL1_START=1
+#U2_BL1_START=1
 U2_BL1_FILE=$U2_DIR/bl1
-U2_BL2_START=31
+#U2_BL2_START=31
 U2_BL2_FILE=$U2_DIR/bl2
-U2_UBOOT_START=63
+#U2_UBOOT_START=63
 U2_UBOOT_FILE=$U2_DIR/u-boot
-U2_TZSW_START=2111
+#U2_TZSW_START=2111
 U2_TZSW_FILE=$U2_DIR/tzsw
 
 # Odroid-XU3
 XU3_DIR=$UBOOT_DIR/XU3
-XU3_BL1_START=1
+#XU3_BL1_START=1
 XU3_BL1_FILE=$XU3_DIR/bl1
-XU3_BL2_START=31
+#XU3_BL2_START=31
 XU3_BL2_FILE=$XU3_DIR/bl2
-XU3_UBOOT_START=63
+#XU3_UBOOT_START=63
 XU3_UBOOT_FILE=$XU3_DIR/u-boot
-XU3_TZSW_START=719
+#XU3_TZSW_START=719
 XU3_TZSW_FILE=$XU3_DIR/tzsw
 
 # Fuse
 case $1 in
   U2)
     echo "Fusing: BL1 for Odroid-U2"
-    fuse $U2_BL1_FILE $2 $U2_BL1_START
+    fuse $U2_BL1_FILE $2 $BL1
     echo "Fusing: BL2 for Odroid-U2"
-    fuse $U2_BL2_FILE $2 $U2_BL2_START
+    fuse $U2_BL2_FILE $2 $BL2
     echo "Fusing: U-Boot for Odroid-U2"
-    fuse $U2_UBOOT_FILE $2 $U2_UBOOT_START
+    fuse $U2_UBOOT_FILE $2 $UBOOT
     echo "Fusing: TrustZone S/W for Odroid-U2"
-    fuse $U2_TZSW_FILE $2 $U2_TZSW_START
+    fuse $U2_TZSW_FILE $2 $TZSW    
     ;;
   XU3)
     echo "Fusing: BL1 for Odroid-XU3"
-    fuse $XU3_BL1_FILE $2 $XU3_BL1_START
+    fuse $XU3_BL1_FILE $2 $BL1
     echo "Fusing: BL2 for Odroid-XU3"
-    fuse $XU3_BL2_FILE $2 $XU3_BL2_START
+    fuse $XU3_BL2_FILE $2 $BL2
     echo "Fusing: U-Boot for Odroid-XU3"
-    fuse $XU3_UBOOT_FILE $2 $XU3_UBOOT_START
+    fuse $XU3_UBOOT_FILE $2 $UBOOT
     echo "Fusing: TrustZone S/W for Odroid-XU3"
-    fuse $XU3_TZSW_FILE $2 $XU3_TZSW_START
+    fuse $XU3_TZSW_FILE $2 $TZSW
     ;;
 esac
