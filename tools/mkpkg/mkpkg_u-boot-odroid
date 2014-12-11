@@ -26,27 +26,45 @@ usage() {
 }
 
 echo "getting sources..."
-  if [ ! -d u-boot-odroid ]; then
-    git clone git://github.com/hardkernel/u-boot.git u-boot-odroid
-  fi
+  case $1 in
+    experimental|ex|ng)
+      NG=1
+      if [ ! -d u-boot-odroid-ng ]; then
+        git clone git://github.com/hardkernel/u-boot.git u-boot-odroid-ng
+      fi
 
-  cd u-boot-odroid
-    git reset --hard
-    git clean -fdx
-    case $1 in
-      XU3|xu3) git checkout -m odroidxu3-v2012.07 ; BUILD=xu3 ;;
-      U2|U3|u2|u3) git checkout -m odroid-v2010.12 ; BUILD=u2 ;;
-    esac
-    git pull
-    [ -n $2 ] && git reset --hard $2
-    GIT_REV=`git log -n1 --format=%h`
-    sed -i "s|^EXTRAVERSION[[:space:]]*=.*$|EXTRAVERSION = +$GIT_REV|" Makefile
-    VERSION="$(grep \^VERSION Makefile | head -1 | awk '{print $3}').$(grep \^PATCHLEVEL Makefile | awk '{print $3}')+$GIT_REV"
+      cd u-boot-odroid-ng
+      ;;
+    *)
+      NG=0
+      if [ ! -d u-boot-odroid ]; then
+        git clone git://github.com/hardkernel/u-boot.git u-boot-odroid
+      fi
+
+      cd u-boot-odroid
+      ;;
+  esac
+
+  git reset --hard
+  git clean -fdx
+  case $1 in
+    XU3|xu3) git checkout -m odroidxu3-v2012.07 ; BUILD=xu3 ;;
+    U2|U3|u2|u3) git checkout -m odroid-v2010.12 ; BUILD=u2 ;;
+    experimental|ex|ng) git checkout -m master ; BUILD=ng ;;
+  esac
+  git pull
+  [ -n $2 ] && git reset --hard $2
+  GIT_REV=`git log -n1 --format=%h`
+  sed -i "s|^EXTRAVERSION[[:space:]]*=.*$|EXTRAVERSION = +$GIT_REV|" Makefile
+  VERSION="$(grep \^VERSION Makefile | head -1 | awk '{print $3}').$(grep \^PATCHLEVEL Makefile | awk '{print $3}')+$GIT_REV"
   cd ..
 
 echo "copying sources..."
   rm -rf u-boot-$VERSION
-  cp -a u-boot-odroid u-boot-odroid-$BUILD-$VERSION
+  case $NG in
+    0) cp -a u-boot-odroid u-boot-odroid-$BUILD-$VERSION ;;
+    1) cp -a u-boot-odroid-ng u-boot-odroid-$BUILD-$VERSION ;;
+  esac
 
 echo "cleaning sources..."
   rm -rf u-boot-odroid-$BUILD-$VERSION/.git

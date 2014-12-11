@@ -26,26 +26,45 @@ usage() {
 }
 
 echo "getting sources..."
-  if [ ! -d linux-odroid ]; then
-    git clone git://github.com/hardkernel/linux.git linux-odroid
-  fi
+  case $1 in
+    experimental|ex|ng)
+      NG=1
+      if [ ! -d linux-odroid-ng ]; then
+        git clone https://github.com/abhijeet-dev/linux-samsung linux-odroid-ng
+      fi
 
-  cd linux-odroid
-    git reset --hard
-    git clean -fid
-    git pull
-    case $1 in
-      XU3|xu3) git checkout -m odroidxu3-3.10.y ; BUILD=xu3 ;;
-      U2|U3|u2|u3) git checkout -m odroid-3.8.y ; BUILD=u2 ;;
-    esac
-    GIT_REV=`git log -n1 --format=%h`
-    sed -i "s|^EXTRAVERSION[[:space:]]*=.*$|EXTRAVERSION = +$GIT_REV|" Makefile
-    VERSION="$(grep \^VERSION Makefile | awk '{print $3}').$(grep \^PATCHLEVEL Makefile | awk '{print $3}').$(grep \^SUBLEVEL Makefile | awk '{print $3}')+$GIT_REV"
+      cd linux-odroid-ng
+      ;;
+    *)
+      NG=0
+      if [ ! -d linux-odroid ]; then
+        git clone git://github.com/hardkernel/linux.git linux-odroid
+      fi
+
+      cd linux-odroid
+      ;;
+  esac
+
+  git reset --hard
+  git clean -fid
+  case $1 in
+    XU3|xu3) git checkout -m odroidxu3-3.10.y ; BUILD=xu3 ;;
+    U2|U3|u2|u3) git checkout -m odroid-3.8.y ; BUILD=u2 ;;
+    experimental|ex|ng) git checkout -m xu3_3_17 ; BUILD=ng ;;
+  esac
+  git pull
+  [ -n $2 ] && git reset --hard $2
+  GIT_REV=`git log -n1 --format=%h`
+  sed -i "s|^EXTRAVERSION[[:space:]]*=.*$|EXTRAVERSION = +$GIT_REV|" Makefile
+  VERSION="$(grep \^VERSION Makefile | awk '{print $3}').$(grep \^PATCHLEVEL Makefile | awk '{print $3}').$(grep \^SUBLEVEL Makefile | awk '{print $3}')+$GIT_REV"
   cd ..
 
 echo "copying sources..."
   rm -rf linux-$VERSION
-  cp -a linux-odroid linux-odroid-$BUILD-$VERSION
+  case $NG in
+    0) cp -a linux-odroid linux-odroid-$BUILD-$VERSION ;;
+    1) cp -a linux-odroid-ng linux-odroid-$BUILD-$VERSION ;;
+  esac
 
 echo "cleaning sources..."
   rm -rf linux-odroid-$BUILD-$VERSION/.git
