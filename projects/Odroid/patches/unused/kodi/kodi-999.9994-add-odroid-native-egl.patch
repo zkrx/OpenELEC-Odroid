@@ -1,0 +1,396 @@
+diff -Nur kodi-14-ffad6b8/configure.in kodi-14-ffad6b8.odroid/configure.in
+--- kodi-14-ffad6b8/configure.in	2014-12-09 20:13:49.530160365 +0000
++++ kodi-14-ffad6b8.odroid/configure.in	2014-12-09 20:07:56.210911296 +0000
+@@ -223,6 +223,9 @@
+ mfc_enabled="== MFC enabled. =="
+ mfc_disabled="== MFC disabled. =="
+ 
++odroidgles_enabled="== Odroid GLES enabled. =="
++odroidgles_disabled="== Odroid GLES disabled. =="
++
+ dashes="------------------------"
+ final_message="\n  ${APP_NAME} Configuration:"
+ final_message="\n$dashes$final_message\n$dashes"
+@@ -571,6 +574,12 @@
+   [use_mfc=$enableval],
+   [use_mfc=no])
+ 
++AC_ARG_ENABLE([odroidgles],
++  [AS_HELP_STRING([--enable-odroidgles],
++  [enable use of Odroid GLES (default is no) 'Linux only'])],
++  [use_odroidgles=$enableval],
++  [use_odroidgles=no])
++
+ ### End of external library options
+ 
+ if test "x$host_vendor" != "xapple"; then
+@@ -1679,6 +1688,12 @@
+   AC_DEFINE(HAS_MFC, [1], [Define if MFC hardware decoder is present])
+ fi
+ 
++if test "x$use_odroidgles" != "xno"; then
++  USE_ODROIDGLES=1;
++  AC_SUBST(ARCH_DEFINES, "-DTARGET_POSIX -DTARGET_LINUX -D_LINUX -DTARGET_ODROID")
++  AC_DEFINE(HAS_ODROIDGLES, [1], [Define if supporting Odroid-U2/U3/X/X2/XU3 based GLES Framebuffer])
++fi
++
+ # FFmpeg
+ FFMPEG_LIBNAMES="libavcodec >= 56.1.100
+                  libavfilter >= 5.1.100
+@@ -2413,6 +2428,12 @@
+   final_message="$final_message\n  MFC support:\tNo"
+ fi
+ 
++if test "x$use_odroidgles" != "xno"; then
++  final_message="$final_message\n  Odroid GLES support:\tYes"
++else
++  final_message="$final_message\n  Odroid GLES support:\tNo"
++fi
++
+ ### External libraries messages
+ 
+ if test "$host_vendor" = "apple" ; then
+@@ -2630,6 +2651,7 @@
+ AC_SUBST(USE_MMAL)
+ AC_SUBST(USE_X11)
+ AC_SUBST(USE_MFC)
++AC_SUBST(USE_ODROIDGLES)
+ 
+ # pushd and popd are not available in other shells besides bash, so implement
+ # our own pushd/popd functions
+diff -Nur kodi-14-ffad6b8/xbmc/windowing/egl/EGLNativeTypeOdroid.cpp kodi-14-ffad6b8.odroid/xbmc/windowing/egl/EGLNativeTypeOdroid.cpp
+--- kodi-14-ffad6b8/xbmc/windowing/egl/EGLNativeTypeOdroid.cpp	1970-01-01 00:00:00.000000000 +0000
++++ kodi-14-ffad6b8.odroid/xbmc/windowing/egl/EGLNativeTypeOdroid.cpp	2014-12-09 20:08:24.482533413 +0000
+@@ -0,0 +1,249 @@
++/*
++ *      Copyright (C) 2011-2012 Team XBMC
++ *      http://www.xbmc.org
++ *
++ *  This Program is free software; you can redistribute it and/or modify
++ *  it under the terms of the GNU General Public License as published by
++ *  the Free Software Foundation; either version 2, or (at your option)
++ *  any later version.
++ *
++ *  This Program is distributed in the hope that it will be useful,
++ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
++ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
++ *  GNU General Public License for more details.
++ *
++ *  You should have received a copy of the GNU General Public License
++ *  along with XBMC; see the file COPYING.  If not, see
++ *  <http://www.gnu.org/licenses/>.
++ *
++ */
++
++#include "system.h"
++
++#include <EGL/egl.h>
++#include "EGLNativeTypeOdroid.h"
++#include "utils/log.h"
++#include <stdlib.h>
++#include "guilib/gui3d.h"
++#include <X11/Xatom.h>
++#include <X11/Xlib.h>
++#include <X11/Xutil.h>
++
++#include <unistd.h>
++
++#include "utils/StringUtils.h"
++
++#ifdef CLASSNAME
++#undef CLASSNAME
++#endif
++#define CLASSNAME "CEGLNativeTypeOdroid"
++
++CEGLNativeTypeOdroid::CEGLNativeTypeOdroid()
++{
++}
++
++CEGLNativeTypeOdroid::~CEGLNativeTypeOdroid()
++{
++}
++
++bool CEGLNativeTypeOdroid::CheckCompatibility()
++{
++#ifdef HAS_ODROIDGLES
++    FILE* m_fCPUInfo = fopen("/proc/cpuinfo", "r");
++    if (m_fCPUInfo)
++    {
++      char buffer[512];
++
++      while (fgets(buffer, sizeof(buffer), m_fCPUInfo))
++      {
++        if (strncmp(buffer, "Hardware", strlen("Hardware"))==0)
++        {
++          char *needle = strstr(buffer, ":");
++          if (needle && strlen(needle)>3)
++          {
++            needle+=2;
++            if (strncmp(needle, "ODROID", strlen("ODROID"))==0) {
++//                printf("%s::%s using odroid EGL\n", CLASSNAME, __func__);
++                return true;
++            }
++          }
++        }
++      }
++    }
++#endif
++    return false;
++}
++
++void CEGLNativeTypeOdroid::Initialize()
++{
++  return;
++}
++
++void CEGLNativeTypeOdroid::Destroy()
++{
++  return;
++}
++
++bool CEGLNativeTypeOdroid::CreateNativeDisplay()
++{
++  m_nativeDisplay = XOpenDisplay(NULL);
++  if (m_nativeDisplay)
++    return true;
++  return false;
++}
++
++bool CEGLNativeTypeOdroid::CreateNativeWindow()
++{
++    if (!m_nativeDisplay) 
++      return false;
++
++    Display *xDisplay;
++    Window nativeWindow;
++    Pixmap bitmapNoData;
++    XColor black;
++    static char noData[] = { 0,0,0,0,0,0,0,0 };
++    XWindowAttributes window_attr;
++    XSetWindowAttributes attr;
++    XSetWindowAttributes xattr;
++    XWMHints hints;
++    
++    xDisplay = (Display*) m_nativeDisplay;
++    Window rootWindow = DefaultRootWindow(xDisplay);
++    XGetWindowAttributes(xDisplay, rootWindow, &window_attr);
++    attr.background_pixel = 0;
++    attr.border_pixel = 0;
++    attr.event_mask = ExposureMask | PointerMotionMask | KeyPressMask;
++    nativeWindow = XCreateWindow(xDisplay, rootWindow, 0, 0, window_attr.width, window_attr.height, 0, CopyFromParent, InputOutput, CopyFromParent, CWBackPixel | CWBorderPixel | CWEventMask, &attr);
++    xattr.override_redirect = 0;
++    XChangeWindowAttributes ( xDisplay, nativeWindow, CWOverrideRedirect, &xattr );
++    hints.input = 1;
++    hints.flags = InputHint;
++    XSetWMHints(xDisplay, nativeWindow, &hints);
++
++    black.red = black.green = black.blue = 0;
++    bitmapNoData = XCreateBitmapFromData(xDisplay, nativeWindow, noData, 8, 8);
++    Cursor invisibleCursor = XCreatePixmapCursor(xDisplay, bitmapNoData, bitmapNoData, &black, &black, 0, 0);
++    XDefineCursor(xDisplay, nativeWindow, invisibleCursor);
++    XFreeCursor(xDisplay, invisibleCursor);
++/*
++   {
++      XEvent	x11_event;
++      Atom	x11_state_atom;
++      Atom	x11_fs_atom;
++
++      x11_state_atom	= XInternAtom(xDisplay, "_NET_WM_STATE", True);
++      x11_fs_atom		= XInternAtom(xDisplay, "_NET_WM_STATE_FULLSCREEN", True);
++
++      x11_event.xclient.type			= ClientMessage;
++      x11_event.xclient.serial		= 0;
++      x11_event.xclient.send_event	= True;
++      x11_event.xclient.window		= nativeWindow;
++      x11_event.xclient.message_type	= x11_state_atom;
++      x11_event.xclient.format		= 32;
++      x11_event.xclient.data.l[0]	= 1;
++      x11_event.xclient.data.l[1]	= x11_fs_atom;
++      x11_event.xclient.data.l[2]	= 0;
++
++      XSendEvent(xDisplay, rootWindow, False, SubstructureRedirectMask | SubstructureNotifyMask, &x11_event);
++    }
++*/
++
++    Atom atom[2] = { XInternAtom(xDisplay, "_NET_WM_STATE_FULLSCREEN", False), None };
++    XChangeProperty(xDisplay, nativeWindow, XInternAtom(xDisplay, "_NET_WM_STATE", False), XA_ATOM, 32, PropModeReplace, (const unsigned char *)atom,  1);
++
++    XStoreName(xDisplay , nativeWindow,  "XBMC");
++
++    XFlush(xDisplay);
++
++    m_nativeWindow = (XBNativeWindowType) nativeWindow;
++
++    if (!m_nativeWindow)
++      return false;
++
++    return true;
++}
++
++bool CEGLNativeTypeOdroid::GetNativeDisplay(XBNativeDisplayType **nativeDisplay) const
++{
++  if (!nativeDisplay)
++    return false;
++  *nativeDisplay = (XBNativeDisplayType*) &m_nativeDisplay;
++  return true;
++}
++
++bool CEGLNativeTypeOdroid::GetNativeWindow(XBNativeWindowType **nativeWindow) const
++{
++  if (!nativeWindow)
++    return false;
++  *nativeWindow = (XBNativeWindowType*) &m_nativeWindow;
++  return true;
++}
++
++bool CEGLNativeTypeOdroid::DestroyNativeDisplay()
++{
++//  XCloseDisplay((Display *) m_nativeDisplay);
++  return true;
++}
++
++bool CEGLNativeTypeOdroid::DestroyNativeWindow()
++{
++  return true;
++}
++
++bool CEGLNativeTypeOdroid::GetNativeResolution(RESOLUTION_INFO *res) const
++{
++    XWindowAttributes window_attr;
++    XGetWindowAttributes((Display *) m_nativeDisplay, (Window) m_nativeWindow, &window_attr);
++    res->iWidth         = window_attr.width;
++    res->iHeight        = window_attr.height;
++    res->iScreenWidth   = res->iWidth;
++    res->iScreenHeight  = res->iHeight;
++    res->fRefreshRate   = 60;
++    res->dwFlags        = D3DPRESENTFLAG_PROGRESSIVE;
++    res->iScreen        = 0;
++    res->bFullScreen    = true;
++    res->iSubtitles     = (int)(0.965 * res->iHeight);
++    res->fPixelRatio    = 1.0f;
++    res->strMode       = StringUtils::Format("%dx%d @ %.2f%s - Full Screen", res->iScreenWidth, res->iScreenHeight, res->fRefreshRate, res->dwFlags & D3DPRESENTFLAG_INTERLACED ? "i" : "");
++
++    CLog::Log(LOGNOTICE,"Current resolution: %dx%d\n", window_attr.width, window_attr.height);
++    return true;
++}
++
++bool CEGLNativeTypeOdroid::SetNativeResolution(const RESOLUTION_INFO &res)
++{
++    return false;
++}
++
++bool CEGLNativeTypeOdroid::ProbeResolutions(std::vector<RESOLUTION_INFO> &resolutions)
++{
++    RESOLUTION_INFO res;
++    int iRet = GetNativeResolution(&res);
++    if (iRet && res.iWidth > 1 && res.iHeight > 1)
++    {
++        resolutions.push_back(res);
++        return true;
++    }
++    return false;
++}
++
++bool CEGLNativeTypeOdroid::GetPreferredResolution(RESOLUTION_INFO *res) const
++{
++    GetNativeResolution(res);
++    return true;
++}
++
++bool CEGLNativeTypeOdroid::ShowWindow(bool show)
++{
++    Display *xDisplay;
++    Window nativeWindow;
++    xDisplay = (Display *) m_nativeDisplay;
++    nativeWindow = (Window) m_nativeWindow;
++    if (show) {
++      XMapWindow(xDisplay, nativeWindow);
++    } else {
++      XUnmapWindow(xDisplay, nativeWindow);
++    }
++    XSync(xDisplay, False);
++    return false;
++}
+diff -Nur kodi-14-ffad6b8/xbmc/windowing/egl/EGLNativeTypeOdroid.h kodi-14-ffad6b8.odroid/xbmc/windowing/egl/EGLNativeTypeOdroid.h
+--- kodi-14-ffad6b8/xbmc/windowing/egl/EGLNativeTypeOdroid.h	1970-01-01 00:00:00.000000000 +0000
++++ kodi-14-ffad6b8.odroid/xbmc/windowing/egl/EGLNativeTypeOdroid.h	2014-12-09 20:08:38.434346995 +0000
+@@ -0,0 +1,49 @@
++#pragma once
++
++/*
++ *      Copyright (C) 2011-2012 Team XBMC
++ *      http://www.xbmc.org
++ *
++ *  This Program is free software; you can redistribute it and/or modify
++ *  it under the terms of the GNU General Public License as published by
++ *  the Free Software Foundation; either version 2, or (at your option)
++ *  any later version.
++ *
++ *  This Program is distributed in the hope that it will be useful,
++ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
++ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
++ *  GNU General Public License for more details.
++ *
++ *  You should have received a copy of the GNU General Public License
++ *  along with XBMC; see the file COPYING.  If not, see
++ *  <http://www.gnu.org/licenses/>.
++ *
++ */
++
++#include "EGLNativeType.h"
++#include <list>
++
++class CEGLNativeTypeOdroid : public CEGLNativeType
++{
++public:
++  CEGLNativeTypeOdroid();
++  virtual ~CEGLNativeTypeOdroid();
++  virtual std::string GetNativeName() const { return "odroid"; };
++  virtual bool  CheckCompatibility();
++  virtual void  Initialize();
++  virtual void  Destroy();
++  virtual int   GetQuirks() { return EGL_QUIRK_NONE; };
++
++  virtual bool  CreateNativeDisplay();
++  virtual bool  CreateNativeWindow();
++  virtual bool  GetNativeDisplay(XBNativeDisplayType **nativeDisplay) const;
++  virtual bool  GetNativeWindow(XBNativeWindowType **nativeWindow) const;
++
++  virtual bool  DestroyNativeWindow();
++  virtual bool  DestroyNativeDisplay();
++  virtual bool  GetNativeResolution(RESOLUTION_INFO *res) const;
++  virtual bool  SetNativeResolution(const RESOLUTION_INFO &res);
++  virtual bool  ProbeResolutions(std::vector<RESOLUTION_INFO> &resolutions);
++  virtual bool  GetPreferredResolution(RESOLUTION_INFO *res) const;
++  virtual bool  ShowWindow(bool show);
++};
+diff -Nur kodi-14-ffad6b8/xbmc/windowing/egl/EGLWrapper.cpp kodi-14-ffad6b8.odroid/xbmc/windowing/egl/EGLWrapper.cpp
+--- kodi-14-ffad6b8/xbmc/windowing/egl/EGLWrapper.cpp	2014-12-02 04:20:59.000000000 +0000
++++ kodi-14-ffad6b8.odroid/xbmc/windowing/egl/EGLWrapper.cpp	2014-12-09 20:11:01.716435005 +0000
+@@ -27,6 +27,7 @@
+ #include "EGLNativeTypeFbdev.h"
+ #include "EGLNativeTypeWayland.h"
+ #include "EGLNativeTypeIMX.h"
++#include "EGLNativeTypeOdroid.h"
+ #include "EGLWrapper.h"
+
+ #define CheckError() m_result = eglGetError(); if(m_result != EGL_SUCCESS) CLog::Log(LOGERROR, "EGL error in %s: %x",__FUNCTION__, m_result);
+@@ -85,6 +86,7 @@
+       (nativeGuess = CreateEGLNativeType<CEGLNativeTypeAmlogic>(implementation)) ||
+       (nativeGuess = CreateEGLNativeType<CEGLNativeTypeRaspberryPI>(implementation)) ||
+       (nativeGuess = CreateEGLNativeType<CEGLNativeTypeFbdev>(implementation)) ||
++      (nativeGuess = CreateEGLNativeType<CEGLNativeTypeOdroid>(implementation)) ||
+       (nativeGuess = CreateEGLNativeType<CEGLNativeTypeIMX>(implementation))
+       )
+   {
+diff -Nur kodi-14-ffad6b8/xbmc/windowing/egl/Makefile.in kodi-14-ffad6b8.odroid/xbmc/windowing/egl/Makefile.in
+--- kodi-14-ffad6b8/xbmc/windowing/egl/Makefile.in	2014-12-02 04:20:59.000000000 +0000
++++ kodi-14-ffad6b8.odroid/xbmc/windowing/egl/Makefile.in	2014-12-09 20:13:06.318770611 +0000
+@@ -7,6 +7,7 @@
+ SRCS+= EGLNativeTypeWayland.cpp
+ SRCS+= EGLNativeTypeIMX.cpp
+ SRCS+= EGLNativeTypeFbdev.cpp
++SRCS+= EGLNativeTypeOdroid.cpp
+ SRCS+= EGLWrapper.cpp
+
+ # Wayland specific detail

@@ -1,7 +1,7 @@
-diff -Nur xbmc-14-31ce987/configure.in xbmc-14-31ce987-odroid/configure.in
---- xbmc-14-31ce987/configure.in	2014-10-18 10:14:20.000000000 +0000
-+++ xbmc-14-31ce987-odroid/configure.in	2014-10-22 19:43:18.216106383 +0000
-@@ -218,6 +218,9 @@
+diff -Nur kodi-14-ffad6b8.orig/configure.in kodi-14-ffad6b8/configure.in
+--- kodi-14-ffad6b8.orig/configure.in	2014-12-02 04:21:18.000000000 +0000
++++ kodi-14-ffad6b8/configure.in	2014-12-08 16:21:29.058723641 +0000
+@@ -220,6 +220,9 @@
  libcec_enabled="== libcec enabled. =="
  libcec_disabled="== libcec disabled. CEC adapter support will not be available. =="
  
@@ -11,7 +11,7 @@ diff -Nur xbmc-14-31ce987/configure.in xbmc-14-31ce987-odroid/configure.in
  dashes="------------------------"
  final_message="\n  ${APP_NAME} Configuration:"
  final_message="\n$dashes$final_message\n$dashes"
-@@ -560,6 +563,12 @@
+@@ -562,6 +565,12 @@
    [use_libav_hacks=$enableval],
    [use_libav_hacks=no])
  
@@ -24,7 +24,7 @@ diff -Nur xbmc-14-31ce987/configure.in xbmc-14-31ce987-odroid/configure.in
  ### End of external library options
  
  if test "x$host_vendor" != "xapple"; then
-@@ -1660,6 +1667,11 @@
+@@ -1665,6 +1674,11 @@
    AC_MSG_NOTICE($libcap_disabled)
  fi
  
@@ -36,7 +36,7 @@ diff -Nur xbmc-14-31ce987/configure.in xbmc-14-31ce987-odroid/configure.in
  # FFmpeg
  FFMPEG_LIBNAMES="libavcodec >= 56.1.100
                   libavfilter >= 5.1.100
-@@ -2388,6 +2400,12 @@
+@@ -2393,6 +2407,12 @@
    final_message="$final_message\n  additional codecs:\tNo"
  fi
  
@@ -49,7 +49,7 @@ diff -Nur xbmc-14-31ce987/configure.in xbmc-14-31ce987-odroid/configure.in
  ### External libraries messages
  
  if test "$host_vendor" = "apple" ; then
-@@ -2592,6 +2609,7 @@
+@@ -2609,6 +2629,7 @@
  AC_SUBST(USE_SSE4)
  AC_SUBST(USE_MMAL)
  AC_SUBST(USE_X11)
@@ -57,9 +57,9 @@ diff -Nur xbmc-14-31ce987/configure.in xbmc-14-31ce987-odroid/configure.in
  
  # pushd and popd are not available in other shells besides bash, so implement
  # our own pushd/popd functions
-diff -Nur xbmc-14-31ce987/xbmc/cores/dvdplayer/DVDCodecs/DVDFactoryCodec.cpp xbmc-14-31ce987-odroid/xbmc/cores/dvdplayer/DVDCodecs/DVDFactoryCodec.cpp
---- xbmc-14-31ce987/xbmc/cores/dvdplayer/DVDCodecs/DVDFactoryCodec.cpp	2014-10-18 10:14:06.000000000 +0000
-+++ xbmc-14-31ce987-odroid/xbmc/cores/dvdplayer/DVDCodecs/DVDFactoryCodec.cpp	2014-10-22 19:44:41.063040719 +0000
+diff -Nur kodi-14-ffad6b8.orig/xbmc/cores/dvdplayer/DVDCodecs/DVDFactoryCodec.cpp kodi-14-ffad6b8/xbmc/cores/dvdplayer/DVDCodecs/DVDFactoryCodec.cpp
+--- kodi-14-ffad6b8.orig/xbmc/cores/dvdplayer/DVDCodecs/DVDFactoryCodec.cpp	2014-12-02 04:21:01.000000000 +0000
++++ kodi-14-ffad6b8/xbmc/cores/dvdplayer/DVDCodecs/DVDFactoryCodec.cpp	2014-12-08 16:23:28.437035079 +0000
 @@ -55,7 +55,9 @@
  #include "Overlay/DVDOverlayCodecText.h"
  #include "Overlay/DVDOverlayCodecTX3G.h"
@@ -70,8 +70,8 @@ diff -Nur xbmc-14-31ce987/xbmc/cores/dvdplayer/DVDCodecs/DVDFactoryCodec.cpp xbm
 +#endif
  
  #include "DVDStreamInfo.h"
- #include "settings/Settings.h"
-@@ -190,6 +192,11 @@
+ #include "settings/AdvancedSettings.h"
+@@ -192,6 +194,11 @@
  #else
    hwSupport += "iMXVPU:no ";
  #endif
@@ -83,10 +83,10 @@ diff -Nur xbmc-14-31ce987/xbmc/cores/dvdplayer/DVDCodecs/DVDFactoryCodec.cpp xbm
    CLog::Log(LOGDEBUG, "CDVDFactoryCodec: compiled in hardware support: %s", hwSupport.c_str());
  
    if (hint.stills && (hint.codec == AV_CODEC_ID_MPEG2VIDEO || hint.codec == AV_CODEC_ID_MPEG1VIDEO))
-@@ -198,6 +205,14 @@
-      if ( (pCodec = OpenCodec(new CDVDVideoCodecLibMpeg2(), hint, options)) ) return pCodec;
-   }
+@@ -202,6 +209,13 @@
  
+   if ((EDECODEMETHOD) CSettings::Get().GetInt("videoplayer.decodingmethod") == VS_DECODEMETHOD_HARDWARE)
+   {
 +#if defined(HAS_MFC)
 +  if ( !hint.software ) {
 +    if ( hint.codec == AV_CODEC_ID_H263 || hint.codec == AV_CODEC_ID_H264 || hint.codec == AV_CODEC_ID_MPEG4 || hint.codec == AV_CODEC_ID_MPEG2VIDEO || AV_CODEC_ID_MPEG1VIDEO || hint.codec == AV_CODEC_ID_VC1 ) {
@@ -94,13 +94,12 @@ diff -Nur xbmc-14-31ce987/xbmc/cores/dvdplayer/DVDCodecs/DVDFactoryCodec.cpp xbm
 +    }
 +  }
 +#endif
-+
  #if defined(HAS_LIBAMCODEC)
-   // amcodec can handle dvd playback.
-   if (!hint.software && CSettings::Get().GetBool("videoplayer.useamcodec"))
-diff -Nur xbmc-14-31ce987/xbmc/cores/dvdplayer/DVDCodecs/Video/DVDVideoCodecMFC.cpp xbmc-14-31ce987-odroid/xbmc/cores/dvdplayer/DVDCodecs/Video/DVDVideoCodecMFC.cpp
---- xbmc-14-31ce987/xbmc/cores/dvdplayer/DVDCodecs/Video/DVDVideoCodecMFC.cpp	1970-01-01 00:00:00.000000000 +0000
-+++ xbmc-14-31ce987-odroid/xbmc/cores/dvdplayer/DVDCodecs/Video/DVDVideoCodecMFC.cpp	2014-10-22 19:42:25.008790631 +0000
+     // amcodec can handle dvd playback.
+     if (!hint.software && CSettings::Get().GetBool("videoplayer.useamcodec"))
+diff -Nur kodi-14-ffad6b8.orig/xbmc/cores/dvdplayer/DVDCodecs/Video/DVDVideoCodecMFC.cpp kodi-14-ffad6b8/xbmc/cores/dvdplayer/DVDCodecs/Video/DVDVideoCodecMFC.cpp
+--- kodi-14-ffad6b8.orig/xbmc/cores/dvdplayer/DVDCodecs/Video/DVDVideoCodecMFC.cpp	1970-01-01 00:00:00.000000000 +0000
++++ kodi-14-ffad6b8/xbmc/cores/dvdplayer/DVDCodecs/Video/DVDVideoCodecMFC.cpp	2014-12-08 16:21:29.058723641 +0000
 @@ -0,0 +1,737 @@
 +/*
 + *      Copyright (C) 2005-2012 Team XBMC
@@ -839,9 +838,9 @@ diff -Nur xbmc-14-31ce987/xbmc/cores/dvdplayer/DVDCodecs/Video/DVDVideoCodecMFC.
 +bool CDVDVideoCodecMFC::ClearPicture(DVDVideoPicture* pDvdVideoPicture) {
 +  return CDVDVideoCodec::ClearPicture(pDvdVideoPicture);
 +}
-diff -Nur xbmc-14-31ce987/xbmc/cores/dvdplayer/DVDCodecs/Video/DVDVideoCodecMFC.h xbmc-14-31ce987-odroid/xbmc/cores/dvdplayer/DVDCodecs/Video/DVDVideoCodecMFC.h
---- xbmc-14-31ce987/xbmc/cores/dvdplayer/DVDCodecs/Video/DVDVideoCodecMFC.h	1970-01-01 00:00:00.000000000 +0000
-+++ xbmc-14-31ce987-odroid/xbmc/cores/dvdplayer/DVDCodecs/Video/DVDVideoCodecMFC.h	2014-10-22 19:42:25.012790580 +0000
+diff -Nur kodi-14-ffad6b8.orig/xbmc/cores/dvdplayer/DVDCodecs/Video/DVDVideoCodecMFC.h kodi-14-ffad6b8/xbmc/cores/dvdplayer/DVDCodecs/Video/DVDVideoCodecMFC.h
+--- kodi-14-ffad6b8.orig/xbmc/cores/dvdplayer/DVDCodecs/Video/DVDVideoCodecMFC.h	1970-01-01 00:00:00.000000000 +0000
++++ kodi-14-ffad6b8/xbmc/cores/dvdplayer/DVDCodecs/Video/DVDVideoCodecMFC.h	2014-12-08 16:21:29.058723641 +0000
 @@ -0,0 +1,80 @@
 +#pragma once
 +
@@ -923,9 +922,9 @@ diff -Nur xbmc-14-31ce987/xbmc/cores/dvdplayer/DVDCodecs/Video/DVDVideoCodecMFC.
 +
 +  bool OpenDevices();
 +};
-diff -Nur xbmc-14-31ce987/xbmc/cores/dvdplayer/DVDCodecs/Video/Makefile.in xbmc-14-31ce987-odroid/xbmc/cores/dvdplayer/DVDCodecs/Video/Makefile.in
---- xbmc-14-31ce987/xbmc/cores/dvdplayer/DVDCodecs/Video/Makefile.in	2014-10-18 10:14:06.000000000 +0000
-+++ xbmc-14-31ce987-odroid/xbmc/cores/dvdplayer/DVDCodecs/Video/Makefile.in	2014-10-22 19:42:25.012790580 +0000
+diff -Nur kodi-14-ffad6b8.orig/xbmc/cores/dvdplayer/DVDCodecs/Video/Makefile.in kodi-14-ffad6b8/xbmc/cores/dvdplayer/DVDCodecs/Video/Makefile.in
+--- kodi-14-ffad6b8.orig/xbmc/cores/dvdplayer/DVDCodecs/Video/Makefile.in	2014-12-02 04:21:01.000000000 +0000
++++ kodi-14-ffad6b8/xbmc/cores/dvdplayer/DVDCodecs/Video/Makefile.in	2014-12-08 16:21:29.058723641 +0000
 @@ -42,6 +42,10 @@
  SRCS += DVDVideoCodecMMAL.cpp
  endif
@@ -937,9 +936,9 @@ diff -Nur xbmc-14-31ce987/xbmc/cores/dvdplayer/DVDCodecs/Video/Makefile.in xbmc-
  LIB=Video.a
  
  include @abs_top_srcdir@/Makefile.include
-diff -Nur xbmc-14-31ce987/xbmc/linux/LinuxV4l2.cpp xbmc-14-31ce987-odroid/xbmc/linux/LinuxV4l2.cpp
---- xbmc-14-31ce987/xbmc/linux/LinuxV4l2.cpp	1970-01-01 00:00:00.000000000 +0000
-+++ xbmc-14-31ce987-odroid/xbmc/linux/LinuxV4l2.cpp	2014-10-22 19:42:25.012790580 +0000
+diff -Nur kodi-14-ffad6b8.orig/xbmc/linux/LinuxV4l2.cpp kodi-14-ffad6b8/xbmc/linux/LinuxV4l2.cpp
+--- kodi-14-ffad6b8.orig/xbmc/linux/LinuxV4l2.cpp	1970-01-01 00:00:00.000000000 +0000
++++ kodi-14-ffad6b8/xbmc/linux/LinuxV4l2.cpp	2014-12-08 16:21:29.062723584 +0000
 @@ -0,0 +1,314 @@
 +/*
 + *      Copyright (C) 2005-2012 Team XBMC
@@ -1255,9 +1254,9 @@ diff -Nur xbmc-14-31ce987/xbmc/linux/LinuxV4l2.cpp xbmc-14-31ce987-odroid/xbmc/l
 +
 +  return V4L2_OK;
 +}
-diff -Nur xbmc-14-31ce987/xbmc/linux/LinuxV4l2.h xbmc-14-31ce987-odroid/xbmc/linux/LinuxV4l2.h
---- xbmc-14-31ce987/xbmc/linux/LinuxV4l2.h	1970-01-01 00:00:00.000000000 +0000
-+++ xbmc-14-31ce987-odroid/xbmc/linux/LinuxV4l2.h	2014-10-22 19:42:25.012790580 +0000
+diff -Nur kodi-14-ffad6b8.orig/xbmc/linux/LinuxV4l2.h kodi-14-ffad6b8/xbmc/linux/LinuxV4l2.h
+--- kodi-14-ffad6b8.orig/xbmc/linux/LinuxV4l2.h	1970-01-01 00:00:00.000000000 +0000
++++ kodi-14-ffad6b8/xbmc/linux/LinuxV4l2.h	2014-12-08 16:21:29.062723584 +0000
 @@ -0,0 +1,77 @@
 +#pragma once
 +
@@ -1336,9 +1335,9 @@ diff -Nur xbmc-14-31ce987/xbmc/linux/LinuxV4l2.h xbmc-14-31ce987-odroid/xbmc/lin
 +inline int v4l2_align(int v, int a) {
 +  return ((v + a - 1) / a) * a;
 +}
-diff -Nur xbmc-14-31ce987/xbmc/linux/Makefile.in xbmc-14-31ce987-odroid/xbmc/linux/Makefile.in
---- xbmc-14-31ce987/xbmc/linux/Makefile.in	2014-10-18 10:14:04.000000000 +0000
-+++ xbmc-14-31ce987-odroid/xbmc/linux/Makefile.in	2014-10-22 19:42:25.012790580 +0000
+diff -Nur kodi-14-ffad6b8.orig/xbmc/linux/Makefile.in kodi-14-ffad6b8/xbmc/linux/Makefile.in
+--- kodi-14-ffad6b8.orig/xbmc/linux/Makefile.in	2014-12-02 04:20:53.000000000 +0000
++++ kodi-14-ffad6b8/xbmc/linux/Makefile.in	2014-12-08 16:21:29.062723584 +0000
 @@ -6,6 +6,7 @@
  SRCS += DBusReserve.cpp
  SRCS += LinuxResourceCounter.cpp
