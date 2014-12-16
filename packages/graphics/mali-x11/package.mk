@@ -17,7 +17,7 @@
 ################################################################################
 
 PKG_NAME="mali-x11"
-PKG_VERSION="1.2"
+PKG_VERSION="1.3"
 PKG_REV="1"
 PKG_ARCH="arm"
 PKG_LICENSE="nonfree"
