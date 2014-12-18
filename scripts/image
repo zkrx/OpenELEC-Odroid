@@ -126,6 +126,10 @@ IMAGE_NAME="$DISTRONAME-$TARGET_VERSION"
 
   ln -sf /etc/issue $INSTALL/etc/motd
 
+  if [ "$PROJECT" = "Odroid" ]; then
+    ln -sf /storage/.cache/local $INSTALL/usr/local
+  fi
+
 # Basissystem...
   $SCRIPTS/install libc
   $SCRIPTS/install gcc
