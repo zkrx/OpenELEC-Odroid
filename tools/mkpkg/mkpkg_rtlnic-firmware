@@ -33,7 +33,7 @@ echo "copying sources..."
   rm -rf rtlnic-firmware-$GIT_REV
   mkdir -p rtlnic-firmware-$GIT_REV
   cp -R linux-firmware-git/rtl_nic rtlnic-firmware-$GIT_REV
-  #cp -R linux-firmware-git/LICENSE.rtlnic rtlnic-firmware-$GIT_REV
+  cp -R linux-firmware-git/rtlwifi rtlnic-firmware-$GIT_REV
 
 echo "cleaning sources..."
 
