@@ -17,13 +17,13 @@
 ################################################################################
 
 PKG_NAME="mali-fb"
-PKG_VERSION="1.2"
+PKG_VERSION="1.4"
 PKG_REV="1"
 PKG_ARCH="arm"
 PKG_LICENSE="nonfree"
 PKG_SITE="http://www.arm.com/products/multimedia/mali-graphics-hardware/mali-400-mp.php"
 PKG_URL="$ODROID_MIRROR/$PKG_NAME-$PKG_VERSION.tar.xz"
-PKG_DEPENDS_TARGET="toolchain"
+PKG_DEPENDS_TARGET="toolchain Mesa"
 PKG_PRIORITY="optional"
 PKG_SECTION="graphics"
 PKG_SHORTDESC="mali-fb: OpenGL-ES and Mali driver for Mali 400 GPU's (No X11)"
