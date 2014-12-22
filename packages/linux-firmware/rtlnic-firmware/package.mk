@@ -17,7 +17,7 @@
 ################################################################################
 
 PKG_NAME="rtlnic-firmware"
-PKG_VERSION="20140930.f662913"
+PKG_VERSION="20141220.38e5405"
 PKG_REV="1"
 PKG_ARCH="any"
 PKG_LICENSE=""
