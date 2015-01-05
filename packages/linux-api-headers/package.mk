@@ -17,8 +17,8 @@
 ################################################################################
 
 PKG_NAME="linux-api-headers"
-PKG_VERSION="3.0"
-PKG_URL="http://www.kernel.org/pub/linux/kernel/v3.0/linux-$PKG_VERSION.tar.bz2"
+PKG_VERSION="3.18"
+PKG_URL="http://www.kernel.org/pub/linux/kernel/v3.0/linux-$PKG_VERSION.tar.xz"
 PKG_REV="1"
 PKG_ARCH="any"
 PKG_LICENSE="GPL"
@@ -31,7 +31,7 @@ PKG_LONGDESC="linux-api-headers: Linux kernel headers sanitized for development 
 PKG_SOURCE_DIR="linux-$PKG_VERSION"
 
 unpack() { 
-  $SCRIPTS/extract $PKG_NAME linux-$PKG_VERSION.tar.bz2 $BUILD
+  $SCRIPTS/extract $PKG_NAME $(basename $PKG_URL) $BUILD
 }
 
 pre_make_target() {

@@ -23,7 +23,11 @@ PKG_ARCH="any"
 PKG_LICENSE="GPL"
 PKG_SITE="http://www.netfilter.org/"
 PKG_URL="http://www.netfilter.org/projects/iptables/files/$PKG_NAME-$PKG_VERSION.tar.bz2"
-PKG_DEPENDS_TARGET="toolchain linux"
+if [ "$PROJECT" = Odroid ]; then
+  PKG_DEPENDS_TARGET="toolchain"
+else
+  PKG_DEPENDS_TARGET="toolchain linux"
+fi
 PKG_PRIORITY="optional"
 PKG_SECTION="network"
 PKG_SHORTDESC="iptables: IP packet filter administration"
