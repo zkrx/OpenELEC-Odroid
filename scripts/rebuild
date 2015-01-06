@@ -1,0 +1,319 @@
+#!/bin/bash
+
+################################################################################
+#      This file is part of OpenELEC - http://www.openelec.tv
+#      Copyright (C) 2009-2014 Stephan Raue (stephan@openelec.tv)
+#
+#  OpenELEC is free software: you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation, either version 2 of the License, or
+#  (at your option) any later version.
+#
+#  OpenELEC is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
+#
+#  You should have received a copy of the GNU General Public License
+#  along with OpenELEC.  If not, see <http://www.gnu.org/licenses/>.
+################################################################################
+
+. config/options $1
+
+show_config
+
+BUILD_DATE=`date +%Y%m%d%H%M%S`
+
+if [ "$OPENELEC_VERSION" = devel ]; then
+  if ! GIT_BUILD=$(git rev-list --count HEAD 2>/dev/null)
+  then
+    GIT_BUILD=$(git rev-list HEAD | wc -l)
+  fi
+  GIT_HASH=$(git rev-parse HEAD)
+  GIT_ABBREV=$(git log -1 --pretty=format:%h)
+  OPENELEC_VERSION=$OPENELEC_VERSION-$BUILD_DATE-r$GIT_BUILD-g$GIT_ABBREV
+fi
+
+if [ -z "$ODROID_VERSION" ]; then
+  TARGET_VERSION="$PROJECT.$TARGET_ARCH-$OPENELEC_VERSION"
+else
+  TARGET_VERSION="$PROJECT-$ODROID_VERSION"
+fi
+IMAGE_NAME="$DISTRONAME-$TARGET_VERSION"
+
+# setup fakeroot
+  rm -rf $FAKEROOT_SCRIPT   # remove $FAKEROOT_SCRIPT if it exist
+  touch $FAKEROOT_SCRIPT    # create an empty $FAKEROOT_SCRIPT
+  chmod +x $FAKEROOT_SCRIPT # make $FAKEROOT_SCRIPT executable
+  echo "chown -R 0:0 $INSTALL" >> $FAKEROOT_SCRIPT
+
+# make target dir
+  mkdir -p $TARGET_IMG
+    rm -rf $TARGET_IMG/$IMAGE_NAME.kernel
+
+# copy kernel to target dir
+  if [ "$BOOTLOADER" = "u-boot" ]; then
+    KERNEL_IMAGE="$KERNEL_UBOOT_TARGET"
+  elif [ "$BOOTLOADER" = "bcm2835-bootloader" ]; then
+    KERNEL_IMAGE="zImage"
+  elif [ "$PROJECT" = "Odroid" ]; then
+    KERNEL_IMAGE="zImage"
+  else
+    KERNEL_IMAGE="bzImage"
+  fi
+
+  if [ "$TARGET_ARCH" = i386 -o "$TARGET_ARCH" = x86_64 ]; then
+    KERNEL_ARCH="x86"
+  elif [ "$TARGET_ARCH" = arm ]; then
+    KERNEL_ARCH="arm"
+  fi
+
+  if [ "$PROJECT" != "Odroid" ]; then
+    cp -PR $BUILD/linux-*/arch/$KERNEL_ARCH/boot/$KERNEL_IMAGE $TARGET_IMG/$IMAGE_NAME.kernel
+    chmod 0644 $TARGET_IMG/$IMAGE_NAME.kernel
+  fi
+
+  if [ "$PROJECT" = "Odroid" ]; then
+    # generate uInitrd
+    mkimage -A arm -T ramdisk -n RootFS\ [$PROJECT] -C none -d $INSTALL/../initramfs.cpio $INSTALL/../uInitrd
+    # generate boot.scr(s)
+    for f in debug auto 720p 720p-noedid 1080p 1080p-noedid; do
+      mkimage -A arm -T script -n $f\ [Odroid-XU3] -C none -d \
+        $PROJECT_DIR/$PROJECT/bootloader/XU3/boot-${f}.cfg \
+        $INSTALL/usr/share/bootloader/XU3/boot-${f}.scr
+      mkimage -A arm -T script -n $f\ [Odroid-U2/3] -C none -d \
+        $PROJECT_DIR/$PROJECT/bootloader/U2/boot-${f}.cfg \
+        $INSTALL/usr/share/bootloader/U2/boot-${f}.scr
+    done
+    install -m 755 $PROJECT_DIR/$PROJECT/bootloader/bootres $INSTALL/usr/bin/bootres
+  fi
+
+# create squashfs file
+  if [ -z "$SQUASHFS_COMPRESSION" ]; then
+    SQUASHFS_COMPRESSION="gzip"
+  fi
+
+  echo "rm -rf $TARGET_IMG/$IMAGE_NAME.system" >> $FAKEROOT_SCRIPT
+  echo "$ROOT/$TOOLCHAIN/bin/mksquashfs $BUILD/image/system $TARGET_IMG/$IMAGE_NAME.system -noappend -comp $SQUASHFS_COMPRESSION" >> $FAKEROOT_SCRIPT
+
+# run fakeroot
+  $ROOT/$TOOLCHAIN/bin/fakeroot -- $FAKEROOT_SCRIPT
+  rm -rf $FAKEROOT_SCRIPT
+
+# set permissions
+  chmod 0644 $TARGET_IMG/$IMAGE_NAME.system
+
+  if [ "$1" = "release" -o "$1" = "mkimage" ]; then
+
+    RELEASE_DIR="target/$IMAGE_NAME"
+
+    # cleanup
+      rm -rf $RELEASE_DIR
+
+    # create release dir
+      mkdir -p $RELEASE_DIR
+      # remove n previous created release image
+        rm -rf $TARGET_IMG/$IMAGE_NAME.img.gz
+        if [ -n "$BOOTLOADER" ]; then
+          if [ -d $ROOT/projects/$PROJECT/packages ]; then
+          	BOOTLOADER_DIR=`find $ROOT/projects/$PROJECT/packages -type d -name $BOOTLOADER 2>/dev/null`
+          else
+          	BOOTLOADER_DIR=""
+          fi
+
+          if [ -z "$BOOTLOADER_DIR" -o ! -d "$BOOTLOADER_DIR" ]; then
+          	BOOTLOADER_DIR=`find $PACKAGES -type d -name $BOOTLOADER 2>/dev/null`
+          fi
+
+          if [ -d "$BOOTLOADER_DIR"/files ]; then
+            cp -R $BOOTLOADER_DIR/files/* $RELEASE_DIR
+          fi
+
+          if [ -f $PROJECT_DIR/$PROJECT/bootloader/release ]; then
+            . $PROJECT_DIR/$PROJECT/bootloader/release
+          elif [ -f "$BOOTLOADER_DIR"/release ]; then
+            . $BOOTLOADER_DIR/release
+          fi
+        fi
+
+        cp $ROOT/README* $RELEASE_DIR
+        cp $ROOT/CHANGELOG* $RELEASE_DIR
+        cp -R $CONFIG/release/openelec.ico $RELEASE_DIR
+        echo "$TARGET_VERSION" > $RELEASE_DIR/RELEASE
+
+        if [ -n "$MEDIACENTER" ] ; then
+          echo "Kodi commit: `scripts/git_version $MEDIACENTER`" >> $RELEASE_DIR/RELEASE
+        fi
+
+      mkdir -p $RELEASE_DIR/licenses
+        cp $ROOT/licenses/* $RELEASE_DIR/licenses
+
+      mkdir -p $RELEASE_DIR/target/SCR
+        cp $TARGET_IMG/$IMAGE_NAME.system $RELEASE_DIR/target/SYSTEM
+
+      if [ "$PROJECT" = "Odroid" ]; then
+        . $ROOT/packages/linux-odroid-xu3/package.mk
+        install -D -m 0644 $BUILD/linux-odroid-xu3-$PKG_VERSION/arch/$KERNEL_ARCH/boot/$KERNEL_IMAGE $RELEASE_DIR/target/XU3/KERNEL
+        . $ROOT/packages/linux-odroid-u2/package.mk
+        install -D -m 0644 $BUILD/linux-odroid-u2-$PKG_VERSION/arch/$KERNEL_ARCH/boot/$KERNEL_IMAGE $RELEASE_DIR/target/U2/KERNEL
+      else
+        cp $TARGET_IMG/$IMAGE_NAME.kernel $RELEASE_DIR/target/KERNEL
+      fi
+
+     if [ "$PROJECT" = "Odroid" ]; then
+       install -D -m 0644 $INSTALL/../uInitrd $RELEASE_DIR/target/INITRD
+       for f in bl1 bl2 tzsw u-boot; do
+         install -D -m 0644 $INSTALL/usr/share/bootloader/XU3/$f $RELEASE_DIR/3rdparty/U-Boot/XU3/$f
+         install -D -m 0644 $INSTALL/usr/share/bootloader/U2/$f $RELEASE_DIR/3rdparty/U-Boot/U2/$f
+       done
+       for f in $INSTALL/usr/share/bootloader/XU3/boot*.scr; do
+         install -D -m 0644 $f $RELEASE_DIR/target/SCR-XU3/$(basename ${f})
+       done
+       for f in $INSTALL/usr/share/bootloader/U2/boot*.scr; do
+         install -D -m 0644 $f $RELEASE_DIR/target/SCR-U2/$(basename ${f})
+       done
+       # We need to default one boot.scr
+       install -D -m 0644 $RELEASE_DIR/target/SCR-XU3/boot-$DEFAULT_SCR.scr  $RELEASE_DIR/target/XU3/BOOT.SCR
+       install -D -m 0644 $RELEASE_DIR/target/SCR-U2/boot-$DEFAULT_SCR.scr $RELEASE_DIR/target/U2/BOOT.SCR
+       # xu3 dtb
+       install -D -m 0644 $INSTALL/usr/share/bootloader/XU3/DTB $RELEASE_DIR/target/XU3/DTB
+       # lets get rid of things we don't care about in $TARGET_IMG
+       mv $TARGET_IMG/$IMAGE_NAME.system $INSTALL/../SYSTEM
+     fi
+
+    # create md5sum's
+      ( cd $RELEASE_DIR;
+        md5sum -t target/SYSTEM > target/SYSTEM.md5;
+        if [ "$PROJECT" = "Odroid" ]; then
+          md5sum -t target/U2/KERNEL > target/U2/KERNEL.md5;
+          md5sum -t target/XU3/KERNEL > target/XU3/KERNEL.md5;
+          md5sum -t target/INITRD > target/INITRD.md5;
+          md5sum -t target/U2/BOOT.SCR > target/U2/BOOT.SCR.md5;
+          md5sum -t target/XU3/BOOT.SCR > target/XU3/BOOT.SCR.md5;
+          md5sum -t target/XU3/DTB > target/XU3/DTB.md5;
+        else
+          md5sum -t target/KERNEL > target/KERNEL.md5;
+        fi
+      )
+
+    # create target directory
+      mkdir -p $TARGET_IMG
+
+    # remove an previous created release tarball
+      rm -rf $TARGET_IMG/$IMAGE_NAME.tar
+
+    # create release tarball
+      tar cf $TARGET_IMG/$IMAGE_NAME.tar -C target $IMAGE_NAME
+
+    # create image files if requested
+      if [ "$1" = "mkimage" ] && [ "$PROJECT" = "Odroid" ]; then
+        sudo env \
+          ROOT="$ROOT" \
+          BUILD="$BUILD" \
+          INSTALL="$INSTALL" \
+          TARGET_IMG="$TARGET_IMG" \
+          IMAGE_NAME="$IMAGE_NAME" \
+          RESIZE="$RESIZE" \
+          DEFAULT_SCR="$DEFAULT_SCR" \
+          PROJECT="$PROJECT" \
+          $SCRIPTS/mkimage-odroid
+      elif [ "$1" = "mkimage" -a -n "$BOOTLOADER" ]; then
+        if [ "$2" == "efi" ] ; then
+          UEFI=yes
+        fi
+        echo "mkimage: boo. now root access (sudo) is required..."
+        echo "mkimage: see scripts/image and scripts/mkimage if you dont trust us :)"
+        # variables used in image script must be passed
+        sudo env \
+          PATH="$PATH" \
+          ROOT="$ROOT" \
+          TOOLCHAIN="$TOOLCHAIN" \
+          TARGET_IMG="$TARGET_IMG" \
+          IMAGE_NAME="$IMAGE_NAME" \
+          BOOTLOADER="$BOOTLOADER" \
+          RELEASE_DIR="$RELEASE_DIR" \
+          UUID_SYSTEM="$(uuidgen)" \
+          UUID_STORAGE="$(uuidgen)" \
+          UEFI="$UEFI" \
+          $SCRIPTS/mkimage
+      fi
+
+    # cleanup release dir
+      rm -rf $RELEASE_DIR
+
+  elif [ "$1" = "noobs" ]; then
+
+    RELEASE_DIR="$TARGET_IMG/${IMAGE_NAME}-$1"
+
+    # cleanup
+      rm -rf $RELEASE_DIR
+
+    # create release dir
+      mkdir -p $RELEASE_DIR
+
+      cp -PR $ROOT/config/$1/* $RELEASE_DIR
+
+      cp $ROOT/README* $RELEASE_DIR
+      cp $ROOT/CHANGELOG $RELEASE_DIR/release_notes.txt
+
+
+      sed -e "s%@DISTRONAME@%$DISTRONAME%g" \
+          -e "s%@OPENELEC_VERSION@%$OPENELEC_VERSION%g" \
+          -e "s%@RELEASE_DATE@%$(date +%F)%g" \
+          -e "s%@KERNEL_VERSION@%$(kernel_version)%g" \
+          -e "s%@DESCRIPTION@%$DESCRIPTION%g" \
+          -i $RELEASE_DIR/os.json
+
+    # create System dir
+      mkdir -p $RELEASE_DIR/System
+
+        BOOTLOADER_DIR=`find $PACKAGES -type d -name $BOOTLOADER 2>/dev/null`
+        if [ -d "$BOOTLOADER_DIR"/files/3rdparty/bootloader/ ]; then
+          cp -PR $BOOTLOADER_DIR/files/3rdparty/bootloader/* $RELEASE_DIR/System
+        fi
+
+      # copy Bootloader
+        cp -PR $BUILD/bcm2835-bootloader-*/LICENCE* $RELEASE_DIR/System/
+        cp -PR $BUILD/bcm2835-bootloader-*/bootcode.bin $RELEASE_DIR/System/
+        cp -PR $BUILD/bcm2835-bootloader-*/fixup_x.dat $RELEASE_DIR/System/fixup.dat
+        cp -PR $BUILD/bcm2835-bootloader-*/start_x.elf $RELEASE_DIR/System/start.elf
+
+      # copy system files
+        cp $TARGET_IMG/$IMAGE_NAME.system $RELEASE_DIR/System/SYSTEM
+        cp $TARGET_IMG/$IMAGE_NAME.kernel $RELEASE_DIR/System/kernel.img
+
+      # create md5sum's
+        ( cd $RELEASE_DIR/System;
+          md5sum -t SYSTEM > SYSTEM.md5;
+          md5sum -t kernel.img > kernel.img.md5;
+        )
+
+      # copy additional files
+        cp -R $CONFIG/release/openelec.ico $RELEASE_DIR/System
+        mkdir -p $RELEASE_DIR/System/licenses
+          cp $ROOT/licenses/* $RELEASE_DIR/System/licenses
+
+    # create Storage dir
+      mkdir -p $RELEASE_DIR/Storage
+
+    # remove an previous created release tarball
+      rm -rf $RELEASE_DIR/System.tar.xz
+      rm -rf $RELEASE_DIR/Storage.tar.xz
+
+    # create filesystem tarballs
+      tar cJf $RELEASE_DIR/System.tar.xz -C $RELEASE_DIR/System/ .
+      tar cJf $RELEASE_DIR/Storage.tar.xz -C $RELEASE_DIR/Storage/ .
+
+    # remove an filesystem dirs
+      rm -rf $RELEASE_DIR/System
+      rm -rf $RELEASE_DIR/Storage
+
+    # remove an previous created release tarball
+      rm -rf $TARGET_IMG/${IMAGE_NAME}-$1.tar
+
+    # create release tarball
+      tar cf $TARGET_IMG/${IMAGE_NAME}-$1.tar -C $TARGET ${IMAGE_NAME}-$1
+
+    # cleanup release dir
+      rm -rf $RELEASE_DIR
+  fi

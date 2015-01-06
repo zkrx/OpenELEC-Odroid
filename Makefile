@@ -22,3 +22,6 @@ clean:
 
 src-pkg:
 	tar cvjf sources.tar.bz2 sources .stamps
+
+rebuild:
+	./scripts/rebuild mkimage
