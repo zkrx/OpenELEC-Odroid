@@ -19,7 +19,7 @@
 PKG_NAME="u-boot-odroid-u2"
 PKG_VERSION="2010.12+33e05ff"
 PKG_SITE="http://hardkernel.org"
-PKG_URL="http://zalaare.homenet.org/odroid/$PKG_NAME-$PKG_VERSION.tar.xz"
+PKG_URL="$ODROID_MIRROR/$PKG_NAME-$PKG_VERSION.tar.xz"
 PKG_REV="1"
 PKG_ARCH="arm"
 PKG_LICENSE="GPL"
