@@ -47,7 +47,6 @@ makeinstall_target() {
 }
 
 post_makeinstall_target() {
-  [ -f $SYSROOT_PREFIX/usr/include ] && rm -r $SYSROOT_PREFIX/usr/include
   mkdir -p $SYSROOT_PREFIX/usr/include
   cp -R dest/include/* $SYSROOT_PREFIX/usr/include
 }
