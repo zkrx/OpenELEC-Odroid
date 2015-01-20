@@ -349,8 +349,10 @@ if [ ! -f $STAMP ]; then
       cd $ROOT
     fi  # ! "$PKG_SECTION" = "virtual"
 
-    # remove la files
-    find $SYSROOT_PREFIX/ -name "*.la" -delete
+    # TODO: slow...
+    for i in `find $SYSROOT_PREFIX/usr/lib/ -name "*.la" 2>/dev/null`; do \
+      $SED "s:\(['= ]\)/usr:\\1$SYSROOT_PREFIX/usr:g" $i; \
+    done
 
     for i in `sed -n "s/^\([^#].*\)=\".*$/\1/p" $PROJECT_DIR/$PROJECT/options | grep -v "#"`; do
       eval val=\$$i
