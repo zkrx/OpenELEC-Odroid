@@ -25,7 +25,7 @@ if [ ! -z "$1" ]; then
   export BUILD_INDENT=$((${BUILD_INDENT:-1}+$BUILD_INDENT_SIZE))
 
   if [ "$CLEAN_SOURCES" = true ]; then
-    rm -rf $SOURCES/$1-[0-9]*
+    rm -rf $SOURCES/$1-*
     return
   fi
 
