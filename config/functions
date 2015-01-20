@@ -55,42 +55,26 @@ setup_toolchain() {
 }
 
 kernel_path() {
-  if [ -e $ROOT/projects/$PROJECT/packages/linux/package.mk ]; then
+  if [ -e $ROOT/projects/$PROJECT/devices/$DEVICE/packages/linux/package.mk ]; then
+    . $ROOT/projects/$PROJECT/devices/$DEVICE/packages/linux/package.mk
+  elif [ -e $ROOT/projects/$PROJECT/packages/linux/package.mk ]; then
     . $ROOT/projects/$PROJECT/packages/linux/package.mk
   else
     . $ROOT/packages/linux/package.mk
   fi
 
-  echo $ROOT/$BUILD/${PKG_NAME}-${PKG_VERSION}
-}
-
-odroid_u2_kernel_path() {
-  . $ROOT/packages/linux-odroid-u2/package.mk
-  echo $ROOT/$BUILD/${PKG_NAME}-${PKG_VERSION}
-}
-
-odroid_xu3_kernel_path () {
-  . $ROOT/packages/linux-odroid-xu3/package.mk
   echo $ROOT/$BUILD/${PKG_NAME}-${PKG_VERSION}
 }
 
 kernel_version() {
-  if [ -e $ROOT/projects/$PROJECT/packages/linux/package.mk ]; then
+  if [ -e $ROOT/projects/$PROJECT/devices/$DEVICE/packages/linux/package.mk ]; then
+    . $ROOT/projects/$PROJECT/devices/$DEVICE/packages/linux/package.mk
+  elif [ -e $ROOT/projects/$PROJECT/packages/linux/package.mk ]; then
     . $ROOT/projects/$PROJECT/packages/linux/package.mk
   else
     . $ROOT/packages/linux/package.mk
   fi
 
-  echo ${PKG_VERSION}
-}
-
-odroid_u2_kernel_version() {
-  . $ROOT/packages/linux-odroid-u2/package.mk
-  echo ${PKG_VERSION}
-}
-
-odroid_xu3_kernel_version() {
-  . $ROOT/packages/linux-odroid-xu3/package.mk
   echo ${PKG_VERSION}
 }
 
@@ -102,13 +86,18 @@ get_module_dir() {
 # get package's build dir
 get_build_dir() {
   if [ ! -z $1 ] ; then
-    local _PKG_DIR=$(find $ROOT/projects/$PROJECT/packages -name $1 2>/dev/null)
+    local _PKG_DIR=$(find $ROOT/projects/$PROJECT/devices/$DEVICE/packages -name $1 2>/dev/null)
     if [ -d "$_PKG_DIR" -a -f $_PKG_DIR/package.mk ] ; then
       . $_PKG_DIR/package.mk
     else
-      local _PKG_DIR=$(find $ROOT/packages -name $1 2>/dev/null)
+      local _PKG_DIR=$(find $ROOT/projects/$PROJECT/packages -name $1 2>/dev/null)
       if [ -d "$_PKG_DIR" -a -f $_PKG_DIR/package.mk ] ; then
         . $_PKG_DIR/package.mk
+      else
+        local _PKG_DIR=$(find $ROOT/packages -name $1 2>/dev/null)
+        if [ -d "$_PKG_DIR" -a -f $_PKG_DIR/package.mk ] ; then
+          . $_PKG_DIR/package.mk
+        fi
       fi
     fi
 
@@ -281,15 +270,15 @@ dashes="==========================="
     exit 1
   fi
 
-  if [[ "$PROJECT" != Odroid ]]; then
-    if [ ! -f $PROJECT_DIR/$PROJECT/linux/linux.$TARGET_ARCH.conf ]; then
+  if [ "$PROJECT" != Odroid ]; then
+    if [ ! -f $PROJECT_DIR/$PROJECT/linux/linux.$TARGET_ARCH.conf && ! -f $PROJECT_DIR/$PROJECT/devices/$DEVICE/linux/linux.$TARGET_ARCH.conf ]; then
       check_arch="$check_arch\n $dashes$dashes$dashes"
       check_arch="$check_arch\n ERROR: Architecture not found, use a valid Architecture"
       check_arch="$check_arch\n for your project or create a new config"
       check_arch="$check_arch\n $dashes$dashes$dashes"
       check_arch="$check_arch\n\n Valid Architectures for your project: $PROJECT"
 
-      for arch in $PROJECT_DIR/$PROJECT/linux/*.conf; do
+      for arch in $PROJECT_DIR/$PROJECT/linux/*.conf $PROJECT_DIR/$PROJECT/devices/$DEVICE/linux/*.conf; do
         check_arch="$check_arch\n - $(basename $arch | cut -f2 -d".")"
       done
       echo -e $check_arch

@@ -1,0 +1,83 @@
+diff -Nur a/arch/arm/boot/dts/exynos5422_evt0.dtsi b/arch/arm/boot/dts/exynos5422_evt0.dtsi
+--- a/arch/arm/boot/dts/exynos5422_evt0.dtsi	2014-11-26 11:52:02.000000000 -0500
++++ b/arch/arm/boot/dts/exynos5422_evt0.dtsi	2015-01-19 12:17:35.678074759 -0500
+@@ -1159,6 +1159,27 @@
+ 		samsung,syscon-phandle = <&pmu_system_controller>;
+ 		status = "enabled";
+ 	};
++
++	cec@101B0000 {
++		compatible = "samsung,exynos5-cec_driver";
++		reg = <0x101B0000 0x1000>;
++		interrupts = <0 114 0>;
++
++		gpios = <&gpx3 6 0xf>;
++		pinctrl-names = "hdmi_cec";
++		pinctrl-0 = <&hdmi_cec>;
++
++		clock-names = "pclk_hdmi_cec";
++		clocks = <&clock 966>;
++
++		#address-cells = <1>;
++		#size-cells = <1>;
++		ranges;
++
++		hdmiphy-sys {
++			reg = <0x10040700 0x4>;
++		};
++	};
+ 	
+ 	hdmiphy: hdmiphy@145D0000 {
+ 		reg = <0x145D0000 0x20>;
+diff -Nur a/arch/arm/configs/odroidxu3_defconfig b/arch/arm/configs/odroidxu3_defconfig
+--- a/arch/arm/configs/odroidxu3_defconfig	2014-11-26 12:07:21.000000000 -0500
++++ b/arch/arm/configs/odroidxu3_defconfig	2015-01-19 12:30:06.251447730 -0500
+@@ -2368,6 +2368,7 @@
+ # CONFIG_VIDEO_EXYNOS_JPEG is not set
+ # CONFIG_VIDEO_EXYNOS_HX_JPEG is not set
+ # CONFIG_VIDEO_EXYNOS_TV is not set
++CONFIG_VIDEO_EXYNOS_HDMI_CEC=y
+ # CONFIG_VIDEO_TIMBERDALE is not set
+ # CONFIG_SOC_CAMERA is not set
+ # CONFIG_VIDEO_SAMSUNG_EXYNOS4_IS is not set
+diff -Nur a/drivers/media/platform/exynos/Makefile b/drivers/media/platform/exynos/Makefile
+--- a/drivers/media/platform/exynos/Makefile	2014-11-26 11:52:05.000000000 -0500
++++ b/drivers/media/platform/exynos/Makefile	2015-01-19 12:22:25.737024427 -0500
+@@ -9,4 +9,6 @@
+ obj-$(CONFIG_VIDEO_EXYNOS_JPEG)		+= jpeg4/
+ obj-$(CONFIG_VIDEO_EXYNOS_HX_JPEG)	+= jpeg_hx/
+ obj-$(CONFIG_VIDEO_EXYNOS_TV)		+= tv/
++obj-$(CONFIG_VIDEO_EXYNOS_HDMI_CEC)	+= s5p-hdmi_cec.o
++s5p-hdmi_cec-y				+= tv/hdmi_cec.o tv/hdmi_cec_ctrl.o
+ EXTRA_CLAGS += -Idrivers/media/video
+diff -Nur a/drivers/media/platform/exynos/tv/Kconfig b/drivers/media/platform/exynos/tv/Kconfig
+--- a/drivers/media/platform/exynos/tv/Kconfig	2014-11-26 11:52:05.000000000 -0500
++++ b/drivers/media/platform/exynos/tv/Kconfig	2015-01-19 12:21:28.709221192 -0500
+@@ -75,15 +75,6 @@
+ 	  Say Y here if you want support for the Mixer in Samsung S5P SoCs.
+ 	  This device produce image data to one of output interfaces.
+ 
+-config VIDEO_EXYNOS_HDMI_CEC
+-	tristate "Samsung HDMI CEC Driver"
+-	depends on VIDEO_DEV && VIDEO_V4L2 && I2C
+-	depends on VIDEO_EXYNOS_TV
+-	help
+-	  Say Y here if you want support for the HDMI CEC
+-	  interface in S5P Samsung SoC. The driver can be compiled
+-	  as module.
+-
+ config VIDEO_SAMSUNG_MEMSIZE_TV
+ 	int "Memory size in kbytes for TV"
+ 	depends on VIDEO_EXYNOS_MIXER && VIDEOBUF2_CMA_PHYS
+@@ -97,3 +88,11 @@
+ 	  Enables debugging for Mixer driver.
+ 
+ endif # VIDEO_EXYNOS_TV
++
++config VIDEO_EXYNOS_HDMI_CEC
++	tristate "Samsung HDMI CEC Driver"
++	depends on VIDEO_DEV && VIDEO_V4L2 && I2C
++	help
++	  Say Y here if you want support for the HDMI CEC
++	  interface in S5P Samsung SoC. The driver can be compiled
++	  as module.

@@ -1,12 +1,16 @@
 #!/bin/sh
 
 usage(){ 
-  echo "$0 U2|XU3 path/to/image|/dev/mmcblk0"
+  echo "$0 U2|XU3|C1 path/to/image|/dev/mmcblk0"
   exit
 }
 
 fuse() {
-  dd $UBOOT_FLAGS if=$1 of=$2 seek=$3 > /dev/null 2>&1 || error
+  if [ -z $6 ]; then
+    $(which dd) $UBOOT_FLAGS if=$1 of=$2 bs=$3 seek=$4 skip=$5
+  else
+    $(which dd) $UBOOT_FLAGS if=$1 of=$2 bs=$3 seek=$4 skip=$5 count=$6
+  fi
 }
 
 error() {
@@ -17,24 +21,34 @@ error() {
 [ -z $1 ] && usage
 [ -z $2 ] && usage
 
-if [ -z $INSTALL ]; then 
+if [ -z $INSTALL ]; then
   . $(dirname $0)/../../config/version
-  UBOOT_DIR="$(dirname $0)/../../$(basename $(ls -d $(dirname $0)/../../build.*${OPENELEC_VERSION}))/image/system/usr/share/bootloader"
+ # if [ -z $DEVICE -o -z $PROJECT ]; then
+ #   UBOOT_DIR="$(dirname $0)/../../$(basename $(ls -d $(dirname $0)/../../build.*${OPENELEC_VERSION}))/image/system/usr/share/bootloader"
+ # else
+    UBOOT_DIR="$(dirname $0)/../../$(basename $(ls -d $(dirname $0)/../../build.OpenELEC-Odroid.${1}.*${OPENELEC_VERSION}))/image/system/usr/share/bootloader"
+ # fi
 else
   UBOOT_DIR=$INSTALL/usr/share/bootloader
 fi
-UBOOT_FLAGS="bs=512 conv=notrunc"
+UBOOT_FLAGS="conv=notrunc" # status=none"
 
-BL1=1
-BL2=31
-UBOOT=63
-TZSW=2111
-
-echo "Fusing: BL1 for Odroid-$1"
-fuse $UBOOT_DIR/$1/bl1 $2 $BL1
-echo "Fusing: BL2 for Odroid-$1"
-fuse $UBOOT_DIR/$1/bl2 $2 $BL2
-echo "Fusing: U-Boot for Odroid-$1"
-fuse $UBOOT_DIR/$1/u-boot $2 $UBOOT
-echo "Fusing: TrustZone S/W for Odroid-$1"
-fuse $UBOOT_DIR/$1/tzsw $2 $TZSW
+case $1 in
+  U2|u2|U3|u3|xu3|XU3)
+    echo "Fusing: BL1 for Odroid $1"
+    fuse $UBOOT_DIR/bl1 $2 512 1 0
+    echo "Fusing: BL2 for Odroid $1"
+    fuse $UBOOT_DIR/bl2 $2 512 31 0
+    echo "Fusing: U-Boot for Odroid $1"
+    fuse $UBOOT_DIR/u-boot $2 512 63 0
+    echo "Fusing: TrustZone S/W for Odroid $1"
+    fuse $UBOOT_DIR/tzsw $2 512 2111 0
+    ;;
+  C1|c1)
+    echo "Fusing: BL1 for Odroid $1"
+    fuse $UBOOT_DIR/bl1 $2 1 0 0 442
+    fuse $UBOOT_DIR/bl1 $2 512 1 1
+    echo "Fusing: U-Boot for Odroid $1"
+    fuse $UBOOT_DIR/u-boot $2 512 64 0
+    ;;
+esac

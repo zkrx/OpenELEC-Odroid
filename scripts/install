@@ -76,9 +76,20 @@ fi
 mkdir -p $INSTALL
 
 if [ "$TARGET" = target ] ; then
+# install root (common) files then overwrite with package specific (Project, or Device) [(If found)]
+  if [ -d "$(find $ROOT/packages -type d -name $PKG_NAME 2>/dev/null)/profile.d" ] && [ "$(find $ROOT/packages -type d -name $PKG_NAME 2>/dev/null)" != "$PKG_DIR" ]; then
+    mkdir -p $INSTALL/etc/profile.d
+    cp $(find $ROOT/packages -type d -name $PKG_NAME 2>/dev/null)/profile.d/*.conf $INSTALL/etc/profile.d
+  fi
+
   if [ -d $PKG_DIR/profile.d ]; then
     mkdir -p $INSTALL/etc/profile.d
     cp $PKG_DIR/profile.d/*.conf $INSTALL/etc/profile.d/
+  fi
+
+  if [ -d "$(find $ROOT/packages -type d -name $PKG_NAME 2>/dev/null)/tmpfiles.d" ] && [ "$(find $ROOT/packages -type d -name $PKG_NAME 2>/dev/null)" != "$PKG_DIR" ]; then
+    mkdir -p $INSTALL/usr/lib/tmpfiles.d
+    cp $(find $ROOT/packages -type d -name $PKG_NAME 2>/dev/null)/tmpfiles.d/*.conf $INSTALL/usr/lib/tmpfiles.d
   fi
 
   if [ -d $PKG_DIR/tmpfiles.d ]; then
@@ -86,9 +97,19 @@ if [ "$TARGET" = target ] ; then
     cp $PKG_DIR/tmpfiles.d/*.conf $INSTALL/usr/lib/tmpfiles.d
   fi
 
+  if [ -d "$(find $ROOT/packages -type d -name $PKG_NAME 2>/dev/null)/system.d" ] && [ "$(find $ROOT/packages -type d -name $PKG_NAME 2>/dev/null)" != "$PKG_DIR" ]; then
+    mkdir -p $INSTALL/usr/lib/systemd/system
+    cp $(find $ROOT/packages -type d -name $PKG_NAME 2>/dev/null)/system.d/*.* $INSTALL/usr/lib/systemd/system
+  fi
+
   if [ -d $PKG_DIR/system.d ]; then
     mkdir -p $INSTALL/usr/lib/systemd/system
     cp $PKG_DIR/system.d/*.* $INSTALL/usr/lib/systemd/system
+  fi
+
+  if [ -d "$(find $ROOT/packages -type d -name $PKG_NAME 2>/dev/null)/udev.d" ] && [ "$(find $ROOT/packages -type d -name $PKG_NAME 2>/dev/null)" != "$PKG_DIR" ]; then
+    mkdir -p $INSTALL/usr/lib/udev/rules.d
+    cp $(find $ROOT/packages -type d -name $PKG_NAME 2>/dev/null)/udev.d/*.rules $INSTALL/usr/lib/udev/rules.d
   fi
 
   if [ -d $PKG_DIR/udev.d ]; then
@@ -96,9 +117,19 @@ if [ "$TARGET" = target ] ; then
     cp $PKG_DIR/udev.d/*.rules $INSTALL/usr/lib/udev/rules.d
   fi
 
+  if [ -d "$(find $ROOT/packages -type d -name $PKG_NAME 2>/dev/null)/sleep.d" ] && [ "$(find $ROOT/packages -type d -name $PKG_NAME 2>/dev/null)" != "$PKG_DIR" ]; then
+    mkdir -p $INSTALL/usr/lib/systemd/system-sleep
+    cp $(find $ROOT/packages -type d -name $PKG_NAME 2>/dev/null)/sleep.d/* $INSTALL/usr/lib/systemd/system-sleep
+  fi
+
   if [ -d $PKG_DIR/sleep.d ]; then
     mkdir -p $INSTALL/usr/lib/systemd/system-sleep/
     cp $PKG_DIR/sleep.d/* $INSTALL/usr/lib/systemd/system-sleep/
+  fi
+
+  if [ -d "$(find $ROOT/packages -type d -name $PKG_NAME 2>/dev/null)/sleep.d.serial" ] && [ "$(find $ROOT/packages -type d -name $PKG_NAME 2>/dev/null)" != "$PKG_DIR" ]; then
+    mkdir -p $INSTALL/usr/lib/systemd/system-sleep.serial
+    cp $(find $ROOT/packages -type d -name $PKG_NAME 2>/dev/null)/sleep.d.serial/* $INSTALL/usr/lib/systemd/system-sleep.serial
   fi
 
   if [ -d $PKG_DIR/sleep.d.serial ]; then
@@ -106,9 +137,19 @@ if [ "$TARGET" = target ] ; then
     cp $PKG_DIR/sleep.d.serial/* $INSTALL/usr/lib/systemd/system-sleep.serial
   fi
 
+  if [ -d "$(find $ROOT/packages -type d -name $PKG_NAME 2>/dev/null)/sysctl.d" ] && [ "$(find $ROOT/packages -type d -name $PKG_NAME 2>/dev/null)" != "$PKG_DIR" ]; then
+    mkdir -p $INSTALL/usr/lib/sysctl.d
+    cp $(find $ROOT/packages -type d -name $PKG_NAME 2>/dev/null)/sysctl.d/*.conf $INSTALL/usr/lib/sysctl.d
+  fi
+
   if [ -d $PKG_DIR/sysctl.d ]; then
     mkdir -p $INSTALL/usr/lib/sysctl.d/
     cp $PKG_DIR/sysctl.d/*.conf $INSTALL/usr/lib/sysctl.d/
+  fi
+
+  if [ -d "$(find $ROOT/packages -type d -name $PKG_NAME 2>/dev/null)/modules-load.d" ] && [ "$(find $ROOT/packages -type d -name $PKG_NAME 2>/dev/null)" != "$PKG_DIR" ]; then
+    mkdir -p $INSTALL/usr/lib/modules-load.d
+    cp $(find $ROOT/packages -type d -name $PKG_NAME 2>/dev/null)/modules-load.d/*.conf $INSTALL/usr/lib/modules-load.d
   fi
 
   if [ -d $PKG_DIR/modules-load.d ]; then
@@ -116,14 +157,29 @@ if [ "$TARGET" = target ] ; then
     cp $PKG_DIR/modules-load.d/*.conf $INSTALL/usr/lib/modules-load.d/
   fi
 
+  if [ -d "$(find $ROOT/packages -type d -name $PKG_NAME 2>/dev/null)/sysconf.d" ] && [ "$(find $ROOT/packages -type d -name $PKG_NAME 2>/dev/null)" != "$PKG_DIR" ]; then
+    mkdir -p $INSTALL/etc/sysconf.d
+    cp $(find $ROOT/packages -type d -name $PKG_NAME 2>/dev/null)/sysconf.d/*.conf $INSTALL/etc/sysconf.d
+  fi
+
   if [ -d $PKG_DIR/sysconf.d ]; then
     mkdir -p $INSTALL/etc/sysconf.d
     cp $PKG_DIR/sysconf.d/*.conf $INSTALL/etc/sysconf.d
   fi
 
+  if [ -d "$(find $ROOT/packages -type d -name $PKG_NAME 2>/dev/null)/debug.d" ] && [ "$(find $ROOT/packages -type d -name $PKG_NAME 2>/dev/null)" != "$PKG_DIR" ]; then
+    mkdir -p $INSTALL/usr/share/debugconf
+    cp $(find $ROOT/packages -type d -name $PKG_NAME 2>/dev/null)/debug.d/*.conf $INSTALL/usr/share/debugconf
+  fi
+
   if [ -d $PKG_DIR/debug.d ]; then
     mkdir -p $INSTALL/usr/share/debugconf
       cp $PKG_DIR/debug.d/*.conf $INSTALL/usr/share/debugconf
+  fi
+
+  if [ -d "$(find $ROOT/packages -type d -name $PKG_NAME 2>/dev/null)/modprobe.d" ] && [ "$(find $ROOT/packages -type d -name $PKG_NAME 2>/dev/null)" != "$PKG_DIR" ]; then
+    mkdir -p $INSTALL/lib/modprobe.d
+    cp $(find $ROOT/packages -type d -name $PKG_NAME 2>/dev/null)/modprobe.d/*.conf $INSTALL/lib/modprobe.d
   fi
 
   if [ -d $PKG_DIR/modprobe.d ]; then

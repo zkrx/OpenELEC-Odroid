@@ -1,3 +1,4 @@
+#!/bin/bash
 set -e
 
 . config/functions
@@ -19,7 +20,11 @@ set -e
 HOST_NAME=`$LOCAL_CC -dumpmachine`
 TARGET_NAME=$(echo $TARGET_SUBARCH | sed -e "s,-,,")-openelec-linux-gnu${TARGET_ABI}
 
-BUILD=$BUILD_BASE.$DISTRONAME-$PROJECT.$TARGET_ARCH-$OPENELEC_VERSION
+if [ -n "$DEVICE" ]; then
+  BUILD=$BUILD_BASE.$DISTRONAME-$PROJECT.$DEVICE.$TARGET_ARCH-$OPENELEC_VERSION
+else
+  BUILD=$BUILD_BASE.$DISTRONAME-$PROJECT.$TARGET_ARCH-$OPENELEC_VERSION
+fi
 TARGET_IMG=$ROOT/$TARGET
 TARGET_ADDONS="$TARGET_IMG/$ADDONS/$ADDON_PATH"
 ADDON_BUILD="$BUILD/$ADDONS/$1"
@@ -69,7 +74,24 @@ SED="sed -i"
     _FOUND=0
     PKG_DIR=""
 
-    # first check project folder for a package
+    # first check project device folder for a package
+    for DIR in $(find $ROOT/projects/$PROJECT/devices/$DEVICE/packages -type d -name $_PKG_ROOT_NAME 2>/dev/null); do
+      if [ -r "$DIR/package.mk" ]; then
+        # found first, set $PKG_DIR
+        PKG_DIR="$DIR"
+        # keep track of dirs with package.mk for detecting multiple folders
+        _ALL_DIRS="${_ALL_DIRS}${DIR}\\n"
+        _FOUND=$((_FOUND+1))
+        if [ $_FOUND -gt 1 ]; then
+          # _FOUND more ? fail
+          echo "Error - multiple package folders:"
+          echo -e "$_ALL_DIRS"
+          exit 1
+        fi
+      fi
+    done
+
+    # next check project folder for a package
     for DIR in $(find $ROOT/projects/$PROJECT/packages -type d -name $_PKG_ROOT_NAME 2>/dev/null); do
       if [ -r "$DIR/package.mk" ]; then
         # found first, set $PKG_DIR

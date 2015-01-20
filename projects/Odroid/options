@@ -2,15 +2,11 @@
 # setup system defaults
 ################################################################################
 
-  # The TARGET_CPU variable controls which processor should be targeted for
-  # generated code.
-    case $TARGET_ARCH in
-      arm|ARM)
-        TARGET_CPU="cortex-a9"
-        TARGET_FLOAT="hard"
-        TARGET_FPU="neon"
-        ;;
-    esac
+  # Setup controls which processor should be targeted for generated code.
+    TARGET_ARCH=arm
+    TARGET_CPU="cortex-a9"
+    TARGET_FLOAT="hard"
+    TARGET_FPU="neon"
 
   # Bootloader to use (syslinux / u-boot)
     BOOTLOADER="u-boot"
@@ -24,6 +20,9 @@
   # Target Configfile for u-boot
     UBOOT_CONFIGFILE=""
 
+  # Kernel config file
+    KERNEL_CFG_FILE=""
+
   # Kernel target for u-boot (default 'uImage' if BOOTLOADER=u-boot) (uImage / zImage)
     KERNEL_UBOOT_TARGET="zImage"
 
@@ -32,10 +31,6 @@
 
   # Additional kernel make parameters (for example to specify the u-boot loadaddress)
     KERNEL_MAKE_EXTRACMD=""
-
-  # Kernel to use. values can be:
-  # default:  default mainline kernel odroid
-    LINUX="odroid"
 
 
 ################################################################################
@@ -68,22 +63,8 @@
   # OpenGL(X) implementation to use : Override
     OPENGL="no"
 
-  # OpenGL-ES implementation to use : Override
-    OPENGLES="mali-x11"
-
   # include uvesafb support : Override
     UVESAFB_SUPPORT="no"
-
-  # Displayserver to use : Override
-    DISPLAYSERVER="x11"
-
-  # Windowmanager to use : Override
-    WINDOWMANAGER="none"
-
-  # Xorg Graphic drivers to use (all / i915,i965,r200,r300,r600,nvidia,nouveau)
-  # Space separated list is supported,
-  # e.g. GRAPHIC_DRIVERS="i915 i965 r300 r600 radeonsi nvidia nouveau"
-    GRAPHIC_DRIVERS="armsoc"
 
   # LCD driver to Use : Override
     LCD_DRIVER="none"
@@ -97,18 +78,8 @@
   # build and install OpenVPN support : Override
     OPENVPN_SUPPORT="no"
 
-  # KODI Player implementation to use : Override
-    KODIPLAYER_DRIVER="odroid-mfc"
-
-  # Auto resize of Storage partition (during build of SD image) (yes / no) : Additional
-    RESIZE="no"
-
-  # Set which boot.scr file we want to default : Additional
-  # {720p,720p-noedid,1080p,1080p-noedid,auto,debug}
-    DEFAULT_SCR=auto
-
   # Distribution Specific source location : Additional
-    ODROID_MIRROR="http://freeweb.mine.nu/zalaare"
+    ODROID_MIRROR="http://zalaare.homenet.org/odroid"
 
   # set the addon dirs : Override
     ADDON_PATH="$ADDON_VERSION/Cuboxi/$TARGET_ARCH"
@@ -116,4 +87,3 @@
 
   # Testpackages for development (yes / no) : Override
     TESTING="yes"
-

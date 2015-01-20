@@ -20,7 +20,7 @@
 ################################################################################
 
 usage() {
-  echo "$0 XU3|U2"
+  echo "$0 XU3|U2|C1"
   echo " ex. $0 XU3"
   exit 1
 }
@@ -48,9 +48,10 @@ echo "getting sources..."
   git reset --hard
   git clean -fdx
   case $1 in
-    XU3|xu3) git checkout -m odroidxu3-v2012.07 ; BUILD=xu3 ;;
-    U2|U3|u2|u3) git checkout -m odroid-v2010.12 ; BUILD=u2 ;;
-    experimental|ex|ng) git checkout -m master ; BUILD=ng ;;
+    XU3|xu3) git checkout -m odroidxu3-v2012.07 ;;
+    U2|U3|u2|u3) git checkout -m odroid-v2010.12 ;;
+    C1|c1) git checkout -m odroidc-v2011.03 ;;
+    experimental|ex|ng) git checkout -m master ;;
   esac
   git pull
   [ -n $2 ] && git reset --hard $2
@@ -62,16 +63,15 @@ echo "getting sources..."
 echo "copying sources..."
   rm -rf u-boot-$VERSION
   case $NG in
-    0) cp -a u-boot-odroid u-boot-odroid-$BUILD-$VERSION ;;
-    1) cp -a u-boot-odroid-ng u-boot-odroid-$BUILD-$VERSION ;;
+    0) cp -a u-boot-odroid u-boot-$VERSION ;;
+    1) cp -a u-boot-odroid-ng u-boot-$VERSION ;;
   esac
 
 echo "cleaning sources..."
-  rm -rf u-boot-odroid-$BUILD-$VERSION/.git
+  rm -rf u-boot-$VERSION/.git
 
 echo "packing sources..."
-  tar cJf u-boot-odroid-$BUILD-$VERSION.tar.xz u-boot-odroid-$BUILD-$VERSION
+  tar cJf u-boot-$VERSION.tar.xz u-boot-$VERSION
 
 echo "remove temporary sourcedir..."
-  rm -rf u-boot-odroid-$BUILD-$VERSION
-
+  rm -rf u-boot-$VERSION
