@@ -79,7 +79,7 @@
     OPENVPN_SUPPORT="no"
 
   # Distribution Specific source location : Additional
-    ODROID_MIRROR="http://zalaare.homenet.org/odroid"
+    ODROID_MIRROR="http://freeweb.mine.nu/zalaare/"
 
   # set the addon dirs : Override
     ADDON_PATH="$ADDON_VERSION/Cuboxi/$TARGET_ARCH"
