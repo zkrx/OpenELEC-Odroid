@@ -45,6 +45,14 @@ make_target() {
 }
 
 makeinstall_target() {
+  mkdir -p $ROOT/$TOOLCHAIN/bin
+
+  if [ -f build/tools/mkimage ]; then
+    cp build/tools/mkimage $ROOT/$TOOLCHAIN/bin
+  elif [ -f tools/mkimage ]; then
+    cp tools/mkimage $ROOT/$TOOLCHAIN/bin
+  fi
+
   mkdir -p $INSTALL/usr/share/bootloader
 
   for f in bl1.bin.hardkernel bl2.bin.hardkernel.1mb_uboot tzsw.bin.hardkernel; do
