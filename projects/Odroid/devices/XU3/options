@@ -2,20 +2,29 @@
 # setup system defaults
 ################################################################################
 
+  # Setup controls which processor should be targeted for generated code. : Override
+    TARGET_ARCH=arm
+    TARGET_CPU="cortex-a15.cortex-a7"
+    TARGET_FLOAT="hard"
+    TARGET_FPU="neon"
+
   # u-boot version to use (default)
     UBOOT_VERSION="default"
 
   # Configuration for u-boot
-    UBOOT_CONFIG="smdk4412_config"
+    UBOOT_CONFIG="odroid_config"
 
   # Target Configfile for u-boot
     UBOOT_CONFIGFILE="boot.ini"
 
   # Kernel config file
-    KERNEL_CFG_FILE="odroidu_defconfig"
+    KERNEL_CFG_FILE="odroidxu3_defconfig"
 
   # Kernel target for u-boot (default 'uImage' if BOOTLOADER=u-boot) (uImage / zImage)
     KERNEL_UBOOT_TARGET="zImage"
+
+  # Additional kernel make parameters (for example to specify the u-boot loadaddress)
+    KERNEL_MAKE_EXTRACMD="dtbs"
 
 ################################################################################
 # setup project defaults/overrides
