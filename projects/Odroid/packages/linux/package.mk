@@ -17,7 +17,11 @@
 ################################################################################
 
 PKG_NAME="linux"
-PKG_VERSION="3.10.43+91dc53e"
+case $DEVICE in
+  U2)  PKG_VERSION="3.8.13+0c5ca23" ;;
+  XU3) PKG_VERSION="3.10.60+d37e8a3" ;;
+  C1)  PKG_VERSION="3.10.65+c0ca589" ;;
+esac
 PKG_URL="$ODROID_MIRROR/$PKG_NAME-$PKG_VERSION.tar.xz"
 PKG_REV="1"
 PKG_ARCH="any"
@@ -169,7 +173,7 @@ make_target() {
 makeinstall_target() {
   if [ "$BOOTLOADER" = "u-boot" -a -f "$(ls arch/arm/boot/dts/*.dtb 2>/dev/null)" ]; then
     mkdir -p $INSTALL/usr/share/bootloader
-      cp arch/arm/boot/dts/*.dtb $INSTALL/usr/share/bootloader/dtb
+      cp arch/arm/boot/dts/*.dtb $INSTALL/usr/share/bootloader
   fi
 
   if [ "$PERF_SUPPORT" = "yes" -a "$DEVTOOLS" = "yes" ]; then
@@ -208,6 +212,7 @@ makeinstall_init() {
 }
 
 post_install() {
+  [ "$DEVICE" = U2 ] && ln -sfn /storage/.config/smsc95xx_mac_addr $INSTALL/etc/smsc95xx_mac_addr
   mkdir -p $INSTALL/lib/firmware/
     ln -sfn /storage/.config/firmware/ $INSTALL/lib/firmware/updates
 }
