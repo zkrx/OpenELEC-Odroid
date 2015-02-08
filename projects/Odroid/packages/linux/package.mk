@@ -111,7 +111,7 @@ post_patch() {
 }
 
 makeinstall_host() {
-  make ARCH=$TARGET_ARCH INSTALL_HDR_PATH=dest headers_install
+  make ARCH=$TARGET_ARCH INSTALL_HDR_PATH=dest headers_install || :
   mkdir -p $SYSROOT_PREFIX/usr/include
     cp -R dest/include/* $SYSROOT_PREFIX/usr/include
 }
