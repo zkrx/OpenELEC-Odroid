@@ -32,7 +32,6 @@ if [ $(basename "$0") = "gputemp" -o "$1" = "gpu" ]; then
 fi
 
 if [ "$1" = "cpu" -o "$TEMP" = "0" ]; then
-
   # used with coretemp
   for hwmon in hwmon0 hwmon1; do
     for temp in temp1 temp2; do
@@ -66,9 +65,13 @@ if [ "$1" = "cpu" -o "$TEMP" = "0" ]; then
     TEMP=`cat /sys/devices/virtual/thermal/thermal_zone0/temp`
   fi
 
-  # used on RaspberryPi
+  # used on RaspberryPi | Odroid C1
   if [ "$TEMP" = "0" -a -f /sys/class/thermal/thermal_zone0/temp ]; then
     TEMP=`cat /sys/class/thermal/thermal_zone0/temp`
+  fi
+
+  if [ "${#TEMP}" = "2" ]; then
+    TEMP="$(( $TEMP * 1000 ))"
   fi
 
   TEMP="$(( $TEMP / 1000 ))"
