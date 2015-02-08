@@ -72,9 +72,6 @@
   # additional Firmware to use : Additional
     FIRMWARE="$FIRMWARE rtlnic-firmware samsung-firmware wlan-firmware"
 
-  # build with afpfs-ng support (mounting AFP shares with KODI) (yes / no) : Override
-    KODI_AFP_SUPPORT="yes"
-
   # build and install PPP support : Override
     PPTP_SUPPORT="no"
 
@@ -82,7 +79,7 @@
     OPENVPN_SUPPORT="no"
 
   # Distribution Specific source location : Additional
-    ODROID_MIRROR="http://freeweb.mine.nu/zalaare/"
+    ODROID_MIRROR="http://freeweb.mine.nu/zalaare"
 
   # set the addon dirs : Override
     ADDON_PATH="$ADDON_VERSION/Cuboxi/$TARGET_ARCH"
