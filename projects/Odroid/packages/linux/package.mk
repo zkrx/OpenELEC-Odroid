@@ -110,6 +110,10 @@ post_patch() {
   make -C $PKG_BUILD oldconfig
 }
 
+make_host() {
+  make ARCH=$TARGET_ARCH headers_check || :
+}
+
 makeinstall_host() {
   make ARCH=$TARGET_ARCH INSTALL_HDR_PATH=dest headers_install || :
   mkdir -p $SYSROOT_PREFIX/usr/include
