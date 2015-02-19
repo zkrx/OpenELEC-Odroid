@@ -23,7 +23,7 @@ case "$LINUX" in
     PKG_URL="$DISTRO_SRC/$PKG_NAME-$PKG_VERSION.tar.xz"
     ;;
   3.18)
-    PKG_VERSION="3.18.5"
+    PKG_VERSION="3.18.6"
     PKG_URL="http://www.kernel.org/pub/linux/kernel/v3.x/$PKG_NAME-$PKG_VERSION.tar.xz"
     ;;
   *)
@@ -188,6 +188,16 @@ makeinstall_target() {
     mkdir -p $INSTALL/usr/share/bootloader/$PROJECT
     for dtb in arch/arm/boot/dts/*.dtb; do
       cp $dtb $INSTALL/usr/share/bootloader/$PROJECT/DTB 2>/dev/null || :
+    done
+  elif [ "$BOOTLOADER" = "bcm2835-bootloader" ]; then
+    mkdir -p $INSTALL/usr/share/bootloader/overlays
+    touch $INSTALL/usr/share/bootloader/overlays/README.TXT
+    for dtb in arch/arm/boot/dts/*.dtb; do
+      if `echo "$dtb" | grep ".*/bcm2[^/]*$" >/dev/null`; then
+        cp $dtb $INSTALL/usr/share/bootloader 2>/dev/null || :
+      else
+        cp $dtb $INSTALL/usr/share/bootloader/overlays 2>/dev/null || :
+      fi
     done
   elif [ "$BOOTLOADER" = "bcm2835-bootloader" ]; then
     mkdir -p $INSTALL/usr/share/bootloader/overlays
