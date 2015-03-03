@@ -72,6 +72,12 @@
   # additional Firmware to use : Additional
     FIRMWARE="$FIRMWARE rtlnic-firmware samsung-firmware wlan-firmware"
 
+  # additional drivers to install:
+  # for a list of additinoal drivers see packages/linux-drivers
+  # Space separated list is supported,
+  # e.g. ADDITIONAL_DRIVERS="DRIVER1 DRIVER2"
+    ADDITIONAL_DRIVERS="dvbhdhomerun"
+
   # build and install PPP support : Override
     PPTP_SUPPORT="no"
 
