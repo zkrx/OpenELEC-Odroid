@@ -6,7 +6,7 @@
     UBOOT_VERSION="default"
 
   # Configuration for u-boot
-    UBOOT_CONFIG="smdk4412_config"
+    UBOOT_CONFIG="odroid_defconfig"
 
   # Target Configfile for u-boot
     UBOOT_CONFIGFILE="boot.ini"
