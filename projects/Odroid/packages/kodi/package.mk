@@ -17,7 +17,7 @@
 ################################################################################
 
 PKG_NAME="kodi"
-PKG_VERSION="14-b5dbdb5"
+PKG_VERSION="14-085163e"
 PKG_REV="1"
 PKG_ARCH="any"
 PKG_LICENSE="GPL"
@@ -82,14 +82,6 @@ if [ "$ALSA_SUPPORT" = yes ]; then
   KODI_ALSA="--enable-alsa"
 else
   KODI_ALSA="--disable-alsa"
-fi
-
-if [ "$PULSEAUDIO_SUPPORT" = yes ]; then
-# for PulseAudio support
-  PKG_DEPENDS_TARGET="$PKG_DEPENDS_TARGET pulseaudio"
-  KODI_PULSEAUDIO="--enable-pulse"
-else
-  KODI_PULSEAUDIO="--disable-pulse"
 fi
 
 if [ "$ESPEAK_SUPPORT" = yes ]; then
@@ -309,7 +301,7 @@ PKG_CONFIGURE_OPTS_TARGET="gl_cv_func_gettimeofday_clobber=no \
                            $KODI_XORG \
                            --disable-ccache \
                            $KODI_ALSA \
-                           $KODI_PULSEAUDIO \
+                           --disable-pulse \
                            --enable-rtmp \
                            $KODI_SAMBA \
                            $KODI_NFS \
@@ -403,8 +395,7 @@ post_makeinstall_target() {
 
   mkdir -p $INSTALL/usr/lib/kodi
     cp $PKG_DIR/scripts/kodi-config $INSTALL/usr/lib/kodi
-    cp $PKG_DIR/scripts/kodi-hacks $INSTALL/usr/lib/kodi
-    cp $PKG_DIR/scripts/kodi-sources $INSTALL/usr/lib/kodi
+    cp $PKG_DIR/scripts/kodi.sh $INSTALL/usr/lib/kodi
 
   mkdir -p $INSTALL/usr/lib/openelec
     cp $PKG_DIR/scripts/systemd-addon-wrapper $INSTALL/usr/lib/openelec
@@ -441,8 +432,11 @@ post_makeinstall_target() {
   mkdir -p $INSTALL/usr/lib/python"$PYTHON_VERSION"/site-packages/kodi
     cp -R tools/EventClients/lib/python/* $INSTALL/usr/lib/python"$PYTHON_VERSION"/site-packages/kodi
 
-# install project specific configs
   mkdir -p $INSTALL/usr/share/kodi/config
+    cp $PKG_DIR/config/guisettings.xml $INSTALL/usr/share/kodi/config
+    cp $PKG_DIR/config/sources.xml $INSTALL/usr/share/kodi/config
+
+# install project specific configs
     if [ -f $PROJECT_DIR/$PROJECT/devices/$DEVICE/kodi/guisettings.xml ]; then
       cp -R $PROJECT_DIR/$PROJECT/devices/$DEVICE/kodi/guisettings.xml $INSTALL/usr/share/kodi/config
     elif [ -f $PROJECT_DIR/$PROJECT/kodi/guisettings.xml ]; then
@@ -457,18 +451,18 @@ post_makeinstall_target() {
 
   mkdir -p $INSTALL/usr/share/kodi/system/
     if [ -f $PROJECT_DIR/$PROJECT/devices/$DEVICE/kodi/advancedsettings.xml ]; then
-      cp $PROJECT_DIR/$PROJECT/devices/$DEVICE/kodi/advancedsettings.xml $INSTALL/usr/share/kodi/system/
+      cp -R $PROJECT_DIR/$PROJECT/devices/$DEVICE/kodi/advancedsettings.xml $INSTALL/usr/share/kodi/system/
     elif [ -f $PROJECT_DIR/$PROJECT/kodi/advancedsettings.xml ]; then
-      cp $PROJECT_DIR/$PROJECT/kodi/advancedsettings.xml $INSTALL/usr/share/kodi/system/
+      cp -R $PROJECT_DIR/$PROJECT/kodi/advancedsettings.xml $INSTALL/usr/share/kodi/system/
     else
       cp $PKG_DIR/config/advancedsettings.xml $INSTALL/usr/share/kodi/system/
     fi
 
   mkdir -p $INSTALL/usr/share/kodi/system/settings
     if [ -f $PROJECT_DIR/$PROJECT/devices/$DEVICE/kodi/appliance.xml ]; then
-      cp $PROJECT_DIR/$PROJECT/devices/$DEVICE/kodi/appliance.xml $INSTALL/usr/share/kodi/system/settings
+      cp -R $PROJECT_DIR/$PROJECT/devices/$DEVICE/kodi/appliance.xml $INSTALL/usr/share/kodi/system/settings
     elif [ -f $PROJECT_DIR/$PROJECT/kodi/appliance.xml ]; then
-      cp $PROJECT_DIR/$PROJECT/kodi/appliance.xml $INSTALL/usr/share/kodi/system/settings
+      cp -R $PROJECT_DIR/$PROJECT/kodi/appliance.xml $INSTALL/usr/share/kodi/system/settings
     else
       cp $PKG_DIR/config/appliance.xml $INSTALL/usr/share/kodi/system/settings
     fi
@@ -490,8 +484,6 @@ post_install() {
 # enable default services
   enable_service kodi-autostart.service
   enable_service kodi-cleanlogs.service
-  enable_service kodi-hacks.service
-  enable_service kodi-sources.service
   enable_service kodi-halt.service
   enable_service kodi-poweroff.service
   enable_service kodi-reboot.service
