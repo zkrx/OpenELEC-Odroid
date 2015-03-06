@@ -27,7 +27,7 @@ PKG_REV="1"
 PKG_ARCH="any"
 PKG_LICENSE="GPL"
 PKG_SITE="http://www.kernel.org"
-PKG_DEPENDS_HOST="ccache:host"
+PKG_DEPENDS_HOST="linux-api-headers:host"
 PKG_DEPENDS_TARGET="toolchain cpio:host kmod:host pciutils xz:host wireless-regdb"
 PKG_DEPENDS_INIT="toolchain"
 PKG_NEED_UNPACK="$LINUX_DEPENDS"
@@ -111,13 +111,11 @@ post_patch() {
 }
 
 make_host() {
-  make ARCH=$TARGET_ARCH headers_check || :
+  : # do nothing
 }
 
 makeinstall_host() {
-  make ARCH=$TARGET_ARCH INSTALL_HDR_PATH=dest headers_install || :
-  mkdir -p $SYSROOT_PREFIX/usr/include
-    cp -R dest/include/* $SYSROOT_PREFIX/usr/include
+  : # do nothing
 }
 
 pre_make_target() {
