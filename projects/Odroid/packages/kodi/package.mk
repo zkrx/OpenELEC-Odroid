@@ -251,7 +251,7 @@ fi
 
 if [ ! "$KODIPLAYER_DRIVER" = default ]; then
   if [ "$KODIPLAYER_DRIVER" = odroid-mfc ]; then
-    KODI_CODEC="--enable-codec=mfc"
+    KODI_CODEC="--enable-codec=mfc --enable-mfc"
   elif [ "$KODIPLAYER_DRIVER" = odroid-amcodec ]; then
     KODI_CODEC="--enable-codec=amcodec"
   fi
