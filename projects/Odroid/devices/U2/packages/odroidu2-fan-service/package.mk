@@ -21,7 +21,6 @@ PKG_VERSION="1.0.8"
 PKG_REV="1"
 PKG_ARCH="arm"
 PKG_LICENSE="other"
-#PKG_SITE="http://www.lzop.org"
 PKG_URL="https://github.com/nfstry/odroidu2-fan-service/archive/$PKG_NAME-$PKG_VERSION.tar.gz"
 PKG_SOURCE_DIR="$PKG_NAME-$PKG_NAME-$PKG_VERSION"
 PKG_HOST_DEPENDS_TARGET="toolchain"
@@ -32,9 +31,7 @@ PKG_LONGDESC="enables control of the fan for odroid"
 
 PKG_IS_ADDON="no"
 PKG_AUTORECONF="no"
- 
 
-
-post_install() { 
+post_install() {
   enable_service fancontrol.service
 }
