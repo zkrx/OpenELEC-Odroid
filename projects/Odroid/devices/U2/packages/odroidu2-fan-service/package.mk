@@ -32,6 +32,9 @@ PKG_LONGDESC="enables control of the fan for odroid"
 PKG_IS_ADDON="no"
 PKG_AUTORECONF="no"
 
-post_install() {
+makeinstall_target() {
+  install -D -m 0644 ubuntu_service/fancontrol.service $INSTALL/usr/lib/systemd/system/fancontrol.service
+  install -D -m 0755 odroidu2-fan $INSTALL/bin/odroidu2-fan
+
   enable_service fancontrol.service
 }
