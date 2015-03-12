@@ -87,5 +87,6 @@
   # set the addon server
     ADDON_SERVER_URL="https://raw.github.com/zalaare/OpenELEC-Odroid-Addons"
 
-  # Testpackages for development (yes / no) : Override
-    TESTING="yes"
+  # OEM packages for OEM's (yes / no)
+    OEM_SUPPORT="yes"
+
