@@ -26,16 +26,8 @@ case "$LINUX" in
     PKG_VERSION="cuboxi-3.14-dc5edb8"
     PKG_URL="$DISTRO_SRC/$PKG_NAME-$PKG_VERSION.tar.xz"
     ;;
-  3.18)
-    PKG_VERSION="3.18.5"
-    PKG_URL="http://www.kernel.org/pub/linux/kernel/v3.x/$PKG_NAME-$PKG_VERSION.tar.xz"
-    ;;
   *)
-<<<<<<< HEAD
-    PKG_VERSION="3.17.8"
-=======
-    PKG_VERSION="3.19"
->>>>>>> upstream/master
+    PKG_VERSION="3.19.1"
     PKG_URL="http://www.kernel.org/pub/linux/kernel/v3.x/$PKG_NAME-$PKG_VERSION.tar.xz"
     ;;
 esac
@@ -55,19 +47,6 @@ PKG_LONGDESC="This package contains a precompiled kernel image and the modules."
 PKG_IS_ADDON="no"
 PKG_AUTORECONF="no"
 
-<<<<<<< HEAD
-if [ "$PROJECT" = Odroid ]; then
-  if [ -f "$STAMPS/$PKG_NAME/build_host" ]; then
-    exit
-  fi
-fi
-
-if [ "$PERF_SUPPORT" = "yes" -a "$DEVTOOLS" = "yes" ]; then
-  PKG_DEPENDS_TARGET="$PKG_DEPENDS_TARGET elfutils Python"
-fi
-
-=======
->>>>>>> upstream/master
 PKG_MAKE_OPTS_HOST="ARCH=$TARGET_ARCH headers_check"
 
 if [ "$BOOTLOADER" = "u-boot" ]; then
@@ -169,23 +148,14 @@ make_target() {
 
 makeinstall_target() {
   if [ "$BOOTLOADER" = "u-boot" ]; then
-    mkdir -p $INSTALL/usr/share/bootloader/$PROJECT
+    mkdir -p $INSTALL/usr/share/bootloader
     for dtb in arch/arm/boot/dts/*.dtb; do
-      cp $dtb $INSTALL/usr/share/bootloader/$PROJECT/DTB 2>/dev/null || :
-    done
-  elif [ "$BOOTLOADER" = "bcm2835-bootloader" ]; then
-    mkdir -p $INSTALL/usr/share/bootloader/overlays
-    touch $INSTALL/usr/share/bootloader/overlays/README.TXT
-    for dtb in arch/arm/boot/dts/*.dtb; do
-<<<<<<< HEAD
-=======
       cp $dtb $INSTALL/usr/share/bootloader 2>/dev/null || :
     done
   elif [ "$BOOTLOADER" = "bcm2835-bootloader" ]; then
     mkdir -p $INSTALL/usr/share/bootloader/overlays
     touch $INSTALL/usr/share/bootloader/overlays/README.TXT
     for dtb in arch/arm/boot/dts/*.dtb; do
->>>>>>> upstream/master
       if `echo "$dtb" | grep ".*/bcm2[^/]*$" >/dev/null`; then
         cp $dtb $INSTALL/usr/share/bootloader 2>/dev/null || :
       else
