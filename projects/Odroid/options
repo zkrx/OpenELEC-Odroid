@@ -87,3 +87,5 @@
   # OEM packages for OEM's (yes / no)
     OEM_SUPPORT="yes"
 
+  # build with installer (yes / no)
+    INSTALLER_SUPPORT="no"
