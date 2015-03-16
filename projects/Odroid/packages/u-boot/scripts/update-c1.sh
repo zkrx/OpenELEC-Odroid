@@ -46,10 +46,10 @@ fi
 
 echo "*** updating u-boot for Odroid on: $BOOT_DISK ..."
 
-#dd bs=512 if=$SYSTEM_ROOT/usr/share/bootloader/bl1 of=$BOOT_DISK seek=1
-#dd bs=512 if=$SYSTEM_ROOT/usr/share/bootloader/bl2 of=$BOOT_DISK seek=31
+dd bs=512 if=$SYSTEM_ROOT/usr/share/bootloader/bl1 of=$BOOT_DISK seek=1
+dd bs=512 if=$SYSTEM_ROOT/usr/share/bootloader/bl2 of=$BOOT_DISK seek=31
 dd bs=512 if=$SYSTEM_ROOT/usr/share/bootloader/u-boot of=$BOOT_DISK seek=63
-#dd bs=512 if=$SYSTEM_ROOT/usr/share/bootloader/tzsw of=$BOOT_DISK seek=2111
+dd bs=512 if=$SYSTEM_ROOT/usr/share/bootloader/tzsw of=$BOOT_DISK seek=2111
 
 # mount $BOOT_ROOT r/o
   sync

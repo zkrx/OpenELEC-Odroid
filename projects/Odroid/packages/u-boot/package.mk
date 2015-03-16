@@ -23,7 +23,7 @@ PKG_URL="$ODROID_MIRROR/$PKG_NAME-$PKG_VERSION.tar.xz"
 PKG_REV="1"
 PKG_ARCH="arm"
 PKG_LICENSE="GPL"
-PKG_DEPENDS_TARGET="toolchain dtc:host"
+PKG_DEPENDS_TARGET="dtc:host hk-bootloader"
 PKG_PRIORITY="optional"
 PKG_SECTION="tools"
 PKG_SHORTDESC="u-boot: Universal Bootloader project"
@@ -55,13 +55,12 @@ makeinstall_target() {
 
   mkdir -p $INSTALL/usr/share/bootloader
 
-  #for f in bl1.HardKernel bl2.HardKernel tzsw.HardKernel; do
-  #  cp -PRv $ROOT/$PKG_BUILD/sd_fuse/$f $INSTALL/usr/share/bootloader/${f/.*}
-  #done
-
   if [ -f "./u-boot.bin" ]; then
     cp -PRv ./u-boot.bin $INSTALL/usr/share/bootloader/u-boot
   fi 
 
-  cp -PRv $PKG_DIR/scripts/update.sh $INSTALL/usr/share/bootloader
+  case $DEVICE in
+    U2|XU3) cp -PRv $PKG_DIR/scripts/update-u2.sh $INSTALL/usr/share/bootloader/update.sh ;;
+    C1)     cp -PRv $PKG_DIR/scripts/update-c1.sh $INSTALL/usr/share/bootloader/update.sh ;;
+  esac
 }

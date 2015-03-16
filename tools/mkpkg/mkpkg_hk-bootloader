@@ -1,0 +1,107 @@
+#!/bin/bash
+
+################################################################################
+#      This file is part of OpenELEC - http://www.openelec.tv
+#      Copyright (C) 2009-2012 Stephan Raue (stephan@openelec.tv)
+#
+#  This Program is free software; you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation; either version 2, or (at your option)
+#  any later version.
+#
+#  This Program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+#  GNU General Public License for more details.
+#
+#  You should have received a copy of the GNU General Public License
+#  along with OpenELEC.tv; see the file COPYING.  If not, write to
+#  the Free Software Foundation, 51 Franklin Street, Suite 500, Boston, MA 02110, USA.
+#  http://www.gnu.org/copyleft/gpl.html
+################################################################################
+
+TOPDIR=$(pwd)
+GIT_FLAGS="${GIT_FLAGS:=-q}"
+HK_GIT="https://github.com/hardkernel/u-boot"
+
+usage() {
+  echo "$0 XU3|U2|C1"
+  echo "  ex. $0 XU3"
+  exit 1
+}
+
+sources() {
+  echo -n "Getting Sources ... "
+
+  cd $TOPDIR
+
+  if [ ! -d hk-bootloader.git ]; then
+    git clone $GIT_FLAGS $HK_GIT hk-bootloader.git
+  fi
+
+  cd $TOPDIR/hk-bootloader.git
+
+  git reset $GIT_FLAGS --hard
+  git clean $GIT_FLAGS -fd
+
+  git checkout $GIT_FLAGS -m $BRANCH
+
+  git pull $GIT_FLAGS
+
+  if [ -n $2 ]; then
+    git reset $GIT_FLAGS --hard $2
+    git clean $GIT_FLAGS -fd
+  fi
+
+  VERSION=`git log -n1 --format=%h`
+
+  echo "DONE"
+}
+
+package() {
+  cd $TOPDIR
+
+  if [ -d hk-bootloader-$VERSION ]; then
+    echo -n "Cleaning Old Release ... "
+    rm -rf hk-bootloader-$VERSION
+    echo "DONE"
+  fi
+
+  echo -n "Copying GIT to Release ... "
+  case $BRANCH in
+    *2010.12*)
+      install -D hk-bootloader.git/sd_fuse/bl1.HardKernel hk-bootloader-$VERSION/bl1.bin
+      install -D hk-bootloader.git/sd_fuse/bl2.HardKernel hk-bootloader-$VERSION/bl2.bin
+      install -D hk-bootloader.git/sd_fuse/tzsw.HardKernel hk-bootloader-$VERSION/tzsw.bin
+      ;;
+    *2012.07*)
+      install -D hk-bootloader.git/sd_fuse/hardkernel_1mb_uboot/bl1.bin.hardkernel hk-bootloader-$VERSION/bl1.bin
+      install -D hk-bootloader.git/sd_fuse/hardkernel_1mb_uboot/bl2.bin.hardkernel.1mb_uboot hk-bootloader-$VERSION/bl2.bin
+      install -D hk-bootloader.git/sd_fuse/hardkernel_1mb_uboot/tzsw.bin.hardkernel hk-bootloader-$VERSION/tzsw.bin
+      ;;
+    *2011.03*)
+      install -D hk-bootloader.git/sd_fuse/bl1.bin.hardkernel hk-bootloader-$VERSION/bl1.bin
+      ;;
+  esac
+  echo "DONE"
+
+  echo -n "Compressing Source ... "
+  tar cJf hk-bootloader-$BUILD-$VERSION.tar.xz hk-bootloader-$VERSION
+  echo "DONE"
+
+  echo -n "Final Cleanup ... "
+  rm -rf hk-bootloader-$VERSION
+  echo "DONE"
+}
+
+if [ -z $1 ]; then
+  usage
+else
+  case $1 in
+    U2|u2|U3|u3) BRANCH="odroid-v2010.12"    ; BUILD=U2  ;;
+    XU3|xu3)     BRANCH="odroidxu3-v2012.07" ; BUILD=XU3 ;;
+    C1|c1)       BRANCH="odroidc-v2011.03"   ; BUILD=C1  ;;
+  esac
+  sources $1 $2
+  package $1
+fi
