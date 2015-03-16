@@ -23,7 +23,7 @@ PKG_ARCH="any"
 PKG_LICENSE="various"
 PKG_SITE="http://www.openelec.tv"
 PKG_URL=""
-PKG_DEPENDS_TARGET="toolchain $PROJECT htop"
+PKG_DEPENDS_TARGET="toolchain htop"
 PKG_PRIORITY="optional"
 PKG_SECTION="virtual"
 PKG_SHORTDESC="OEM: Metapackage for various OEM packages"
@@ -33,5 +33,5 @@ PKG_IS_ADDON="no"
 PKG_AUTORECONF="no"
 
 case $DEVICE in
-  U2)  PKG_DEPENDS_TARGET="$PKG_DEPENDS_TARGET odroidu2-fan-control" ;;
+  U2)  PKG_DEPENDS_TARGET="$PKG_DEPENDS_TARGET odroidu2-fan-service" ;;
 esac
