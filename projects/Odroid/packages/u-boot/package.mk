@@ -55,7 +55,9 @@ makeinstall_target() {
 
   mkdir -p $INSTALL/usr/share/bootloader
 
-  if [ -f "./u-boot.bin" ]; then
+  if [ -f "./u-boot-dtb.bin" ]; then
+    cp -PRv ./u-boot-dtb.bin $INSTALL/usr/share/bootloader/u-boot
+  elif [ -f "./u-boot.bin" ]; then
     cp -PRv ./u-boot.bin $INSTALL/usr/share/bootloader/u-boot
   fi 
 
