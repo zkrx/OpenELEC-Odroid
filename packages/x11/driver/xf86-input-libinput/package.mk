@@ -16,22 +16,25 @@
 #  along with OpenELEC.  If not, see <http://www.gnu.org/licenses/>.
 ################################################################################
 
-PKG_NAME="xf86-input-evdev"
-PKG_VERSION="2.9.1"
+PKG_NAME="xf86-input-libinput"
+PKG_VERSION="0.8.0"
 PKG_REV="1"
 PKG_ARCH="any"
-PKG_LICENSE="OSS"
-PKG_SITE="http://www.X.org"
+PKG_LICENSE="GPL"
+PKG_SITE="http://www.freedesktop.org/wiki/Software/libinput/"
 PKG_URL="http://xorg.freedesktop.org/archive/individual/driver/$PKG_NAME-$PKG_VERSION.tar.bz2"
-PKG_DEPENDS_TARGET="toolchain util-macros inputproto libevdev systemd"
+PKG_DEPENDS_TARGET="toolchain libinput"
 PKG_PRIORITY="optional"
 PKG_SECTION="x11/driver"
-PKG_SHORTDESC="xf86-input-evdev: Generic Xorg Linux input driver"
-PKG_LONGDESC="Evdev is an Xorg input driver for Linux's generic event devices. It therefore supports all input devices that the kernel knows about, including most mice and keyboards."
+PKG_SHORTDESC="This is an X driver based on libinput."
+PKG_LONGDESC="This is an X driver based on libinput."
 
 PKG_IS_ADDON="no"
 PKG_AUTORECONF="yes"
 
-PKG_CONFIGURE_OPTS_TARGET="--disable-silent-rules \
-                           --with-xorg-module-dir=$XORG_PATH_MODULES \
-                           --with-gnu-ld"
+PKG_CONFIGURE_OPTS_TARGET="--with-xorg-module-dir=$XORG_PATH_MODULES"
+
+post_makeinstall_target() {
+  mkdir -p $INSTALL/usr/share/X11/xorg.conf.d
+    cp $ROOT/$PKG_BUILD/conf/99-libinput.conf $INSTALL/usr/share/X11/xorg.conf.d
+}
