@@ -18,7 +18,7 @@
 
 PKG_NAME="linux"
 case $DEVICE in
-  U2)  PKG_VERSION="3.8.13+0c5ca23" ;;
+  U2)  PKG_VERSION="3.19.2+0f25c54" ;;
   XU3) PKG_VERSION="3.10.60+d37e8a3" ;;
   C1)  PKG_VERSION="3.10.65+c0ca589" ;;
 esac
@@ -59,7 +59,11 @@ post_patch() {
          -e "s|^CROSS_COMPILE[[:space:]]*?=.*$|CROSS_COMPILE = $TARGET_PREFIX|" \
          $PKG_BUILD/Makefile
 
-  cp $PKG_BUILD/arch/arm/configs/$KERNEL_CFG_FILE $PKG_BUILD/.config
+  if [ -f $PROJECT_DIR/$PROJECT/devices/$DEVICE/$PKG_NAME/$PKG_NAME.$TARGET_ARCH.conf ]; then
+    cp -v $PROJECT_DIR/$PROJECT/devices/$DEVICE/$PKG_NAME/$PKG_NAME.$TARGET_ARCH.conf $PKG_BUILD/.config
+  else
+    cp -v $PKG_BUILD/arch/arm/configs/$KERNEL_CFG_FILE $PKG_BUILD/.config
+  fi
 
   # enable SquashFS
   sed -i -e "s|^CONFIG_SQUASHFS[[:space:]]*=.*$|CONFIG_SQUASHFS=y|" \
@@ -226,4 +230,5 @@ post_install() {
   [ "$DEVICE" = U2 ] && ln -sfn /storage/.config/smsc95xx_mac_addr $INSTALL/etc/smsc95xx_mac_addr
   mkdir -p $INSTALL/lib/firmware/
     ln -sfn /storage/.config/firmware/ $INSTALL/lib/firmware/updates
+  enable_service cpufreq-threshold.service
 }
