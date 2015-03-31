@@ -81,9 +81,6 @@
   # build and install PPP support : Override
     PPTP_SUPPORT="no"
 
-  # build and install OpenVPN support : Override
-    OPENVPN_SUPPORT="no"
-
   # Distribution Specific source location : Additional
     ODROID_MIRROR="http://freeweb.mine.nu/zalaare"
 
