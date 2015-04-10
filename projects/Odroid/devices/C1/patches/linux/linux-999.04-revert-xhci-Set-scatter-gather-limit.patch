@@ -1,0 +1,26 @@
+diff -Nur a/drivers/usb/host/xhci.c b/drivers/usb/host/xhci.c
+--- a/drivers/usb/host/xhci.c	2015-04-08 16:53:05.000000000 +0000
++++ b/drivers/usb/host/xhci.c	2015-04-10 15:10:05.043053063 +0000
+@@ -4671,8 +4671,8 @@
+ 	int			retval;
+ 	u32			temp;
+ 
+-	/* Accept arbitrarily long scatter-gather lists */
+-	hcd->self.sg_tablesize = ~0;
++	/* Limit the block layer scatter-gather lists to half a segment. */
++	hcd->self.sg_tablesize = TRBS_PER_SEGMENT / 2;
+ 	/* XHCI controllers don't stop the ep queue on short packets :| */
+ 	hcd->self.no_stop_on_short = 1;
+ 
+diff -Nur a/drivers/usb/host/xhci.h b/drivers/usb/host/xhci.h
+--- a/drivers/usb/host/xhci.h	2015-04-08 16:53:05.000000000 +0000
++++ b/drivers/usb/host/xhci.h	2015-04-10 15:06:52.019948330 +0000
+@@ -1237,7 +1237,7 @@
+  * since the command ring is 64-byte aligned.
+  * It must also be greater than 16.
+  */
+-#define TRBS_PER_SEGMENT	64
++#define TRBS_PER_SEGMENT	256
+ /* Allow two commands + a link TRB, along with any reserved command TRBs */
+ #define MAX_RSVD_CMD_TRBS	(TRBS_PER_SEGMENT - 3)
+ #define TRB_SEGMENT_SIZE	(TRBS_PER_SEGMENT*16)

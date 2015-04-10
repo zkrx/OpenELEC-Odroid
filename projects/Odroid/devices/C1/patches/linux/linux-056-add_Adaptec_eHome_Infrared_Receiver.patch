@@ -1,0 +1,20 @@
+diff -Nur a/drivers/media/rc/mceusb.c b/drivers/media/rc/mceusb.c
+--- a/drivers/media/rc/mceusb.c	2015-04-08 16:53:01.000000000 +0000
++++ b/drivers/media/rc/mceusb.c	2015-04-09 13:52:37.760684741 +0000
+@@ -199,6 +199,7 @@
+ #define VENDOR_TIVO		0x105a
+ #define VENDOR_CONEXANT		0x0572
+ #define VENDOR_TWISTEDMELON	0x2596
++#define VENDOR_ADAPTEC         0x03f3
+ 
+ enum mceusb_model_type {
+ 	MCE_GEN2 = 0,		/* Most boards */
+@@ -399,6 +400,8 @@
+ 	{ USB_DEVICE(VENDOR_TWISTEDMELON, 0x8016) },
+ 	/* Twisted Melon Inc. - Manta Transceiver */
+ 	{ USB_DEVICE(VENDOR_TWISTEDMELON, 0x8042) },
++        /* Adaptec / HP eHome Receiver */
++        { USB_DEVICE(VENDOR_ADAPTEC, 0x0094) },
+ 	/* Terminating entry */
+ 	{ }
+ };

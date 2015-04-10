@@ -1,0 +1,31 @@
+diff -Nur a/sound/pci/hda/patch_hdmi.c b/sound/pci/hda/patch_hdmi.c
+--- a/sound/pci/hda/patch_hdmi.c	2015-04-08 16:53:08.000000000 +0000
++++ b/sound/pci/hda/patch_hdmi.c	2015-04-10 15:05:26.162879293 +0000
+@@ -1399,6 +1399,14 @@
+ 	if (err < 0)
+ 		return err;
+ 
++	/*
++	 * Some HDMI codecs (at least NVIDIA 0x10de000b:0x10de0101:0x100100)
++	 * start transmitting an empty audio stream as soon as PIN_OUT and
++	 * AC_DIG1_ENABLE are enabled, which happens at open() time.
++	 * To avoid that, set format to 0, which is not valid for HDMI.
++	*/
++	snd_hda_codec_write(codec, cvt_nid, 0, AC_VERB_SET_STREAM_FORMAT, 0);
++
+ 	if (spec->num_cvts < ARRAY_SIZE(spec->cvt_nids))
+ 		spec->cvt_nids[spec->num_cvts] = cvt_nid;
+ 	spec->num_cvts++;
+@@ -1526,6 +1534,12 @@
+ 	int pinctl;
+ 
+ 	if (hinfo->nid) {
++		/*
++		* Make sure no empty audio is output after this point by
++		* setting stream format to 0, which is not valid for HDMI.
++		*/
++		__snd_hda_codec_cleanup_stream(codec, hinfo->nid, 1);
++
+ 		cvt_idx = cvt_nid_to_cvt_index(spec, hinfo->nid);
+ 		if (snd_BUG_ON(cvt_idx < 0))
+ 			return -EINVAL;
