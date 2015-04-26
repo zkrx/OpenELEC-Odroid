@@ -53,9 +53,6 @@
   # Auto resize of Storage partition (during build of SD image) (yes / no) : Additional
     RESIZE="yes"
 
-  # Enable Amlogic Remote
-    AMREMOTE_SUPPORT="yes"
-
   # set the addon dirs
     ADDON_PATH="$ADDON_VERSION/$PROJECT/$DEVICE"
     ADDON_URL="$ADDON_SERVER_URL/$ADDON_PATH"
