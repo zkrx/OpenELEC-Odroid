@@ -17,7 +17,7 @@
 ################################################################################
 
 PKG_NAME="opengles-mali"
-PKG_VERSION="1216b9e"
+PKG_VERSION="a2bca98"
 PKG_REV="1"
 PKG_ARCH="arm"
 PKG_LICENSE="nonfree"
