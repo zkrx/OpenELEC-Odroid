@@ -61,6 +61,12 @@ post_patch() {
 
   cp $PKG_BUILD/arch/arm/configs/$KERNEL_CFG_FILE $PKG_BUILD/.config
 
+  # device specific changes
+  if [ -f $PROJECT_DIR/$PROJECT/devices/$DEVICE/linux/linux.conf ]; then
+    cat $PROJECT_DIR/$PROJECT/devices/$DEVICE/linux/linux.conf >> \
+      $PKG_BUILD/.config
+  fi
+
   # enable SquashFS
   sed -i -e "s|^CONFIG_SQUASHFS[[:space:]]*=.*$|CONFIG_SQUASHFS=y|" \
          -e "s|^# CONFIG_SQUASHFS[[:space:]].*$|CONFIG_SQUASHFS=y|" $PKG_BUILD/.config
