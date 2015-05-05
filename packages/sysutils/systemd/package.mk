@@ -34,6 +34,7 @@ PKG_AUTORECONF="yes"
 
 PKG_CONFIGURE_OPTS_TARGET="ac_cv_func_malloc_0_nonnull=yes \
                            ac_cv_have_decl_IFLA_BOND_AD_INFO=no \
+                           ac_cv_have_decl_IFLA_BRPORT_UNICAST_FLOOD=no \
                            KMOD=/usr/bin/kmod \
                            --disable-nls \
                            --disable-gtk-doc \
@@ -231,7 +232,7 @@ post_install() {
   add_group tty 5
   add_group video 39
   add_group utmp 22
-  add_group input 199 # TODO change gid
+  add_group input 199
 
   enable_service machine-id.service
   enable_service debugconfig.service
