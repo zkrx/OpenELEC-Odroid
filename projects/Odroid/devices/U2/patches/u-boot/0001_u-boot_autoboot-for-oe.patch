@@ -1,6 +1,6 @@
 diff -Nur a/include/configs/odroid.h b/include/configs/odroid.h
 --- a/include/configs/odroid.h	2015-03-03 20:29:10.000000000 +0000
-+++ b/include/configs/odroid.h	2015-03-20 19:11:57.027486019 +0000
++++ b/include/configs/odroid.h	2015-03-04 15:41:03.133183628 +0000
 @@ -131,6 +131,7 @@
  	"kernel_args=" \
  		"setenv bootargs root=/dev/mmcblk${mmcrootdev}p${mmcrootpart}" \
@@ -9,14 +9,32 @@ diff -Nur a/include/configs/odroid.h b/include/configs/odroid.h
  	"boot_fit=" \
  		"setenv kerneladdr 0x42000000;" \
  		"setenv kernelname Image.itb;" \
-@@ -154,7 +155,9 @@
+@@ -153,13 +154,27 @@
+ 		"run loadkernel;" \
  		"run kernel_args;" \
  		"bootz ${kerneladdr} ${initrd_addr} ${fdt_addr};\0" \
++	"openelec=" \
++		"setenv kerneladdr 0x40007FC0;" \
++		"setenv kernelname KERNEL;" \
++		"setenv initrdname INITRD;" \
++		"setenv bootargs boot=LABEL=System disk=LABEL=System" \
++		" ro ${console} ${opts}\0" \
++		"run check_dtb;" \
++		"run check_ramdisk;" \
++		"run loadkernel;" \
++		"bootz ${kerneladdr} ${initrd_addr} ${fdt_addr};\0" \
  	"autoboot=" \
 -		"if test -e mmc 0 Image.itb; then; " \
-+		"if test -e mmc 0 boot.ini; then; "\
++		"if test -e mmc 0 boot.ini; then; " \
 +			"run boot_ini;" \
 +		"elif test -e mmc 0 Image.itb; then; " \
  			"run boot_fit;" \
  		"elif test -e mmc 0 zImage; then; " \
  			"run boot_zimg;" \
+ 		"elif test -e mmc 0 uImage; then; " \
+ 			"run boot_uimg;" \
++		"elif test -e mmc 0 KERNEL; then; " \
++			"run openelec;" \
+ 		"fi;\0" \
+ 	"console=" CONFIG_DEFAULT_CONSOLE \
+ 	"mmcbootdev=0\0" \

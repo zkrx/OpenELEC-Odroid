@@ -12,13 +12,10 @@
     UBOOT_CONFIGFILE="boot.ini"
 
   # Kernel config file
-    KERNEL_CFG_FILE="exynos_defconfig"
+    KERNEL_CFG_FILE="odroidu_defconfig"
 
   # Kernel target for u-boot (default 'uImage' if BOOTLOADER=u-boot) (uImage / zImage)
     KERNEL_UBOOT_TARGET="zImage"
-
-  # Additional kernel make parameters (for example to specify the u-boot loadaddress)
-    KERNEL_MAKE_EXTRACMD="exynos4412-odroidu3.dtb"
 
 ################################################################################
 # setup project defaults/overrides
