@@ -17,7 +17,10 @@
 ################################################################################
 
 PKG_NAME="u-boot"
-PKG_VERSION="2015.04+19e5118"
+case $DEVICE in
+  U2|XU3) PKG_VERSION="2015.04+19e5118" ;;
+  C1)     PKG_VERSION="2011.03+e7d4447" ;;
+esac
 PKG_SITE="http://git.denx.de/?p=u-boot/u-boot-samsung.git;a=summary"
 PKG_URL="$ODROID_MIRROR/$PKG_NAME-$PKG_VERSION.tar.xz"
 PKG_REV="1"
