@@ -183,7 +183,7 @@ else
 fi
 
 if [ ! "$KODIPLAYER_DRIVER" = default ]; then
-  [ "$KODIPLAYER_DRIVER" = odroid-mfc ] || PKG_DEPENDS_TARGET="$PKG_DEPENDS_TARGET $KODIPLAYER_DRIVER"
+  PKG_DEPENDS_TARGET="$PKG_DEPENDS_TARGET $KODIPLAYER_DRIVER"
 
   if [ "$KODIPLAYER_DRIVER" = bcm2835-driver ]; then
     KODI_OPENMAX="--enable-openmax"
