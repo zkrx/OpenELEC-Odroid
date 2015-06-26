@@ -1,7 +1,7 @@
 From f8aeb55bea64fde80a63a88d5d7bad8fd2dde3d9 Mon Sep 17 00:00:00 2001
 From: Alex Deryskyba <alex@codesnake.com>
 Date: Sun, 2 Nov 2014 15:54:29 +0200
-Subject: [PATCH 15/16] [aml] Add some key mappings for HDMI CEC
+Subject: [PATCH 15/17] [aml] Add some key mappings for HDMI CEC
 
 ---
  xbmc/input/linux/LinuxInputDevices.cpp |    5 +++++
