@@ -1,6 +1,6 @@
-diff -Nur a/src/lib/adapter/Exynos/ExynosCECAdapterCommunication.cpp b/src/lib/adapter/Exynos/ExynosCECAdapterCommunication.cpp
---- a/src/lib/adapter/Exynos/ExynosCECAdapterCommunication.cpp	2014-10-28 15:20:50.000000000 +0000
-+++ b/src/lib/adapter/Exynos/ExynosCECAdapterCommunication.cpp	2015-01-25 23:42:05.324537990 +0000
+diff -Nur a/src/libcec/adapter/Exynos/ExynosCECAdapterCommunication.cpp b/src/libcec/adapter/Exynos/ExynosCECAdapterCommunication.cpp
+--- a/src/libcec/adapter/Exynos/ExynosCECAdapterCommunication.cpp	2014-10-28 15:20:50.000000000 +0000
++++ b/src/libcec/adapter/Exynos/ExynosCECAdapterCommunication.cpp	2015-01-25 23:42:05.324537990 +0000
 @@ -161,16 +161,14 @@
  
  uint16_t CExynosCECAdapterCommunication::GetPhysicalAddress(void)
