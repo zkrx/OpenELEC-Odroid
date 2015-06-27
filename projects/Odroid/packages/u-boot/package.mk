@@ -62,7 +62,9 @@ makeinstall_target() {
     cp -PRv ./u-boot-dtb.bin $INSTALL/usr/share/bootloader/u-boot
   elif [ -f "./u-boot.bin" ]; then
     cp -PRv ./u-boot.bin $INSTALL/usr/share/bootloader/u-boot
-  fi 
+  elif [ -f "./sd_fuse/u-boot.bin" ]; then
+    cp -PRv ./sd_fuse/u-boot.bin $INSTALL/usr/share/bootloader/u-boot
+  fi
 
   case $DEVICE in
     U2|XU3) cp -PRv $PKG_DIR/scripts/update-u2.sh $INSTALL/usr/share/bootloader/update.sh ;;
