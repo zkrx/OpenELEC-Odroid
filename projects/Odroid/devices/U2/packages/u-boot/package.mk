@@ -61,7 +61,9 @@ makeinstall_target() {
 
   if [ -f "./u-boot.bin" ]; then
     cp -PRv ./u-boot.bin $INSTALL/usr/share/bootloader/u-boot
-  fi 
+  elif [ -f "./sd_fuse/u-boot.bin" ]; then
+    cp -PRv ./sd_fuse/u-boot.bin $INSTALL/usr/share/bootloader/u-boot
+  fi
 
   cp -PRv $PKG_DIR/scripts/update.sh $INSTALL/usr/share/bootloader
 }
