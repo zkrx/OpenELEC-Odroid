@@ -1,6 +1,6 @@
 #!/bin/bash
 
-TOP_DIR=/odroid
+TOP_DIR=$(pwd | sed -e 's;/mkaddons;;' -e 's;/tools;;')
 
 # Get current addon version
 . $TOP_DIR/config/version
@@ -23,7 +23,7 @@ for addon in ${ADDONS[@]} ; do
     for device in ${DEVICES[@]} ; do
       echo "PROJECT=${project} DEVICE=${device} $TOP_DIR/scripts/create_addon ${addon}"
       cd $TOP_DIR && \
-      PROJECT=${project} DEVICE=${device} $TOP_DIR/scripts/create_addon ${addon}
+        PROJECT=${project} DEVICE=${device} $TOP_DIR/scripts/create_addon ${addon}
     done
   done
 done
@@ -31,9 +31,6 @@ done
 for project in ${PROJECTS[@]} ; do
   for device in ${DEVICES[@]} ; do
     cd $TOP_DIR/target/addons/$ADDON_VERSION/${project}/${device} && \
-    $TOP_DIR/tools/mkaddons/genrepo
- #   for dir in `find $TOP_DIR/target/addons/$ADDON_VERSION/${project}/${device} -maxdepth 1 -type d` ; do
- #     cd ${dir} && [ -f addon.xml ] && rm addon.xml
- #   done
+      $TOP_DIR/tools/mkaddons/genrepo
   done
 done
