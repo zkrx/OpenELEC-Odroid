@@ -1,6 +1,6 @@
 #!/bin/bash
 
-TOP_DIR=/Odroid-Addons
+TOP_DIR=$(pwd | sed -e 's;/mkaddons;;' -e 's;/tools;;')
 
 # Get current addon version
 . $TOP_DIR/config/version
