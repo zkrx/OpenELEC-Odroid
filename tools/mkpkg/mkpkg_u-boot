@@ -22,7 +22,7 @@
 
 TOPDIR=$(pwd)
 GIT_FLAGS="${GIT_FLAGS:=-q}"
-SAMSUNG_GIT="git://git.denx.de/u-boot-samsung.git"
+GIT_REPO="git://git.denx.de/u-boot.git"
 
 usage() {
   echo "$0 XU3|U2|C1"
@@ -36,7 +36,7 @@ sources() {
   cd $TOPDIR
 
   if [ ! -d u-boot.git ]; then
-    git clone $GIT_FLAGS $SAMSUNG_GIT u-boot.git
+    git clone $GIT_FLAGS $GIT_REPO u-boot.git
   fi
 
   cd $TOPDIR/u-boot.git
