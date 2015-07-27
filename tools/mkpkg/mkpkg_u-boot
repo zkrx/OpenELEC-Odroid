@@ -45,7 +45,7 @@ sources() {
   git clean $GIT_FLAGS -fd
 
   case $1 in
-    U2|u2|U3|u3|XU3|xu3) git checkout $GIT_FLAGS -m uboot ;;
+    U2|u2|U3|u3|XU3|xu3) git checkout $GIT_FLAGS -m master ;;
     c1|C1) echo "Not yet implimented!" && exit 0 ;;
     *) usage ;;
   esac
