@@ -19,8 +19,8 @@
 PKG_NAME="hk-bootloader"
 case $DEVICE in
   U2)  PKG_VERSION="33e05ff" ;;
-  XU3) PKG_VERSION="d80b05d" ;;
-  C1)  PKG_VERSION="f631c80" ;;
+  XU3) PKG_VERSION="3acd50c" ;;
+  C1)  PKG_VERSION="c878e20" ;;
 esac
 PKG_REV="1"
 PKG_ARCH="arm"
