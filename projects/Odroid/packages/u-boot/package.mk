@@ -18,7 +18,7 @@
 
 PKG_NAME="u-boot"
 case $DEVICE in
-  U2|XU3) PKG_VERSION="2015.04+19e5118" ;;
+  U2|XU3) PKG_VERSION="2015.07+2647394" ;;
   C1)     PKG_VERSION="2011.03+e7d4447" ;;
 esac
 PKG_SITE="http://git.denx.de/?p=u-boot/u-boot-samsung.git;a=summary"
