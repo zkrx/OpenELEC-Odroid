@@ -19,14 +19,14 @@
 PKG_NAME="u-boot"
 case $DEVICE in
   U2|XU3) PKG_VERSION="2015.07+2647394" ;;
-  C1)     PKG_VERSION="2011.03+e7d4447" ;;
+  C1)     PKG_VERSION="2011.03+e7d4447" ; PKG_OTHER_DEPENDS="linaro-arm-toolchain:host" ;;
 esac
 PKG_SITE="http://git.denx.de/?p=u-boot/u-boot-samsung.git;a=summary"
 PKG_URL="$ODROID_MIRROR/$PKG_NAME-$PKG_VERSION.tar.xz"
 PKG_REV="1"
 PKG_ARCH="arm"
 PKG_LICENSE="GPL"
-PKG_DEPENDS_TARGET="toolchain dtc:host hk-bootloader"
+PKG_DEPENDS_TARGET="toolchain dtc:host hk-bootloader $PKG_OTHER_DEPENDS"
 PKG_PRIORITY="optional"
 PKG_SECTION="tools"
 PKG_SHORTDESC="u-boot: Universal Bootloader project"
@@ -43,8 +43,16 @@ pre_configure_target() {
 }
 
 make_target() {
-  make CROSS_COMPILE="$TARGET_PREFIX" ARCH="$TARGET_ARCH" $UBOOT_CONFIG
-  make CROSS_COMPILE="$TARGET_PREFIX" ARCH="$TARGET_ARCH" HOSTCC="$HOST_CC" HOSTSTRIP="true"
+  case $DEVICE in
+    U2|XU3)
+      make CROSS_COMPILE="$TARGET_PREFIX" ARCH="$TARGET_ARCH" $UBOOT_CONFIG
+      make CROSS_COMPILE="$TARGET_PREFIX" ARCH="$TARGET_ARCH" HOSTCC="$HOST_CC" HOSTSTRIP="true"
+      ;;
+    C1)
+      make CROSS_COMPILE="arm-none-eabi-" $UBOOT_CONFIG
+      make CROSS_COMPILE="arm-none-eabi-" HOSTCC="$HOST_CC" HOSTSTRIP="true"
+      ;;
+  esac
 }
 
 makeinstall_target() {
