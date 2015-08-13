@@ -17,8 +17,8 @@
 ################################################################################
 
 PKG_NAME="linux-api-headers"
-PKG_VERSION="3.19"
-PKG_URL="http://www.kernel.org/pub/linux/kernel/v3.0/linux-$PKG_VERSION.tar.xz"
+PKG_VERSION="4.0"
+PKG_URL="http://www.kernel.org/pub/linux/kernel/v4.x/linux-$PKG_VERSION.tar.xz"
 PKG_REV="1"
 PKG_ARCH="any"
 PKG_LICENSE="GPL"
