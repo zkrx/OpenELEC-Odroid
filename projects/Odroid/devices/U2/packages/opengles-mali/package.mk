@@ -17,7 +17,7 @@
 ################################################################################
 
 PKG_NAME="opengles-mali"
-PKG_VERSION="2.0+U2"
+PKG_VERSION="4412_r5p0"
 PKG_REV="1"
 PKG_ARCH="arm"
 PKG_LICENSE="nonfree"
@@ -27,14 +27,14 @@ PKG_PRIORITY="optional"
 PKG_SECTION="graphics"
 PKG_SHORTDESC="OpenGL-ES and Mali driver for Mali GPUs"
 PKG_LONGDESC="OpenGL-ES and Mali driver for Mali GPUs"
-PKG_SOURCE_DIR="mali"
+PKG_SOURCE_DIR="$PKG_NAME-$PKG_VERSION"
 
 PKG_IS_ADDON="no"
 PKG_AUTORECONF="no"
 
 if [ "$DISPLAYSERVER" = "x11" ]; then
-  PKG_VERSION="${PKG_VERSION}_x11"
-  PKG_URL="http://builder.mdrjr.net/tools/mali-r4p0.txz"
+  PKG_VERSION="r5p0_x11"
+  PKG_URL="http://builder.mdrjr.net/tools/u3/4412_r5p0_x11.tar.xz"
   PKG_DEPENDS_TARGET="$PKG_DEPENDS_TARGET libXfixes libXdmcp libXrender libxcb libXcomposite"
   LINKS=( "ln -sfn libMali.so libEGL.so" "ln -sfn libMali.so libGLESv2.so" )
   DESTROY=(
@@ -48,8 +48,8 @@ if [ "$DISPLAYSERVER" = "x11" ]; then
     "rm -f libGLESv2.so.2.0"
   )
 else
-  PKG_VERSION="${PKG_VERSION}_fb"
-  PKG_URL="http://builder.mdrjr.net/tools/r4p0-mp400-fbdev.tar"
+  PKG_VERSION="r5p0_fb"
+  PKG_URL="http://builder.mdrjr.net/tools/u3/4412_r5p0_fbdev.tar.xz"
   LINKS=( "ln -sfn libMali.so libEGL.so" "ln -sfn libMali.so libGLESv2.so" )
   DESTROY=(
     "rm -f libEGL.so.1"
@@ -63,7 +63,8 @@ else
 fi
 
 unpack() {
-  $SCRIPTS/extract $PKG_NAME $(basename $PKG_URL) $BUILD
+  mkdir -p $BUILD/$PKG_SOURCE_DIR
+  $SCRIPTS/extract $PKG_NAME $(basename $PKG_URL) $BUILD/$PKG_SOURCE_DIR
 }
 
 make_target() {
