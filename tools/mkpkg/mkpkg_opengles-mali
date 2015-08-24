@@ -21,7 +21,7 @@
 ################################################################################
 
 TOPDIR=$(pwd)
-GIT_FLAGS=""
+GIT_FLAGS="${GIT_FLAGS:=-q}"
 
 sources() {
   echo -n "Getting Sources ... "
