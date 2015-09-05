@@ -63,11 +63,11 @@
   # OpenGL(X) implementation to use : Override
     OPENGL="no"
 
-  # include uvesafb support : Override
-    UVESAFB_SUPPORT="no"
-
   # LCD driver to Use : Override
     LCD_DRIVER="none"
+
+  # KODI DCADEC support (yes / no) : Override
+    DCADEC_SUPPORT="yes"
 
   # additional Firmware to use : Additional
     FIRMWARE="$FIRMWARE rtlnic-firmware samsung-firmware wlan-firmware"
