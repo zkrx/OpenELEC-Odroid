@@ -33,6 +33,7 @@ mkpkg-temp
 
 # crap
 .DS_Store
+.delete*
 
 # homedirectory stuff
 .ssh
