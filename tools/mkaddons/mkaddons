@@ -5,14 +5,17 @@ TOP_DIR=$(pwd | sed -e 's;/mkaddons;;' -e 's;/tools;;')
 # Get current addon version
 . $TOP_DIR/config/version
 
+# Binary addons included in OE
+BINARY_ADDONS=$( find $TOP_DIR/packages/mediacenter/kodi-binary-addons -maxdepth 1 -type d -exec basename {} \; | sed '1d' )
+
 ADDONS=(
   "boblightd"
   "hdhomerun"
   "imon-mce"
   "sundtek-mediatv"
   "repository.unofficial.addon.pro"
-  "tvheadend"
   "vdr-addon"
+  $BINARY_ADDONS
 )
 
 PROJECTS=( "Odroid" )
