@@ -1,3 +1,6 @@
 [submodule "packages/unofficial"]
 	path = packages/unofficial
 	url = https://github.com/OpenELEC/unofficial-addons.git
+[submodule "projects/Odroid/packages/unofficial-addons"]
+	path = projects/Odroid/packages/unofficial-addons
+	url = https://github.com/OpenELEC/unofficial-addons.git
