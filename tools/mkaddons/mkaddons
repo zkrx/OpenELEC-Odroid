@@ -13,6 +13,7 @@ ADDONS=(
   "hdhomerun"
   "imon-mce"
   "sundtek-mediatv"
+  "tvheadend"
   "repository.unofficial.addon.pro"
   "vdr-addon"
   $BINARY_ADDONS
