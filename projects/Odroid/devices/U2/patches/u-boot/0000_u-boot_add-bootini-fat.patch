@@ -6,7 +6,7 @@ diff -Nur a/common/cmd_fat.c b/common/cmd_fat.c
  );
  #endif
 +
-+int do_fat_cfgload(cmd_tbl_t *cmdtp, int flag, int argc, char *argv[])
++int do_fat_bootini(cmd_tbl_t *cmdtp, int flag, int argc, char *argv[])
 +{
 +	unsigned long   filesize = 0;
 +	unsigned char   *fp = (unsigned char *)0x5FFF0000, cmd[512], skip = 0, first = 1;
@@ -68,8 +68,8 @@ diff -Nur a/common/cmd_fat.c b/common/cmd_fat.c
 +}
 +
 +U_BOOT_CMD(
-+	cfgload, 1, 0, do_fat_cfgload,
-+	"cfgload - boot.ini textfile load from FAT32\n",
++	bootini, 1, 0, do_fat_bootini,
++	"bootini - boot.ini textfile load from FAT32\n",
 +	"<interface(only support mmc 0:1/0:2)>\n"
 +	"	- boot.ini file load from FAT32 on 'interface'\n"
 +	"Will attempt boot from: \n"
