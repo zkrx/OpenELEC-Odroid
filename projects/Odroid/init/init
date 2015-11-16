@@ -62,7 +62,7 @@
 
   # run platform_init script if exists
   if [ -f "./platform_init" ]; then
-    ./platform_init
+    /bin/busybox sh ./platform_init
   fi
 
   # clear screen and hide cursor
