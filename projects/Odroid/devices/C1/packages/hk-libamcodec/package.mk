@@ -16,7 +16,7 @@
 #  along with OpenELEC.  If not, see <http://www.gnu.org/licenses/>.
 ################################################################################
 
-PKG_NAME="libamcodec"
+PKG_NAME="hk-libamcodec"
 PKG_VERSION="820b12a"
 PKG_REV="1"
 PKG_ARCH="arm"
@@ -26,8 +26,8 @@ PKG_URL="$ODROID_MIRROR/$PKG_NAME-$PKG_VERSION.tar.xz"
 PKG_DEPENDS_TARGET="toolchain alsa-lib"
 PKG_PRIORITY="optional"
 PKG_SECTION="multimedia"
-PKG_SHORTDESC="libamcodec: Interface library for Amlogic media codecs"
-PKG_LONGDESC="libamcodec: Interface library for Amlogic media codecs"
+PKG_SHORTDESC="libamcodec: Interface library for Amlogic media codecs from HardKernel"
+PKG_LONGDESC="libamcodec: Interface library for Amlogic media codecs from HardKernel"
 
 PKG_IS_ADDON="no"
 PKG_AUTORECONF="no"
