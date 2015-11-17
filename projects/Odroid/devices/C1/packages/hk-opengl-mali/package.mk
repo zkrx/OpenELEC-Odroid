@@ -16,18 +16,18 @@
 #  along with OpenELEC.  If not, see <http://www.gnu.org/licenses/>.
 ################################################################################
 
-PKG_NAME="opengles-mali"
-PKG_VERSION="0cb5ca4"
+PKG_NAME="hk-opengl-mali"
+PKG_VERSION="31d5c21"
 PKG_REV="1"
 PKG_ARCH="arm"
 PKG_LICENSE="nonfree"
 PKG_SITE="http://openlinux.amlogic.com:8000/download/ARM/filesystem/"
 PKG_URL="$ODROID_MIRROR/$PKG_NAME-$PKG_VERSION.tar.xz"
-PKG_DEPENDS_TARGET="toolchain libamcodec"
+PKG_DEPENDS_TARGET="toolchain"
 PKG_PRIORITY="optional"
 PKG_SECTION="graphics"
-PKG_SHORTDESC="OpenGL ES pre-compiled libraries for Mali 400 GPUs found in Amlogic Meson6 SoCs"
-PKG_LONGDESC="OpenGL ES pre-compiled libraries for Mali 400 GPUs found in Amlogic Meson6 SoCs. The libraries could be found in a Linux buildroot released by Amlogic at http://openlinux.amlogic.com:8000/download/ARM/filesystem/. See the opengl package."
+PKG_SHORTDESC="HardKernel's OpenGL ES pre-compiled libraries for Mali 400 GPUs found in Amlogic Meson6 SoCs"
+PKG_LONGDESC="HardKerne's OpenGL ES pre-compiled libraries for Mali 400 GPUs found in Amlogic Meson6 SoCs. The libraries could be found in a Linux buildroot released by Amlogic at http://openlinux.amlogic.com:8000/download/ARM/filesystem/. See the opengl package."
 
 PKG_IS_ADDON="no"
 PKG_AUTORECONF="no"
