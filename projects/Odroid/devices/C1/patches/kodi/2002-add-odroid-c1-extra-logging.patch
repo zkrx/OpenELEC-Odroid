@@ -67,6 +67,23 @@ diff -Nur a/xbmc/windowing/egl/EGLNativeTypeAmlogic.cpp b/xbmc/windowing/egl/EGL
  #if defined(_FBDEV_WINDOW_H_)
    delete (fbdev_window*)m_nativeWindow, m_nativeWindow = NULL;
  #endif
+@@ -151,6 +151,7 @@
+
+ bool CEGLNativeTypeAmlogic::SetNativeResolution(const RESOLUTION_INFO &res)
+ {
++  CLog::Log(LOGNOTICE, "%s::%s to %dx%d@%f", CLASSNAME, __func__, res.iScreenWidth, res.iScreenHeight, res.fRefreshRate);
+   if (m_nativeWindow)
+   {
+     ((fbdev_window *)m_nativeWindow)->width = res.iScreenWidth;
+@@ -203,6 +204,7 @@
+
+ bool CEGLNativeTypeAmlogic::ProbeResolutions(std::vector<RESOLUTION_INFO> &resolutions)
+ {
++  CLog::Log(LOGDEBUG, "%s::%s", CLASSNAME, __func__);
+   std::string valstr;
+   SysfsUtils::GetString("/sys/class/amhdmitx/amhdmitx0/disp_cap", valstr);
+   std::vector<std::string> probe_str = StringUtils::Split(valstr, "\n");
+
 @@ -207,6 +220,7 @@
  
  bool CEGLNativeTypeAmlogic::GetPreferredResolution(RESOLUTION_INFO *res) const
