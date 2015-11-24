@@ -43,17 +43,26 @@ if [ "$INITRAMFS_PARTED_SUPPORT" = yes ]; then
 fi
 
 post_install() {
-  if [ -f "$PROJECT_DIR/$PROJECT/devices/$DEVICE/init/init" ]; then
-    install -m 0755 $PROJECT_DIR/$PROJECT/devices/$DEVICE/init/init $ROOT/$BUILD/initramfs/init
-  elif [ -f "$PROJECT_DIR/$PROJECT/init/init" ]; then
+  # init
+  if [ -f "$PROJECT_DIR/$PROJECT/devices/$DEVICE/initramfs/init" ]; then
+    install -m 0755 $PROJECT_DIR/$PROJECT/devices/$DEVICE/initramfs/init $ROOT/$BUILD/initramfs/init
+  elif [ -f "$PROJECT_DIR/$PROJECT/initramfs/init" ]; then
     case $DEVICE in
       U2)  TTY=ttySAC1 ;;
       XU3) TTY=ttySAC2 ;;
       C1)  TTY=ttyS0 ;;
     esac
-    sed -e "s|tty1|$TTY|g" $PROJECT_DIR/$PROJECT/init/init > $ROOT/$BUILD/initramfs/init
+    sed -e "s|tty1|$TTY|g" $PROJECT_DIR/$PROJECT/initramfs/init > $ROOT/$BUILD/initramfs/init
     chmod 0755 $ROOT/$BUILD/initramfs/init
   fi
+
+  # platform_init
+  if [ -f "$PROJECT_DIR/$PROJECT/devices/$DEVICE/initramfs/platform_init" ]; then
+    install -m 0755 $PROJECT_DIR/$PROJECT/devices/$DEVICE/initramfs/platform_init $ROOT/$BUILD/initramfs/platform_init
+  elif [ -f "$PROJECT_DIR/$PROJECT/initramfs/platform_init" ]; then
+    install -m 0755 $PROJECT_DIR/$PROJECT/initramfs/platform_init $ROOT/$BUILD/initramfs/platform_init
+  fi
+
   cd $ROOT/$BUILD/initramfs
     mkdir -p $ROOT/$BUILD/image/
     find . | cpio -H newc -ov -R 0:0 > $ROOT/$BUILD/image/initramfs.cpio

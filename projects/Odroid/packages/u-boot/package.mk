@@ -18,11 +18,10 @@
 
 PKG_NAME="u-boot"
 case $DEVICE in
-  U2|XU3) PKG_VERSION="2015.07+2647394" ;;
-  C1)     PKG_VERSION="2011.03+e7d4447" ; PKG_OTHER_DEPENDS="linaro-arm-toolchain:host" ;;
+  U2|XU3) PKG_VERSION="2015.10" ; PKG_URL="ftp://ftp.denx.de/pub/u-boot/u-boot-$PKG_VERSION.tar.bz2" ;;
+  C1)     PKG_VERSION="2011.03+e7d4447" ; PKG_URL="$ODROID_MIRROR/$PKG_NAME-$PKG_VERSION.tar.xz" ; PKG_OTHER_DEPENDS="linaro-arm-toolchain:host" ;;
 esac
-PKG_SITE="http://git.denx.de/?p=u-boot/u-boot-samsung.git;a=summary"
-PKG_URL="$ODROID_MIRROR/$PKG_NAME-$PKG_VERSION.tar.xz"
+PKG_SITE="http://www.denx.de/wiki/U-Boot/WebHome"
 PKG_REV="1"
 PKG_ARCH="arm"
 PKG_LICENSE="GPL"
