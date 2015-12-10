@@ -17,13 +17,13 @@
 ################################################################################
 
 PKG_NAME="kodi"
-PKG_VERSION="15.2-02e7013"
+PKG_VERSION="16.0-beta2-64de219"
 PKG_REV="1"
 PKG_ARCH="any"
 PKG_LICENSE="GPL"
 PKG_SITE="http://www.kodi.tv"
 PKG_URL="$DISTRO_SRC/$PKG_NAME-$PKG_VERSION.tar.xz"
-PKG_DEPENDS_TARGET="toolchain kodi:host libsquish boost Python zlib bzip2 systemd pciutils lzo pcre swig:host libass curl rtmpdump fontconfig fribidi tinyxml libjpeg-turbo libpng tiff freetype jasper libogg libcdio libmpeg2 taglib libxml2 libxslt yajl sqlite libvorbis ffmpeg"
+PKG_DEPENDS_TARGET="toolchain kodi:host libsquish boost Python zlib bzip2 systemd pciutils lzo pcre swig:host libass curl rtmpdump fontconfig fribidi tinyxml libjpeg-turbo libpng tiff freetype jasper libogg libcdio libmpeg2 taglib libxml2 libxslt yajl sqlite libvorbis ffmpeg crossguid giflib"
 PKG_DEPENDS_HOST="lzo:host libpng:host libjpeg-turbo:host giflib:host"
 PKG_PRIORITY="optional"
 PKG_SECTION="mediacenter"
@@ -41,12 +41,10 @@ PKG_AUTORECONF="no"
 
 if [ "$DISPLAYSERVER" = "x11" ]; then
 # for libX11 support
-  PKG_DEPENDS_TARGET="$PKG_DEPENDS_TARGET libX11 libXext libdrm"
-# for libXrandr support
-  PKG_DEPENDS_TARGET="$PKG_DEPENDS_TARGET libXrandr"
-  KODI_XORG="--enable-x11 --enable-xrandr"
+  PKG_DEPENDS_TARGET="$PKG_DEPENDS_TARGET libX11 libXext libdrm libXrandr"
+  KODI_XORG="--enable-x11"
 else
-  KODI_XORG="--disable-x11 --disable-xrandr"
+  KODI_XORG="--disable-x11"
 fi
 
 if [ ! "$OPENGL" = "no" ]; then
@@ -191,11 +189,29 @@ else
 fi
 
 if [ ! "$KODIPLAYER_DRIVER" = default ]; then
-  if [ "$KODIPLAYER_DRIVER" = odroid-mfc ]; then
+  PKG_DEPENDS_TARGET="$PKG_DEPENDS_TARGET $KODIPLAYER_DRIVER"
+
+  if [ "$KODIPLAYER_DRIVER" = bcm2835-driver ]; then
+    KODI_OPENMAX="--enable-openmax"
+    KODI_PLAYER="--enable-player=omxplayer"
+    KODI_CODEC="--with-platform=raspberry-pi"
+    BCM2835_INCLUDES="-I$SYSROOT_PREFIX/usr/include/interface/vcos/pthreads/ \
+                      -I$SYSROOT_PREFIX/usr/include/interface/vmcs_host/linux"
+    KODI_CFLAGS="$KODI_CFLAGS $BCM2835_INCLUDES"
+    KODI_CXXFLAGS="$KODI_CXXFLAGS $BCM2835_INCLUDES"
+  elif [ "$KODIPLAYER_DRIVER" = libfslvpuwrap ]; then
+    KODI_CODEC="--enable-codec=imxvpu"
+    PKG_DEPENDS_TARGET="$PKG_DEPENDS_TARGET gpu-viv-g2d"
+  elif [ "$KODIPLAYER_DRIVER" = libamcodec ]; then
+    KODI_CODEC="--enable-codec=amcodec"
+  elif [ "$KODIPLAYER_DRIVER" = odroid-mfc ]; then
+    PKG_DEPENDS_TARGET="${PKG_DEPENDS_TARGET/ $KODIPLAYER_DRIVER/}"
     KODI_CODEC="--enable-codec=mfc"
   elif [ "$KODIPLAYER_DRIVER" = odroid-amcodec ]; then
     KODI_CODEC="--enable-codec=amcodec"
-    PKG_DEPENDS_TARGET="$PKG_DEPENDS_TARGET hk-libamcodec"
+    PKG_DEPENDS_TARGET="${PKG_DEPENDS_TARGET/ $KODIPLAYER_DRIVER/} hk-libamcodec"
+  else
+    KODI_OPENMAX="--disable-openmax"
   fi
 fi
 
@@ -241,12 +257,6 @@ PKG_CONFIGURE_OPTS_TARGET="gl_cv_func_gettimeofday_clobber=no \
                            $KODI_CEC \
                            --enable-udev \
                            --disable-libusb \
-                           --disable-goom \
-                           --disable-rsxs \
-                           --disable-projectm \
-                           --disable-waveform \
-                           --disable-spectrum \
-                           --disable-fishbmc \
                            $KODI_XORG \
                            --disable-ccache \
                            $KODI_ALSA \
@@ -263,6 +273,7 @@ PKG_CONFIGURE_OPTS_TARGET="gl_cv_func_gettimeofday_clobber=no \
                            $KODI_SSH \
                            $KODI_AIRPLAY \
                            $KODI_AIRTUNES \
+                           --enable-gif \
                            $KODI_NONFREE \
                            --disable-asap-codec \
                            $KODI_WEBSERVER \
@@ -360,6 +371,7 @@ post_makeinstall_target() {
   rm -rf $INSTALL/usr/share/applications
   rm -rf $INSTALL/usr/share/icons
   rm -rf $INSTALL/usr/share/kodi/addons/service.xbmc.versioncheck
+  rm -rf $INSTALL/usr/share/kodi/addons/visualization.vortex
   rm -rf $INSTALL/usr/share/xsessions
 
   mkdir -p $INSTALL/usr/share/kodi/addons
