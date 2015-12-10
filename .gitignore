@@ -44,7 +44,7 @@ mkpkg-temp
 .zdirs
 .less*
 .config
-.nano_history
+.nano*
 .histfile
 .OpenELEC
 .viminfo
