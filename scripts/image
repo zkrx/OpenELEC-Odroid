@@ -2,7 +2,7 @@
 
 ################################################################################
 #      This file is part of OpenELEC - http://www.openelec.tv
-#      Copyright (C) 2009-2014 Stephan Raue (stephan@openelec.tv)
+#      Copyright (C) 2009-2016 Stephan Raue (stephan@openelec.tv)
 #
 #  OpenELEC is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -199,10 +199,10 @@ fi
   MODVER=$(basename $(ls -d $INSTALL/lib/modules/*))
   find $INSTALL/lib/modules/$MODVER/ -name *.ko | \
     sed -e "s,$INSTALL/lib/modules/$MODVER/,," > $INSTALL/lib/modules/$MODVER/modules.order
-  $ROOT/$TOOLCHAIN/bin/depmod -b $INSTALL $MODVER > /dev/null
+  $ROOT/$TOOLCHAIN/bin/depmod -b $INSTALL $MODVER 2> /dev/null
 
 # strip kernel modules
-  for MOD in `find $INSTALL/lib/modules/ -name *.ko`; do
+  for MOD in `find $INSTALL/lib/modules/ -type f -name *.ko`; do
     $STRIP --strip-debug $MOD
   done
 

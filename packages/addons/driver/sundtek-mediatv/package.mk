@@ -1,6 +1,6 @@
 ################################################################################
 #      This file is part of OpenELEC - http://www.openelec.tv
-#      Copyright (C) 2009-2014 Stephan Raue (stephan@openelec.tv)
+#      Copyright (C) 2009-2016 Stephan Raue (stephan@openelec.tv)
 #
 #  OpenELEC is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -17,8 +17,8 @@
 ################################################################################
 
 PKG_NAME="sundtek-mediatv"
-PKG_VERSION="6.0"
-PKG_REV="1"
+PKG_VERSION="7.0"
+PKG_REV="0"
 PKG_ARCH="any"
 PKG_LICENSE="nonfree"
 PKG_SITE="http://support.sundtek.com/"
@@ -32,7 +32,7 @@ PKG_IS_ADDON="yes"
 PKG_ADDON_TYPE="xbmc.service"
 PKG_ADDON_PROVIDES=""
 PKG_AUTORECONF="no"
-PKG_ADDON_REPOVERSION="6.0"
+PKG_ADDON_REPOVERSION="7.0"
 
 make_target() {
   mkdir -p $ROOT/$PKG_BUILD

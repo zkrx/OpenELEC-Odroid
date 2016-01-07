@@ -1,6 +1,6 @@
 ################################################################################
 #      This file is part of OpenELEC - http://www.openelec.tv
-#      Copyright (C) 2009-2014 Stephan Raue (stephan@openelec.tv)
+#      Copyright (C) 2009-2016 Stephan Raue (stephan@openelec.tv)
 #
 #  OpenELEC is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -34,7 +34,7 @@ PKG_AUTORECONF="yes"
 
 get_graphicdrivers
 
-DRM_CONFIG="--disable-libkms --disable-intel --disable-radeon"
+DRM_CONFIG="--disable-libkms --disable-intel --disable-radeon --disable-amdgpu"
 DRM_CONFIG="$DRM_CONFIG --disable-nouveau --disable-vmwgfx"
 DRM_CONFIG="$DRM_CONFIG --disable-exynos-experimental-api"
 
@@ -45,11 +45,8 @@ for drv in $GRAPHIC_DRIVERS; do
 
   [ "$drv" = "r200" -o "$drv" = "r300" -o "$drv" = "r600" -o "$drv" = "radeonsi" ] && \
     DRM_CONFIG=`echo $DRM_CONFIG | sed -e 's/disable-libkms/enable-libkms/'` && \
-    DRM_CONFIG=`echo $DRM_CONFIG | sed -e 's/disable-radeon/enable-radeon/'`
-
-  [ "$drv" = "armsoc" ] && \
-    DRM_CONFIG=`echo $DRM_CONFIG | sed -e 's/disable-libkms/enable-libkms/'` && \
-    DRM_CONFIG=`echo $DRM_CONFIG | sed -e 's/disable-exynos/enable-exynos/'`
+    DRM_CONFIG=`echo $DRM_CONFIG | sed -e 's/disable-radeon/enable-radeon/'` && \
+    DRM_CONFIG=`echo $DRM_CONFIG | sed -e 's/disable-amdgpu/enable-amdgpu/'`
 done
 
 PKG_CONFIGURE_OPTS_TARGET="--disable-udev \
