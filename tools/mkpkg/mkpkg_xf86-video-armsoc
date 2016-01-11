@@ -1,4 +1,5 @@
-#!/bin/sh
+#!/bin/bash
+
 ################################################################################
 #      This file is part of OpenELEC - http://www.openelec.tv
 #      Copyright (C) 2009-2012 Stephan Raue (stephan@openelec.tv)
@@ -19,28 +20,60 @@
 #  http://www.gnu.org/copyleft/gpl.html
 ################################################################################
 
-echo "getting sources..."
-  if [ ! -d xf86-video-armsoc.git ]; then
-    case $1 in 
-      U2|u2|u3|U3|x2|X2) git clone https://github.com/dsd/xf86-video-armsoc.git -b r4p0 ;;
-      XU3|xu3) git clone git://anongit.freedesktop.org/xorg/driver/xf86-video-armsoc.git ;;
-    esac
+TOPDIR=$(pwd)
+GIT_FLAGS="${GIT_FLAGS:=-q}"
+PKG_NAME="xf86-video-armsoc"
+
+sources() {
+  echo -n "Getting Sources ... "
+
+  cd $TOPDIR
+
+  if [ ! -d $PKG_NAME.git ]; then
+    git clone $GIT_FLAGS git://anongit.freedesktop.org/xorg/driver/xf86-video-armsoc.git $PKG_NAME.git
   fi
 
-  cd xf86-video-armsoc
-    git pull
+  cd $TOPDIR/$PKG_NAME.git
+
+  git reset $GIT_FLAGS --hard
+  git clean $GIT_FLAGS -fd
+  git pull $GIT_FLAGS
+
+  if [ -n $1 ]; then
+    git reset $GIT_FLAGS --hard $1
+    GIT_REV=$1
+  else
     GIT_REV=`git log -n1 --format=%h`
-  cd ..
+  fi
 
-echo "copying sources..."
-  rm -rf xf86-video-armsoc-$GIT_REV
-  cp -R xf86-video-armsoc xf86-video-armsoc-$GIT_REV
+  echo "DONE"
+}
 
-echo "cleaning sources..."
-  rm -rf xf86-video-armsoc-$GIT_REV/.git
+package() {
+  cd $TOPDIR
 
-echo "packing sources..."
-  tar cvJf xf86-video-armsoc-$GIT_REV.tar.xz xf86-video-armsoc-$GIT_REV
+  if [ -d ${PKG_NAME}-${GIT_REV} ]; then
+    echo -n "Cleaning Old Release ... "
+    rm -rf ${PKG_NAME}-${GIT_REV}
+    echo "DONE"
+  fi
 
-echo "remove temporary sourcedir..."
-  rm -rf xf86-video-armsoc-$GIT_REV
+  echo -n "Copying GIT to Release ... "
+  cp -RP $PKG_NAME.git ${PKG_NAME}-${GIT_REV}
+  echo "DONE"
+
+  echo -n "Cleaning Source ... "
+  rm -rf ${PKG_NAME}-${GIT_REV}/.git
+  echo "DONE"
+
+  echo -n "Compressing Source ... "
+  tar cJf ${PKG_NAME}-${GIT_REV}.tar.xz ${PKG_NAME}-${GIT_REV}
+  echo "DONE"
+
+  echo -n "Final Cleanup ... "
+  rm -rf ${PKG_NAME}-${GIT_REV}
+  echo "DONE"
+}
+
+sources $1
+package

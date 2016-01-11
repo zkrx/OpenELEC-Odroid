@@ -18,7 +18,7 @@
 
 PKG_NAME="linux"
 case $DEVICE in
-  U2)  PKG_VERSION="3.8.13+1130f87" ;;
+  U2)  PKG_VERSION="3.8.13+ddfddf8" ;;
   XU3) PKG_VERSION="3.10.82+30cd824" ;;
   C1)  PKG_VERSION="3.10.80+c5a1115" ;;
 esac
