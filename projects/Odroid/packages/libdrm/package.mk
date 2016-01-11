@@ -1,10 +1,6 @@
 ################################################################################
 #      This file is part of OpenELEC - http://www.openelec.tv
-<<<<<<< HEAD
 #      Copyright (C) 2009-2016 Stephan Raue (stephan@openelec.tv)
-=======
-#      Copyright (C) 2009-2014 Stephan Raue (stephan@openelec.tv)
->>>>>>> f489a80a4532960b0e1434e3169844647218710a
 #
 #  OpenELEC is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
