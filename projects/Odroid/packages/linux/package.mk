@@ -18,16 +18,13 @@
 
 PKG_NAME="linux"
 case $DEVICE in
-  U2)  PKG_VERSION="3.8.13+ddfddf8" ;;
-  XU3) PKG_VERSION="3.10.82+30cd824" ;;
-  C1)  PKG_VERSION="3.10.80+c5a1115" ;;
+  U2|XU3)  PKG_VERSION="4.4" ; PKG_URL="https://cdn.kernel.org/pub/linux/kernel/v4.x/linux-$PKG_VERSION.tar.xz" ;;
+  C1)      PKG_VERSION="3.10.80+c5a1115" ; PKG_URL="$ODROID_MIRROR/$PKG_NAME-$PKG_VERSION.tar.xz" ; PKG_DEPENDS_HOST="linux-api-headers:host" ;;
 esac
-PKG_URL="$ODROID_MIRROR/$PKG_NAME-$PKG_VERSION.tar.xz"
 PKG_REV="1"
 PKG_ARCH="any"
 PKG_LICENSE="GPL"
 PKG_SITE="http://www.kernel.org"
-PKG_DEPENDS_HOST="linux-api-headers:host"
 PKG_DEPENDS_TARGET="toolchain cpio:host kmod:host pciutils xz:host lzop:host wireless-regdb"
 PKG_DEPENDS_INIT="toolchain"
 PKG_NEED_UNPACK="$LINUX_DEPENDS"
@@ -107,9 +104,17 @@ make_host() {
   : # do nothing
 }
 
-makeinstall_host() {
-  : # do nothing
-}
+case $DEVICE in
+  U2|XU3)
+    makeinstall_host() {
+      make ARCH=$TARGET_ARCH INSTALL_HDR_PATH=dest headers_install
+      mkdir -p $SYSROOT_PREFIX/usr/include
+      cp -R dest/include/* $SYSROOT_PREFIX/usr/include
+      } ;;
+  C1)
+    makeinstall_host() { : # do nothing
+      } ;;
+esac
 
 pre_make_target() {
   # regdb
