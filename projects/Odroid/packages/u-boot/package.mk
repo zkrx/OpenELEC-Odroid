@@ -18,7 +18,7 @@
 
 PKG_NAME="u-boot"
 case $DEVICE in
-  U2|XU3) PKG_VERSION="2015.10" ; PKG_URL="ftp://ftp.denx.de/pub/u-boot/u-boot-$PKG_VERSION.tar.bz2" ;;
+  U2|XU3) PKG_VERSION="2016.01" ; PKG_URL="ftp://ftp.denx.de/pub/u-boot/u-boot-$PKG_VERSION.tar.bz2" ;;
   C1)     PKG_VERSION="2011.03+e7d4447" ; PKG_URL="$ODROID_MIRROR/$PKG_NAME-$PKG_VERSION.tar.xz" ; PKG_OTHER_DEPENDS="linaro-arm-toolchain:host" ;;
 esac
 PKG_SITE="http://www.denx.de/wiki/U-Boot/WebHome"
