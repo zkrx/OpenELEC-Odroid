@@ -1,6 +1,6 @@
 ################################################################################
 #      This file is part of OpenELEC - http://www.openelec.tv
-#      Copyright (C) 2009-2014 Stephan Raue (stephan@openelec.tv)
+#      Copyright (C) 2009-2016 Stephan Raue (stephan@openelec.tv)
 #
 #  OpenELEC is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -38,8 +38,7 @@ PKG_AUTORECONF="no"
 configure_target() {
   ( cd kernel
     LDFLAGS="" make dvb_hdhomerun KERNEL_DIR=$(kernel_path)
-    #TODO: Find out why this is broken
-    #fix_module_depends dvb_hdhomerun_core.ko "dvb_core"
+    fix_module_depends dvb_hdhomerun_core.ko "dvb_core" || true
   )
 
 # absolute path
