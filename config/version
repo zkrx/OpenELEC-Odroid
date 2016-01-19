@@ -1,5 +1,5 @@
 # VERSION: set full version, use "devel" for development version
-  OPENELEC_VERSION="6.95.0"
+  OPENELEC_VERSION="Next"
 
 # OS_VERSION: OS Version
   OS_VERSION="7.0"
@@ -8,4 +8,4 @@
   ADDON_VERSION="7.0"
 
 # ODROID_VERSION: BUILD Revision for Odroid
-  ODROID_VERSION="$OPENELEC_VERSION.0"
+  ODROID_VERSION="$OPENELEC_VERSION"
