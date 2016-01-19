@@ -18,7 +18,7 @@
     UBOOT_CONFIGFILE="boot.ini"
 
   # Kernel config file
-    KERNEL_CFG_FILE="odroidxu3_defconfig"
+    KERNEL_CFG_FILE="exynos_defconfig"
 
   # Kernel target for u-boot (default 'uImage' if BOOTLOADER=u-boot) (uImage / zImage)
     KERNEL_UBOOT_TARGET="zImage"
