@@ -17,8 +17,11 @@
 ################################################################################
 
 PKG_NAME="linux-api-headers"
-PKG_VERSION="3.19"
-PKG_URL="http://www.kernel.org/pub/linux/kernel/v3.0/linux-$PKG_VERSION.tar.xz"
+case $DEVICE in
+  U2|XU3)  PKG_VERSION="4.4"  ; KVER=v4.x ;;
+  C1)      PKG_VERSION="3.19" ; KVER=v3.0 ;;
+esac
+PKG_URL="http://www.kernel.org/pub/linux/kernel/$KVER/linux-$PKG_VERSION.tar.xz"
 PKG_REV="1"
 PKG_ARCH="any"
 PKG_LICENSE="GPL"
