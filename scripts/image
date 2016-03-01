@@ -208,7 +208,7 @@ fi
 
 # copy vendor device related files to filesystem
   if [ -d "$HOME/.openelec/devices/$DEVICE/filesystem" ]; then
-    cp -PR $HOME/.openelec/devices/$DEVICE/filesystem/" $INSTALL
+    cp -PR $HOME/.openelec/devices/$DEVICE/filesystem/ $INSTALL
     # install device specific systemd services
     for service in $HOME/.openelec/devices/$DEVICE/filesystem/usr/lib/systemd/system/*.service ; do
       if [ -f "$service" ] ; then
